@@ -1,0 +1,223 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+<BaseLayout
+  title="Gabriel Alisasis – Operations & Automation Specialist"
+  description="Gabriel Alisasis – GoHighLevel automation specialist and operations manager. CRM systems, workflow automation, and the operational systems that let businesses scale."
+>
+  <section class="hero">
+    <div class="hero-blob" aria-hidden="true"></div>
+    <div class="wrap">
+      <div class="hero-top">
+        <span>Gabriel Alisasis / Operations &amp; Automation</span>
+        <span>Philippines – Remote, US hours</span>
+        <span class="avail">Available for work</span>
+      </div>
+
+      <h1>Systems that run the business, <em>not you.</em></h1>
+
+      <div class="hero-grid">
+        <div>
+          <p class="lede"><strong>GoHighLevel automation specialist and operations manager.</strong> I build the CRM workflows and backend systems that scale without breaking, and when it runs deeper than a workflow builder, I write the code.</p>
+          <div class="hero-ctas">
+            <a href="#contact" class="btn btn-primary magnetic">Book a call →</a>
+            <a href="/work" class="btn btn-ghost magnetic">See the work</a>
+          </div>
+          <div class="hero-roster">
+            <span class="lbl">Recent engagements</span>
+            <div class="names">
+              <span>Cordelia ARC</span><span>Kemp Beauty</span><span>Sell Ready AI</span>
+              <span>Orange Ashes</span><span>LiveHowYouWant</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="figure">
+          <div class="figure-head">
+            <span>Fig. 01 – automation canvas</span>
+            <button class="canvas-run" id="canvasRun">▶ Run</button>
+          </div>
+          <div class="flow" id="flow">
+            <button class="flow-node" aria-expanded="false" aria-controls="nd-0">
+              <span class="tag tag-trigger">Trigger</span>
+              <span class="txt"><strong>New lead submits form</strong><small>GoHighLevel intake funnel</small></span>
+              <span class="chev" aria-hidden="true">›</span>
+            </button>
+            <div class="node-detail" id="nd-0"><div class="node-detail-inner"><dl>
+              <dt>Trigger</dt><dd>Form submitted</dd>
+              <dt>Source</dt><dd>GHL intake funnel</dd>
+              <dt>Filter</dt><dd>none</dd>
+            </dl></div></div>
+            <div class="flow-connector"></div>
+
+            <button class="flow-node" aria-expanded="false" aria-controls="nd-1">
+              <span class="tag tag-action">Action</span>
+              <span class="txt"><strong>Auto-tag &amp; route in CRM</strong><small>Builds the follow-up sequence</small></span>
+              <span class="chev" aria-hidden="true">›</span>
+            </button>
+            <div class="node-detail" id="nd-1"><div class="node-detail-inner"><dl>
+              <dt>Action</dt><dd>Add tag → assign pipeline</dd>
+              <dt>Branch</dt><dd>by source + time slot</dd>
+              <dt>Then</dt><dd>enrol in nurture sequence</dd>
+            </dl></div></div>
+            <div class="flow-connector"></div>
+
+            <button class="flow-node" aria-expanded="false" aria-controls="nd-2">
+              <span class="tag tag-action">Sync</span>
+              <span class="txt"><strong>Push to Sheets, notify ops</strong><small>Zapier keeps systems in step</small></span>
+              <span class="chev" aria-hidden="true">›</span>
+            </button>
+            <div class="node-detail" id="nd-2"><div class="node-detail-inner"><dl>
+              <dt>Zap</dt><dd>GHL → Google Sheets</dd>
+              <dt>Also</dt><dd>Slack alert to ops channel</dd>
+              <dt>Retry</dt><dd>on failure, 3×</dd>
+            </dl></div></div>
+            <div class="flow-connector"></div>
+
+            <button class="flow-node" aria-expanded="false" aria-controls="nd-3">
+              <span class="tag tag-trigger">Result</span>
+              <span class="txt"><strong>900 → 36,000+ members</strong><small>in 8 months, hands-off</small></span>
+              <span class="chev" aria-hidden="true">›</span>
+            </button>
+            <div class="node-detail" id="nd-3"><div class="node-detail-inner"><dl>
+              <dt>Window</dt><dd>8 months</dd>
+              <dt>Growth</dt><dd>900 → 36,000+ members</dd>
+              <dt>Headcount</dt><dd>unchanged</dd>
+            </dl></div></div>
+          </div>
+          <div class="figure-cap">Click a node to inspect its configuration. Press Run to trace the path end to end.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="wrap">
+    <div class="stat-row">
+      <div class="stat">
+        <div class="num mono" data-count="36000" data-suffix="+">36,000+</div>
+        <div class="lbl">community members scaled<br>from 900, in 8 months</div>
+      </div>
+      <div class="stat">
+        <div class="num mono" data-count="3000" data-suffix="+">3,000+</div>
+        <div class="lbl">customers supported through<br>CRM ops in 5 months</div>
+      </div>
+      <div class="stat">
+        <div class="num mono">3+ yrs</div>
+        <div class="lbl">building GoHighLevel automations<br>&amp; operational systems</div>
+      </div>
+    </div>
+  </div>
+
+  <section id="services">
+    <div class="wrap">
+      <div class="sec-head reveal">
+        <span class="sec-num">01</span>
+        <div>
+          <span class="sec-kicker">Services</span>
+          <h2>Where I plug into your business</h2>
+          <p>Each engagement starts the same way an automation does – with a clear trigger and a defined outcome.</p>
+        </div>
+      </div>
+
+      <ol class="ledger reveal">
+        <li>
+          <span class="lg-num">01 / 06</span>
+          <div class="lg-body">
+            <h3>GoHighLevel CRM &amp; Workflow Build</h3>
+            <p>Full CRM configuration – pipelines, forms, funnels, and automations built from scratch or cleaned up from an existing account.</p>
+          </div>
+          <span class="lg-side"><span class="tag tag-trigger">Setup</span></span>
+        </li>
+        <li>
+          <span class="lg-num">02 / 06</span>
+          <div class="lg-body">
+            <h3>Marketing Automation</h3>
+            <p>Lead capture, nurture sequences, and customer communication flows that run without you touching them daily.</p>
+          </div>
+          <span class="lg-side"><span class="tag tag-action">Automate</span></span>
+        </li>
+        <li>
+          <span class="lg-num">03 / 06</span>
+          <div class="lg-body">
+            <h3>Operations Management</h3>
+            <p>Day-to-day ownership of your operational processes – resolving issues, improving efficiency, keeping things moving.</p>
+          </div>
+          <span class="lg-side"><span class="tag tag-trigger">Manage</span></span>
+        </li>
+        <li>
+          <span class="lg-num">04 / 06</span>
+          <div class="lg-body">
+            <h3>Integrations &amp; Zapier</h3>
+            <p>Connecting GoHighLevel to the rest of your stack – Zapier, APIs, and third-party tools working as one system.</p>
+          </div>
+          <span class="lg-side"><span class="tag tag-action">Connect</span></span>
+        </li>
+        <li>
+          <span class="lg-num">05 / 06</span>
+          <div class="lg-body">
+            <h3>Email Deliverability &amp; Klaviyo</h3>
+            <p>Flow builds, segmentation, and the DNS-level work – SPF, DKIM, DMARC – that decides whether your email reaches the inbox at all.</p>
+          </div>
+          <span class="lg-side"><span class="tag tag-trigger">Deliver</span></span>
+        </li>
+        <li>
+          <span class="lg-num">06 / 06</span>
+          <div class="lg-body">
+            <h3>Storefronts &amp; Web Builds</h3>
+            <p>Shopify theme development in Liquid, custom landing pages, and React front-ends when a template won't do the job.</p>
+          </div>
+          <span class="lg-side"><span class="tag tag-action">Build</span></span>
+        </li>
+      </ol>
+    </div>
+  </section>
+
+
+  <section id="featured-work">
+    <div class="wrap">
+      <div class="sec-head reveal">
+        <span class="sec-num">02</span>
+        <div>
+          <span class="sec-kicker">Client work</span>
+          <h2>Four builds, live in production</h2>
+          <p>The engagements I'd point to first. Each one opens into the full record on its own page.</p>
+        </div>
+      </div>
+      <ol class="ledger reveal">
+        <li>
+          <span class="lg-num">01 / 04</span>
+          <div class="lg-body">
+            <h3>Cordelia ARC</h3>
+            <p>A supportive-living agency's marketing site that grew into the software the agency runs on.</p>
+          </div>
+          <span class="lg-side"><a href="/work/cordelia-arc"><span class="tag tag-action">Read →</span></a></span>
+        </li>
+        <li>
+          <span class="lg-num">02 / 04</span>
+          <div class="lg-body">
+            <h3>Kemp Beauty</h3>
+            <p>Eight Klaviyo flows showed live. Almost none of the email was reaching anyone.</p>
+          </div>
+          <span class="lg-side"><a href="/work/kemp-beauty"><span class="tag tag-action">Read →</span></a></span>
+        </li>
+        <li>
+          <span class="lg-num">03 / 04</span>
+          <div class="lg-body">
+            <h3>Sell Ready AI</h3>
+            <p>A Shopify theme built to behave like a full content platform, 23 pages deep.</p>
+          </div>
+          <span class="lg-side"><a href="/work/sell-ready-ai"><span class="tag tag-action">Read →</span></a></span>
+        </li>
+        <li>
+          <span class="lg-num">04 / 04</span>
+          <div class="lg-body">
+            <h3>Orange Ashes</h3>
+            <p>A real digital storefront, built and run entirely inside GoHighLevel.</p>
+          </div>
+          <span class="lg-side"><a href="/work/orange-ashes"><span class="tag tag-action">Read →</span></a></span>
+        </li>
+      </ol>
+    </div>
+  </section>
+
+</BaseLayout>
