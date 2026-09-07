@@ -1,0 +1,96 @@
+---
+import '../styles/global.css';
+import Header from '../components/Header.astro';
+import CommandPalette from '../components/CommandPalette.astro';
+
+interface Props {
+  title: string;
+  description: string;
+}
+const { title, description } = Astro.props;
+const canonical = new URL(Astro.url.pathname, Astro.site);
+---
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{title}</title>
+<meta name="description" content={description}>
+<meta name="author" content="Gabriel Alisasis">
+<link rel="canonical" href={canonical}>
+<meta name="theme-color" content="#0B0D10">
+
+<meta property="og:type" content="website">
+<meta property="og:title" content={title}>
+<meta property="og:description" content={description}>
+<meta property="og:url" content={canonical}>
+<meta property="og:locale" content="en_US">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content={title}>
+<meta name="twitter:description" content={description}>
+
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='0' fill='%230B0D10'/%3E%3Crect x='9' y='9' width='14' height='14' fill='%23E3B341'/%3E%3C/svg%3E">
+
+<script is:inline>document.documentElement.classList.add('js');</script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,400..800;1,400..800&family=JetBrains+Mono:wght@400;500&family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Person",
+  "name": "Gabriel Alisasis",
+  "jobTitle": "Operations Support & Marketing Automation Specialist",
+  "email": "mailto:gabb.alisasis@gmail.com",
+  "telephone": "+63-966-198-9672",
+  "url": "https://gabrielalisasis.com/",
+  "address": { "@type": "PostalAddress", "addressCountry": "PH" },
+  "knowsAbout": ["GoHighLevel","Marketing Automation","CRM Operations","Klaviyo","Shopify","React","Supabase","Zapier"],
+  "alumniOf": { "@type": "CollegeOrUniversity", "name": "Batangas State University" }
+}
+</script>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<div class="glow" id="glow" aria-hidden="true"></div>
+
+<Header />
+
+<main id="main">
+  <slot />
+
+  <section id="contact" class="contact">
+    <div class="wrap">
+      <span class="sec-kicker">Get in touch</span>
+      <h2>Let's automate your operations.</h2>
+      <p>Whether it's a GoHighLevel build, a CRM cleanup, an email deliverability rescue, or full operations management, tell me what's slowing your business down.</p>
+      <div class="contact-methods reveal">
+        <a href="mailto:gabb.alisasis@gmail.com">gabb.alisasis@gmail.com</a>
+        <a href="tel:+639661989672">+63 966 198 9672</a>
+        <span>Philippines · Remote</span>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <p>© <span id="year">2026</span> Gabriel Alisasis</p>
+    <p>Operations Support &amp; Marketing Automation</p>
+  </div>
+</footer>
+
+<div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Enlarged screenshot" hidden>
+  <button class="lightbox-close" id="lightboxClose">✕ Close</button>
+  <img id="lightboxImg" src="" alt="">
+  <span class="lightbox-cap" id="lightboxCap">Click anywhere or press Esc to close</span>
+</div>
+
+<CommandPalette />
+
+<script is:inline src="/scripts/site.js"></script>
+</body>
+</html>
