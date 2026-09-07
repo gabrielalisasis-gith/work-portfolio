@@ -59,8 +59,10 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
 <div class="cursor-ring" id="cursorRing" aria-hidden="true"></div>
 <div class="cursor-dot" id="cursorDot" aria-hidden="true"></div>
 
+<div class="app-shell">
 <Header />
 
+<div class="content-area">
 <main id="main">
   <slot />
 
@@ -84,11 +86,20 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
     <p>Operations Support &amp; Marketing Automation</p>
   </div>
 </footer>
+</div>
+</div>
 
 <div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Enlarged screenshot" hidden>
   <button class="lightbox-close" id="lightboxClose">✕ Close</button>
   <img id="lightboxImg" src="" alt="">
   <span class="lightbox-cap" id="lightboxCap">Click anywhere or press Esc to close</span>
+</div>
+
+<div class="fan-overlay" id="fanOverlay" role="dialog" aria-modal="true" aria-label="Project screenshots" hidden>
+  <button class="fan-close" id="fanClose">✕ Close</button>
+  <div class="fan-stage" id="fanStage">
+    <span class="fan-hint">Click a card to bring it forward</span>
+  </div>
 </div>
 
 <CommandPalette />
