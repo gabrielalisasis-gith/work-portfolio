@@ -157,7 +157,7 @@
   .sec-head p{ color:var(--muted); font-size:1rem; max-width:62ch; }
 
   /* only hide for the reveal animation when JS is actually running */
-  .js .reveal{ opacity:0; transform:translateY(14px); transition:opacity .5s ease, transform .5s ease; }
+  .js .reveal{ opacity:0; transform:translateY(14px); }
   .js .reveal.in{ opacity:1; transform:none; }
 
   /* ============ HERO ============ */
@@ -709,6 +709,61 @@
   @view-transition { navigation: auto; }
   header{ view-transition-name: site-header; }
   footer{ view-transition-name: site-footer; }
+  ::view-transition-image-pair(root){ isolation: isolate; }
+  ::view-transition-old(root){ animation: pf-page-out .32s cubic-bezier(.4,0,.2,1) forwards; }
+  ::view-transition-new(root){ animation: pf-page-in .5s cubic-bezier(.16,1,.3,1) forwards; mix-blend-mode: normal; }
+  @keyframes pf-page-out{ to{ opacity:0; transform: translateY(-12px) scale(.99); } }
+  @keyframes pf-page-in{ from{ opacity:0; transform: translateY(28px); } to{ opacity:1; transform: none; } }
   @media (prefers-reduced-motion: reduce){
     ::view-transition-group(*), ::view-transition-old(*), ::view-transition-new(*){ animation: none !important; }
+  }
+
+  /* ============ ADDED: hero load-in guards (avoid FOUC before GSAP runs) ============ */
+  .js .hero h1{ visibility: hidden; }
+  .js .hero-top, .js .hero p.lede, .js .hero-ctas, .js .hero-roster, .js .hero .figure{ opacity: 0; }
+  .split-word{ display:inline-block; overflow:hidden; padding-bottom:.08em; margin-bottom:-.08em; vertical-align:top; }
+  .split-word-inner{ display:inline-block; will-change:transform; }
+  @media (prefers-reduced-motion: reduce){
+    .js .hero h1{ visibility: visible; }
+    .js .hero-top, .js .hero p.lede, .js .hero-ctas, .js .hero-roster, .js .hero .figure{ opacity: 1; }
+  }
+
+  /* ============ ADDED: scroll-reveal image wipe ============ */
+  .js .case-shot img, .js .wf-shot img, .js .case-gallery img, .js .site-preview .site-shot{
+    clip-path: inset(0 0 100% 0);
+  }
+  @media (prefers-reduced-motion: reduce){
+    .js .case-shot img, .js .wf-shot img, .js .case-gallery img, .js .site-preview .site-shot{ clip-path:none; }
+  }
+
+  /* ============ ADDED: custom cursor ============ */
+  .cursor-dot, .cursor-ring{
+    position:fixed; top:0; left:0; pointer-events:none; z-index:1200;
+    border-radius:50%; transform:translate(-100px,-100px);
+  }
+  .cursor-dot{ width:6px; height:6px; background:var(--accent); }
+  .cursor-ring{
+    width:34px; height:34px; margin:-14px 0 0 -14px; border:1px solid var(--accent-line);
+    transition:width .2s ease, height .2s ease, margin .2s ease, border-color .2s ease, background .2s ease;
+  }
+  .cursor-ring.hover{ width:56px; height:56px; margin:-25px 0 0 -25px; background:var(--accent-soft); border-color:var(--accent); }
+  @media (pointer:fine){
+    .has-custom-cursor, .has-custom-cursor *{ cursor:none !important; }
+  }
+  @media (pointer:coarse), (prefers-reduced-motion: reduce){
+    .cursor-dot, .cursor-ring{ display:none; }
+  }
+
+  /* ============ ADDED: hero ambient background ============ */
+  .hero-blob{
+    position:absolute; z-index:0; pointer-events:none; border-radius:50%;
+    width:520px; height:520px; top:-160px; right:-120px;
+    background:radial-gradient(circle, var(--accent-soft) 0%, transparent 70%);
+    filter:blur(10px); opacity:.9;
+    animation: pf-drift 16s ease-in-out infinite alternate;
+  }
+  @media (prefers-reduced-motion: reduce){ .hero-blob{ animation:none; } }
+  @keyframes pf-drift{
+    from{ transform:translate(0,0) scale(1); }
+    to{ transform:translate(-30px,26px) scale(1.08); }
   }

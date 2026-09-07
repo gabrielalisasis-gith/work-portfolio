@@ -56,6 +56,8 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
 <body>
 <a class="skip-link" href="#main">Skip to content</a>
 <div class="glow" id="glow" aria-hidden="true"></div>
+<div class="cursor-ring" id="cursorRing" aria-hidden="true"></div>
+<div class="cursor-dot" id="cursorDot" aria-hidden="true"></div>
 
 <Header />
 
@@ -91,6 +93,8 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
 
 <CommandPalette />
 
-<script is:inline src="/scripts/site.js"></script>
+<script>
+  import '../scripts/site.js';
+</script>
 </body>
 </html>
