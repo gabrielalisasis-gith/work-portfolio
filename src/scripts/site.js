@@ -42,6 +42,16 @@ gsap.registerPlugin(ScrollTrigger);
 
   /* ---------- mobile nav ---------- */
   var navToggle = $('#navToggle'), navLinks = $('#navLinks');
+  (function () {
+    var headerEl = $('header');
+    if (!headerEl) return;
+    function syncHeaderHeight() {
+      document.documentElement.style.setProperty('--header-h', headerEl.offsetHeight + 'px');
+    }
+    syncHeaderHeight();
+    window.addEventListener('resize', syncHeaderHeight);
+    window.addEventListener('load', syncHeaderHeight);
+  })();
   if (navToggle && navLinks) {
     navToggle.addEventListener('click', function () {
       var open = navLinks.classList.toggle('open');
@@ -88,20 +98,6 @@ gsap.registerPlugin(ScrollTrigger);
   window.addEventListener('scroll', onScroll, { passive: true });
   window.addEventListener('resize', onScroll, { passive: true });
   onScroll();
-
-  /* ---------- header: hide on scroll down, show on scroll up ---------- */
-  (function () {
-    var header = $('header');
-    if (!header || reduce) return;
-    var lastY = window.scrollY, hidden = false;
-    window.addEventListener('scroll', function () {
-      var y = window.scrollY;
-      var goingDown = y > lastY && y > 140;
-      if (goingDown && !hidden) { hidden = true; gsap.to(header, { yPercent: -100, duration: 0.35, ease: 'power2.out' }); }
-      else if (!goingDown && hidden) { hidden = false; gsap.to(header, { yPercent: 0, duration: 0.35, ease: 'power2.out' }); }
-      lastY = y;
-    }, { passive: true });
-  })();
 
   /* ---------- reveal (scroll-triggered, staggered) ---------- */
   var revealEls = $$('.reveal');
