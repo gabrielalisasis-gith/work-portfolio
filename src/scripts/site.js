@@ -363,6 +363,66 @@ gsap.registerPlugin(ScrollTrigger);
     if (lbImg) lbImg.addEventListener('click', function (e) { e.stopPropagation(); });
   }
 
+  /* ---------- fanned screenshot carousel ---------- */
+  (function () {
+    var overlay = $('#fanOverlay'), stage = $('#fanStage'), closeBtn = $('#fanClose');
+    var trigger = $('#fanTrigger');
+    if (!overlay || !stage || !trigger) return;
+    var fanReturn = null;
+    function buildCards() {
+      var imgs = $$('.case-shot img, .case-gallery img');
+      $$('.fan-card', stage).forEach(function (c) { c.remove(); });
+      var n = imgs.length;
+      imgs.forEach(function (img, i) {
+        var card = document.createElement('div');
+        card.className = 'fan-card';
+        card.style.zIndex = String(i + 1);
+        var inner = document.createElement('img');
+        inner.src = img.currentSrc || img.src;
+        inner.alt = img.alt || '';
+        card.appendChild(inner);
+        var mid = (n - 1) / 2;
+        var offset = i - mid;
+        var angle = offset * 12;
+        var x = offset * 74;
+        var y = Math.abs(offset) * 20;
+        card.style.transform = 'translate(' + x + 'px,' + y + 'px) rotate(' + angle + 'deg)';
+        card.addEventListener('click', function () {
+          $$('.fan-card', stage).forEach(function (c) { c.style.zIndex = '1'; });
+          card.style.zIndex = String(n + 1);
+          if (!reduce) gsap.to(card, { y: y - 16, duration: 0.22, ease: 'power2.out', yoyo: true, repeat: 1 });
+        });
+        stage.appendChild(card);
+        if (!reduce) {
+          gsap.from(card, { y: 70, opacity: 0, rotate: angle * 2, duration: 0.6, delay: i * 0.08, ease: 'back.out(1.6)' });
+        }
+      });
+    }
+    function openFan() {
+      fanReturn = document.activeElement;
+      buildCards();
+      overlay.hidden = false; overlay.classList.add('open');
+      requestAnimationFrame(function () { overlay.classList.add('show'); });
+      if (closeBtn) closeBtn.focus();
+      document.body.style.overflow = 'hidden';
+    }
+    function closeFan() {
+      if (!overlay.classList.contains('open')) return;
+      overlay.classList.remove('show');
+      document.body.style.overflow = '';
+      setTimeout(function () {
+        overlay.classList.remove('open'); overlay.hidden = true;
+        if (fanReturn && fanReturn.focus) { fanReturn.focus(); fanReturn = null; }
+      }, reduce ? 0 : 200);
+    }
+    trigger.addEventListener('click', openFan);
+    if (closeBtn) closeBtn.addEventListener('click', closeFan);
+    overlay.addEventListener('click', function (e) { if (e.target === overlay) closeFan(); });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && overlay.classList.contains('open')) closeFan();
+    });
+  })();
+
   /* ---------- command palette ---------- */
   var cmdk = $('#cmdk'), cmdkInput = $('#cmdkInput'), cmdkList = $('#cmdkList');
   var cmdkReturn = null, sel = 0, results = [];
