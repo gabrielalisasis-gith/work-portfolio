@@ -1,42 +1,42 @@
   /* ============================================================
-     TECHNICAL LEDGER
+     TECHYOPS
      Display: Open Sans · Body: Public Sans · Mono: JetBrains Mono
-     Hairline rules carry the structure. No rounded cards.
+     Palette keyed to the TechyOps mark: deep navy ground, blue accent.
      ============================================================ */
   :root{
-    --ink:#0B0D10; --panel:#101317; --panel-2:#161A1F;
-    --line:#23272D; --line-strong:#39404A;
-    --text:#E9E6E0; --muted:#8B9099;
-    --accent:#E3B341;
-    --accent-soft:rgba(227,179,65,0.10); --accent-line:rgba(227,179,65,0.34);
-    --on-accent:#0B0D10;
-    --pos:#6FCF97; --pos-soft:rgba(111,207,151,0.10); --pos-line:rgba(111,207,151,0.36);
-    --neg:#E0715C; --neg-soft:rgba(224,113,92,0.10);
-    --grid-dot:rgba(227,179,65,0.055); --plate-dot:rgba(233,230,224,0.05);
+    --ink:#0E1430; --panel:#161D3D; --panel-2:#1D2549;
+    --line:#293163; --line-strong:#3F4A85;
+    --text:#E9EDFA; --muted:#8E9AC4;
+    --accent:#4C8DF6;
+    --accent-soft:rgba(76,141,246,0.12); --accent-line:rgba(76,141,246,0.38);
+    --on-accent:#0B1229;
+    --pos:#5AD1A0; --pos-soft:rgba(90,209,160,0.12); --pos-line:rgba(90,209,160,0.38);
+    --neg:#F0796B; --neg-soft:rgba(240,121,107,0.12);
+    --grid-dot:rgba(76,141,246,0.07); --plate-dot:rgba(233,237,250,0.05);
     --radius:18px; --radius-sm:11px;
   }
   :root[data-theme="light"]{
-    --ink:#FBF7EF; --panel:#FFFFFF; --panel-2:#F5EFE1;
-    --line:#E6DCC8; --line-strong:#C9B990;
-    --text:#1B2A4A; --muted:#6B6455;
-    --accent:#C4622D;
-    --accent-soft:rgba(196,98,45,0.10); --accent-line:rgba(196,98,45,0.34);
+    --ink:#F7F9FE; --panel:#FFFFFF; --panel-2:#EDF2FC;
+    --line:#DCE4F5; --line-strong:#AFBDDC;
+    --text:#0F1A38; --muted:#5C6A8E;
+    --accent:#2563EB;
+    --accent-soft:rgba(37,99,235,0.09); --accent-line:rgba(37,99,235,0.32);
     --on-accent:#FFFFFF;
-    --pos:#1B7F4F; --pos-soft:rgba(27,127,79,0.09); --pos-line:rgba(27,127,79,0.36);
-    --neg:#A8412C; --neg-soft:rgba(168,65,44,0.09);
-    --grid-dot:rgba(196,98,45,0.07); --plate-dot:rgba(27,42,74,0.05);
+    --pos:#12805A; --pos-soft:rgba(18,128,90,0.09); --pos-line:rgba(18,128,90,0.36);
+    --neg:#C2410C; --neg-soft:rgba(194,65,12,0.09);
+    --grid-dot:rgba(37,99,235,0.07); --plate-dot:rgba(15,26,56,0.05);
   }
   @media (prefers-color-scheme: light){
     :root:not([data-theme="dark"]){
-      --ink:#FBF7EF; --panel:#FFFFFF; --panel-2:#F5EFE1;
-      --line:#E6DCC8; --line-strong:#C9B990;
-      --text:#1B2A4A; --muted:#6B6455;
-      --accent:#C4622D;
-      --accent-soft:rgba(196,98,45,0.10); --accent-line:rgba(196,98,45,0.34);
+      --ink:#F7F9FE; --panel:#FFFFFF; --panel-2:#EDF2FC;
+      --line:#DCE4F5; --line-strong:#AFBDDC;
+      --text:#0F1A38; --muted:#5C6A8E;
+      --accent:#2563EB;
+      --accent-soft:rgba(37,99,235,0.09); --accent-line:rgba(37,99,235,0.32);
       --on-accent:#FFFFFF;
-      --pos:#1B7F4F; --pos-soft:rgba(27,127,79,0.09); --pos-line:rgba(27,127,79,0.36);
-      --neg:#A8412C; --neg-soft:rgba(168,65,44,0.09);
-      --grid-dot:rgba(196,98,45,0.07); --plate-dot:rgba(27,42,74,0.05);
+      --pos:#12805A; --pos-soft:rgba(18,128,90,0.09); --pos-line:rgba(18,128,90,0.36);
+      --neg:#C2410C; --neg-soft:rgba(194,65,12,0.09);
+      --grid-dot:rgba(37,99,235,0.07); --plate-dot:rgba(15,26,56,0.05);
     }
   }
 
@@ -87,11 +87,14 @@
     font-family:'Open Sans','Public Sans',sans-serif; font-size:1.02rem; font-weight:700;
     display:flex; align-items:center; gap:11px; flex-shrink:0;
   }
-  .logo-dot{
-    width:38px; height:38px; border-radius:var(--radius-sm); flex-shrink:0;
-    background:var(--accent-soft); color:var(--accent); border:1px solid var(--accent-line);
-    display:flex; align-items:center; justify-content:center;
-    font-family:'Open Sans','Public Sans',sans-serif; font-size:.78rem; font-weight:600;
+  .logo-mark{
+    width:36px; height:36px; flex-shrink:0; display:block;
+    transition:transform .35s cubic-bezier(.34,1.4,.64,1);
+  }
+  .logo-mark svg{ width:100%; height:100%; display:block; }
+  .logo:hover .logo-mark{ transform:rotate(90deg); }
+  @media (prefers-reduced-motion: reduce){
+    .logo-mark, .logo:hover .logo-mark{ transition:none; transform:none; }
   }
   .logo-sub{
     display:block; font-family:'Open Sans','Public Sans',sans-serif; font-size:.66rem;
@@ -138,8 +141,8 @@
     }
     nav{ flex-direction:row; align-items:center; gap:10px; height:auto; flex-wrap:nowrap; }
     .logo{ min-width:0; }
-    .logo span:not(.logo-dot){ overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-    .logo-sub{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .logo > span:not(.logo-mark){ min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .logo-sub{ display:none; }
     .sidebar-social{ display:none; }
     .nav-links{
       position:fixed; top:var(--header-h, 64px); left:0; right:0; bottom:0;

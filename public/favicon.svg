@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="TechyOps">
+  <defs>
+    <linearGradient id="to-mark" x1="8" y1="6" x2="56" y2="58" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#93C7F9"/>
+      <stop offset="0.5" stop-color="#4C8DF6"/>
+      <stop offset="1" stop-color="#3253D4"/>
+    </linearGradient>
+  </defs>
+  <g fill="none" stroke="url(#to-mark)" stroke-linecap="round">
+    <path d="M38.41 8.86 A24 24 0 1 1 8.44 28.16" stroke-width="6.6"/>
+    <path d="M22.81 41.19 A13 13 0 1 1 41.96 23.64" stroke-width="6"/>
+  </g>
+  <circle cx="32" cy="32" r="4.2" fill="url(#to-mark)"/>
+</svg>
