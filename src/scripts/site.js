@@ -55,15 +55,17 @@ gsap.registerPlugin(ScrollTrigger);
   if (navToggle && navLinks) {
     navToggle.addEventListener('click', function () {
       var open = navLinks.classList.toggle('open');
-      navToggle.textContent = open ? 'CLOSE' : 'MENU';
+      navToggle.classList.toggle('is-open', open);
       navToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+      navToggle.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
       document.body.style.overflow = open ? 'hidden' : '';
     });
     $$('a', navLinks).forEach(function (a) {
       a.addEventListener('click', function () {
         navLinks.classList.remove('open');
-        navToggle.textContent = 'MENU';
+        navToggle.classList.remove('is-open');
         navToggle.setAttribute('aria-expanded', 'false');
+        navToggle.setAttribute('aria-label', 'Open menu');
         document.body.style.overflow = '';
       });
     });
