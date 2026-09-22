@@ -571,5 +571,47 @@ gsap.registerPlugin(ScrollTrigger);
         glow.style.top = e.clientY + 'px';
       }, { passive: true });
     }
+
+    /* ---------- 3D tilt for bento cards ---------- */
+    $$('.bento-card').forEach(function (card) {
+      var rx = 0, ry = 0, tRx = 0, tRy = 0, raf = null;
+      function loop() {
+        rx += (tRx - rx) * 0.14;
+        ry += (tRy - ry) * 0.14;
+        card.style.setProperty('--rx', rx.toFixed(2) + 'deg');
+        card.style.setProperty('--ry', ry.toFixed(2) + 'deg');
+        var depth = (Math.abs(rx) + Math.abs(ry)) / 14;
+        card.style.setProperty('--tilt-shadow',
+          (-ry * 1.6).toFixed(1) + 'px ' + (rx * 1.6).toFixed(1) + 'px ' + (18 + depth * 20).toFixed(0) + 'px rgba(0,0,0,' + (0.08 + depth * 0.1).toFixed(2) + ')');
+        if (Math.abs(tRx - rx) > 0.02 || Math.abs(tRy - ry) > 0.02) {
+          raf = requestAnimationFrame(loop);
+        } else { raf = null; }
+      }
+      card.addEventListener('pointermove', function (e) {
+        if (e.pointerType && e.pointerType !== 'mouse') return;
+        var r = card.getBoundingClientRect();
+        var px = (e.clientX - r.left) / r.width;
+        var py = (e.clientY - r.top) / r.height;
+        tRy = (px - 0.5) * 14;
+        tRx = -(py - 0.5) * 14;
+        card.style.setProperty('--mx', (px * 100).toFixed(1) + '%');
+        card.style.setProperty('--my', (py * 100).toFixed(1) + '%');
+        if (!raf) raf = requestAnimationFrame(loop);
+      });
+      card.addEventListener('pointerleave', function () {
+        tRx = 0; tRy = 0;
+        if (!raf) raf = requestAnimationFrame(loop);
+      });
+    });
+  }
+
+  /* ---------- WebGL hero moment ---------- */
+  if (!reduce) {
+    var heroCanvas = $('#heroWebgl');
+    if (heroCanvas && window.WebGLRenderingContext) {
+      import('./webgl-hero.js').then(function (mod) {
+        mod.initHeroScene(heroCanvas);
+      }).catch(function () {});
+    }
   }
 })();
