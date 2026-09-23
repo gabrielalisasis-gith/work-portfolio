@@ -333,6 +333,31 @@ gsap.registerPlugin(ScrollTrigger);
     });
   })();
 
+  /* ---------- about: live clocks + availability ---------- */
+  (function () {
+    var card = $('#clockCard'); if (!card) return;
+    var tz = card.getAttribute('data-tz');
+    var start = parseInt(card.getAttribute('data-start'), 10), end = parseInt(card.getAttribute('data-end'), 10);
+    var days = card.getAttribute('data-days').split(',').map(Number);
+    var label = $('#clockStatus span');
+    var WEEKDAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    function tick() {
+      var now = new Date();
+      $$('[data-clock]', card).forEach(function (el) {
+        el.textContent = new Intl.DateTimeFormat('en-US', { timeZone: el.getAttribute('data-clock'), hour: 'numeric', minute: '2-digit' }).format(now);
+      });
+      var p = {};
+      new Intl.DateTimeFormat('en-US', { timeZone: tz, weekday: 'short', hour: 'numeric', hourCycle: 'h23' })
+        .formatToParts(now).forEach(function (x) { p[x.type] = x.value; });
+      var hour = parseInt(p.hour, 10) % 24;
+      var online = days.indexOf(WEEKDAYS.indexOf(p.weekday)) !== -1 && hour >= start && hour < end;
+      card.classList.toggle('is-online', online);
+      label.textContent = online ? 'Online now' : 'Offline right now';
+    }
+    tick();
+    setInterval(tick, 30000);
+  })();
+
   /* ---------- focus trap helper ---------- */
   var FOCUSABLE = 'a[href],button:not([disabled]),input,select,textarea,[tabindex]:not([tabindex="-1"])';
   function trap(container, e) {

@@ -1,136 +1,146 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import { WORK_HOURS } from '../config';
+
+const short = [
+  { when: '2021–25', text: 'Studied Computer Science at Batangas State University, focused on software development.' },
+  { when: '2024–26', text: 'Ran CRM and automation for US businesses, including a community that grew from 900 to 36,000+ members in eight months.' },
+  { when: 'Now', text: 'Building and maintaining systems for clients in healthcare, e-commerce and consulting.' },
+];
+
+const principles = [
+  { title: 'Done means tested with a real signup.',
+    body: 'At Kemp Beauty every Klaviyo flow showed green while almost none of the email arrived. I call a job finished when a real test goes through end to end, like a live signup landing in a Gmail inbox.' },
+  { title: 'Permissions belong in the database.',
+    body: 'On Cordelia ARC’s healthcare platform, every privileged action is checked by row-level security in Postgres. Hiding a button in the interface doesn’t protect anyone’s records.' },
+  { title: 'Every change goes through Git.',
+    body: 'Theme work for Sell Ready AI and Kemp Beauty is tracked in Git against the live store, so any fix can be reviewed or rolled back.' },
+  { title: 'You hear the trade-offs from me.',
+    body: 'When I moved Kemp Beauty’s email to an authenticated subdomain, I also flagged that replies to it would never reach the team, and recommended warming the domain slowly.' },
+  { title: 'If someone copies it by hand, I automate it.',
+    body: 'Orange Ashes orders deliver the moment they’re paid for. WooCommerce bookings open the right CRM opportunity without anyone retyping them.' },
+  { title: 'When the builder runs out, I write the code.',
+    body: 'GoHighLevel’s store couldn’t do what Orange Ashes needed, so I hand-coded the pieces on top. Cordelia ARC outgrew a CRM entirely, so it became a React and Supabase application.' },
+];
+
+const toolbox = [
+  ['Development', 'React, TypeScript, Next.js, JavaScript, Tailwind CSS, HTML and CSS, Shopify Liquid, Supabase, Postgres, Python, SQL, Git'],
+  ['CRM & marketing', 'GoHighLevel, Klaviyo, Zapier, HubSpot, Salesforce, Kommo, Shopify, WordPress, Meta Business Suite'],
+  ['Operations', 'ClickUp, Monday.com, Trello, Google Sheets, Excel, ChatGPT, Claude, Midjourney'],
+];
 ---
 <BaseLayout
   title="About – Gabriel Alisasis"
-  description="Gabriel Alisasis's background and the tools and platforms he works in day to day."
+  description="Gabriel Alisasis builds and runs CRM, automation and web systems for US businesses from Batangas, Philippines. How he works, the tools he uses, and when he's online."
 >
-  <div class="page-top-spacer" aria-hidden="true"></div>
-  <section id="about">
-    <div class="wrap">
-      <div class="sec-head reveal">
-        <span class="sec-num">01</span>
-        <div>
-          <span class="sec-kicker">About</span>
-          <h2>Operations built on systems, not firefighting.</h2>
-        </div>
+  <section class="about-hero" id="about">
+    <svg class="about-mark" viewBox="0 0 64 64" aria-hidden="true">
+      <g fill="none" stroke="currentColor" stroke-linecap="round" stroke-width=".35">
+        <path d="M38.41 8.87 A24 24 0 1 1 8.32 28.12"/>
+        <path d="M39.35 5.50 A27.5 27.5 0 1 1 4.86 27.56"/>
+        <path d="M37.48 12.25 A20.5 20.5 0 1 1 11.77 28.69"/>
+        <path d="M22.81 41.19 A13 13 0 1 1 41.96 23.64"/>
+        <path d="M20.69 43.31 A16 16 0 1 1 44.26 21.72"/>
+        <path d="M24.93 39.07 A10 10 0 1 1 39.66 25.57"/>
+      </g>
+      <circle cx="32" cy="32" r="4.2" fill="currentColor" opacity=".5"/>
+    </svg>
+    <div class="wrap about-hero-grid">
+      <div class="about-intro">
+        <span class="sec-kicker reveal">About</span>
+        <h1 class="about-title reveal">Hi, I’m <span class="accent">Gab.</span></h1>
+        <p class="about-lead reveal">Gabriel Alisasis on paper. I set up and run the systems behind growing businesses: GoHighLevel CRMs, automations, email, storefronts, and the occasional full application.</p>
+        <p class="about-sub reveal">I work from Batangas in the Philippines, on US business hours, under the name TechyOps.</p>
       </div>
 
-      <div class="about-grid">
-        <div class="prose reveal">
-          <p>I'm an Operations Support and Marketing Automation Specialist with hands-on experience managing CRM systems, workflow automation, backend operations, and customer support for U.S.-based businesses.</p>
-          <p>My background is in <strong>GoHighLevel and Bubble</strong> – building the automations, funnels, and operational systems that improve efficiency, improve customer experience, and let a business scale without adding headcount. I hold a Computer Science degree focused on software development, which means I don't just configure CRMs – I understand what's happening under the hood.</p>
-          <p>That matters more than it sounds. The two hardest problems I solved this year weren't in a workflow builder. One was a DMARC policy silently bouncing every marketing email a brand sent. The other was a healthcare platform that needed real role-based access enforced in the database, not hidden in the UI. <strong>I go as deep as the problem requires.</strong></p>
-        </div>
-        <div class="about-panel reveal">
-          <div class="facts">
-            <div><span class="idx mono">01</span><div><strong>GoHighLevel &amp; CRM</strong><span>Workflows, pipelines, forms, funnels, and automations built to convert and retain.</span></div></div>
-            <div><span class="idx mono">02</span><div><strong>Operations management</strong><span>Daily process ownership – resolving issues before they become bottlenecks.</span></div></div>
-            <div><span class="idx mono">03</span><div><strong>Technical fluency</strong><span>CS background in software development – React, Shopify Liquid, Supabase, and data.</span></div></div>
-            <div><span class="idx mono">04</span><div><strong>Deliverability &amp; email</strong><span>Klaviyo flows, DNS authentication (SPF/DKIM/DMARC), and sender reputation.</span></div></div>
-          </div>
-          <div class="about-panel-tags">
-            <span class="bento-pill">Philippines · Remote</span>
-            <span class="bento-pill">GMT+8 · US hours</span>
-          </div>
-        </div>
-      </div>
+      <aside class="clock-card reveal" id="clockCard" data-tz={WORK_HOURS.timeZone} data-start={WORK_HOURS.start} data-end={WORK_HOURS.end} data-days={WORK_HOURS.days.join(',')} aria-label="Current time and availability">
+        <div class="clock-status" id="clockStatus"><b></b><span>Checking availability…</span></div>
+        <dl class="clock-rows">
+          <div class="clock-row is-home"><dt>Batangas, PH</dt><dd data-clock="Asia/Manila">--:--</dd></div>
+          <div class="clock-row"><dt>New York</dt><dd data-clock="America/New_York">--:--</dd></div>
+          <div class="clock-row"><dt>Los Angeles</dt><dd data-clock="America/Los_Angeles">--:--</dd></div>
+        </dl>
+        <p class="clock-note">I work {WORK_HOURS.start} AM to {WORK_HOURS.end - 12} PM {WORK_HOURS.label}, Monday to Friday.</p>
+      </aside>
     </div>
   </section>
-  <section id="skills">
-    <div class="wrap">
-      <div class="sec-head reveal">
-        <span class="sec-num">02</span>
-        <div>
-          <span class="sec-kicker">Stack</span>
-          <h2>The tools, and where they were used</h2>
-          <p>Every mark below points at a real engagement, not a list of things I've heard of.</p>
-        </div>
-      </div>
 
-      <div class="matrix-wrap reveal">
+  <section class="short-version">
+    <div class="wrap">
+      <span class="sec-kicker reveal">The short version</span>
+      <ol class="short-list">
+        {short.map((s) => (
+          <li class="reveal"><span class="short-when">{s.when}</span><p>{s.text}</p></li>
+        ))}
+      </ol>
+    </div>
+  </section>
+
+  <section class="principles" id="how-i-work">
+    <div class="wrap">
+      <div class="principles-head reveal">
+        <span class="sec-kicker">How I work</span>
+        <h2>Six rules I don’t bend on.</h2>
+      </div>
+      <ol class="principle-grid">
+        {principles.map((p, i) => (
+          <li class="principle reveal">
+            <span class="principle-num" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
+            <h3>{p.title}</h3>
+            <p>{p.body}</p>
+          </li>
+        ))}
+      </ol>
+    </div>
+  </section>
+
+  <section id="skills" class="toolkit">
+    <div class="wrap">
+      <div class="principles-head reveal">
+        <span class="sec-kicker">Stack</span>
+        <h2>The tools, and where they were used.</h2>
+        <p>Every dot is a real engagement.</p>
+      </div>
+      <div class="matrix-wrap matrix-card reveal">
         <table class="matrix">
-          <caption class="sr-only">Which tools were used on which client engagement</caption>
-          <thead>
-            <tr>
-              <th scope="col">Tool</th>
-              <th scope="col">Cordelia ARC</th>
-              <th scope="col">Kemp Beauty</th>
-              <th scope="col">Sell Ready AI</th>
-              <th scope="col">Orange Ashes</th>
-              <th scope="col">LiveHowYouWant</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr><th scope="row">GoHighLevel</th>
-              <td class="cell-no">·</td><td class="cell-no">·</td><td class="cell-no">·</td><td class="cell-yes">■</td><td class="cell-yes">■</td></tr>
-            <tr><th scope="row">Klaviyo</th>
-              <td class="cell-no">·</td><td class="cell-yes">■</td><td class="cell-no">·</td><td class="cell-no">·</td><td class="cell-no">·</td></tr>
-            <tr><th scope="row">Shopify Liquid</th>
-              <td class="cell-no">·</td><td class="cell-yes">■</td><td class="cell-yes">■</td><td class="cell-no">·</td><td class="cell-no">·</td></tr>
-            <tr><th scope="row">React / TypeScript</th>
-              <td class="cell-yes">■</td><td class="cell-no">·</td><td class="cell-no">·</td><td class="cell-no">·</td><td class="cell-no">·</td></tr>
-            <tr><th scope="row">Supabase / Postgres</th>
-              <td class="cell-yes">■</td><td class="cell-no">·</td><td class="cell-no">·</td><td class="cell-no">·</td><td class="cell-no">·</td></tr>
-            <tr><th scope="row">HTML / CSS / JS</th>
-              <td class="cell-yes">■</td><td class="cell-yes">■</td><td class="cell-yes">■</td><td class="cell-yes">■</td><td class="cell-no">·</td></tr>
-            <tr><th scope="row">DNS / DKIM / DMARC</th>
-              <td class="cell-no">·</td><td class="cell-yes">■</td><td class="cell-no">·</td><td class="cell-yes">■</td><td class="cell-no">·</td></tr>
-            <tr><th scope="row">Zapier</th>
-              <td class="cell-no">·</td><td class="cell-no">·</td><td class="cell-no">·</td><td class="cell-no">·</td><td class="cell-yes">■</td></tr>
-            <tr><th scope="row">Git</th>
-              <td class="cell-yes">■</td><td class="cell-yes">■</td><td class="cell-yes">■</td><td class="cell-no">·</td><td class="cell-no">·</td></tr>
-          </tbody>
-        </table>
+                  <caption class="sr-only">Which tools were used on which client engagement</caption>
+                  <thead>
+                    <tr>
+                      <th scope="col">Tool</th>
+                      <th scope="col">Cordelia ARC</th>
+                      <th scope="col">Kemp Beauty</th>
+                      <th scope="col">Sell Ready AI</th>
+                      <th scope="col">Orange Ashes</th>
+                      <th scope="col">LiveHowYouWant</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr><th scope="row">GoHighLevel</th>
+                      <td class="cell-no"><span class="m-dot" aria-hidden="true"></span><span class="sr-only">Not used</span></td><td class="cell-no"><span class="m-dot" aria-hidden="true"></span><span class="sr-only">Not used</span></td><td class="cell-no"><span class="m-dot" aria-hidden="true"></span><span class="sr-only">Not used</span></td><td class="cell-yes"><span class="m-dot" aria-hidden="true"></span><span class="sr-only">Used</span></td><td class="cell-yes"><span class="m-dot" aria-hidden="true"></span><span class="sr-only">Used</span></td></tr>
+                    <tr><th scope="row">Klaviyo</th>
+                      <td class="cell-no"><span class="m-dot" aria-hidden="true"></span><span class="sr-only">Not used</span></td><td class="cell-yes"><span class="m-dot" aria-hidden="true"></span><span class="sr-only">Used</span></td><td class="cell-no"><span class="m-dot" aria-hidden="true"></span><span class="sr-only">Not used</span></td><td class="cell-no"><span class="m-dot" aria-hidden="true"></span><span class="sr-only">Not used</span></td><td class="cell-no"><span class="m-dot" aria-hidden="true"></span><span class="sr-only">Not used</span></td></tr>
+                    <tr><th scope="row">Shopify Liquid</th>
+                      <td class="cell-no"><span class="m-dot" aria-hidden="true"></span><span class="sr-only">Not used</span></td><td class="cell-yes"><span class="m-dot" aria-hidden="true"></span><span class="sr-only">Used</span></td><td class="cell-yes"><span class="m-dot" aria-hidden="true"></span><span class="sr-only">Used</span></td><td class="cell-no"><span class="m-dot" aria-hidden="true"></span><span class="sr-only">Not used</span></td><td class="cell-no"><span class="m-dot" aria-hidden="true"></span><span class="sr-only">Not used</span></td></tr>
+                    <tr><th scope="row">React / TypeScript</th>
+                      <td class="cell-yes"><span class="m-dot" aria-hidden="true"></span><span class="sr-only">Used</span></td><td class="cell-no"><span class="m-dot" aria-hidden="true"></span><span class="sr-only">Not used</span></td><td class="cell-no"><span class="m-dot" aria-hidden="true"></span><span class="sr-only">Not used</span></td><td class="cell-no"><span class="m-dot" aria-hidden="true"></span><span class="sr-only">Not used</span></td><td class="cell-no"><span class="m-dot" aria-hidden="true"></span><span class="sr-only">Not used</span></td></tr>
+                    <tr><th scope="row">Supabase / Postgres</th>
+                      <td class="cell-yes"><span class="m-dot" aria-hidden="true"></span><span class="sr-only">Used</span></td><td class="cell-no"><span class="m-dot" aria-hidden="true"></span><span class="sr-only">Not used</span></td><td class="cell-no"><span class="m-dot" aria-hidden="true"></span><span class="sr-only">Not used</span></td><td class="cell-no"><span class="m-dot" aria-hidden="true"></span><span class="sr-only">Not used</span></td><td class="cell-no"><span class="m-dot" aria-hidden="true"></span><span class="sr-only">Not used</span></td></tr>
+                    <tr><th scope="row">HTML / CSS / JS</th>
+                      <td class="cell-yes"><span class="m-dot" aria-hidden="true"></span><span class="sr-only">Used</span></td><td class="cell-yes"><span class="m-dot" aria-hidden="true"></span><span class="sr-only">Used</span></td><td class="cell-yes"><span class="m-dot" aria-hidden="true"></span><span class="sr-only">Used</span></td><td class="cell-yes"><span class="m-dot" aria-hidden="true"></span><span class="sr-only">Used</span></td><td class="cell-no"><span class="m-dot" aria-hidden="true"></span><span class="sr-only">Not used</span></td></tr>
+                    <tr><th scope="row">DNS / DKIM / DMARC</th>
+                      <td class="cell-no"><span class="m-dot" aria-hidden="true"></span><span class="sr-only">Not used</span></td><td class="cell-yes"><span class="m-dot" aria-hidden="true"></span><span class="sr-only">Used</span></td><td class="cell-no"><span class="m-dot" aria-hidden="true"></span><span class="sr-only">Not used</span></td><td class="cell-yes"><span class="m-dot" aria-hidden="true"></span><span class="sr-only">Used</span></td><td class="cell-no"><span class="m-dot" aria-hidden="true"></span><span class="sr-only">Not used</span></td></tr>
+                    <tr><th scope="row">Zapier</th>
+                      <td class="cell-no"><span class="m-dot" aria-hidden="true"></span><span class="sr-only">Not used</span></td><td class="cell-no"><span class="m-dot" aria-hidden="true"></span><span class="sr-only">Not used</span></td><td class="cell-no"><span class="m-dot" aria-hidden="true"></span><span class="sr-only">Not used</span></td><td class="cell-no"><span class="m-dot" aria-hidden="true"></span><span class="sr-only">Not used</span></td><td class="cell-yes"><span class="m-dot" aria-hidden="true"></span><span class="sr-only">Used</span></td></tr>
+                    <tr><th scope="row">Git</th>
+                      <td class="cell-yes"><span class="m-dot" aria-hidden="true"></span><span class="sr-only">Used</span></td><td class="cell-yes"><span class="m-dot" aria-hidden="true"></span><span class="sr-only">Used</span></td><td class="cell-yes"><span class="m-dot" aria-hidden="true"></span><span class="sr-only">Used</span></td><td class="cell-no"><span class="m-dot" aria-hidden="true"></span><span class="sr-only">Not used</span></td><td class="cell-no"><span class="m-dot" aria-hidden="true"></span><span class="sr-only">Not used</span></td></tr>
+                  </tbody>
+                </table>
       </div>
-
-      <div class="skills-grid">
-        <div class="skill-group reveal">
-          <h4>Development</h4>
-          <div class="pill-row">
-            <span class="pill">React</span><span class="pill">TypeScript</span><span class="pill">Next.js</span>
-            <span class="pill">JavaScript</span><span class="pill">Tailwind CSS</span><span class="pill">HTML / CSS</span>
-            <span class="pill">Shopify Liquid</span><span class="pill">Supabase</span><span class="pill">Postgres</span>
-            <span class="pill">Python</span><span class="pill">SQL</span><span class="pill">Git</span>
-          </div>
-        </div>
-        <div class="skill-group reveal">
-          <h4>CRM &amp; marketing platforms</h4>
-          <div class="pill-row">
-            <span class="pill">GoHighLevel</span><span class="pill">Klaviyo</span><span class="pill">Zapier</span>
-            <span class="pill">HubSpot CRM</span><span class="pill">Salesforce CRM</span><span class="pill">Kommo</span>
-            <span class="pill">Shopify</span><span class="pill">WordPress</span><span class="pill">Meta Business Suite</span>
-          </div>
-        </div>
-        <div class="skill-group reveal">
-          <h4>Operations &amp; analytics</h4>
-          <div class="pill-row">
-            <span class="pill">ClickUp</span><span class="pill">Monday.com</span><span class="pill">Trello</span>
-            <span class="pill">Google Sheets</span><span class="pill">Microsoft Excel</span>
-            <span class="pill">ChatGPT</span><span class="pill">Claude</span><span class="pill">Midjourney</span>
-          </div>
-        </div>
+      <div class="toolbox reveal">
+        {toolbox.map(([group, list]) => (
+          <div><h4>{group}</h4><p>{list}</p></div>
+        ))}
       </div>
     </div>
   </section>
-
-  <section id="education">
-    <div class="wrap">
-      <div class="sec-head reveal">
-        <span class="sec-num">03</span>
-        <div>
-          <span class="sec-kicker">Education</span>
-          <h2>Background</h2>
-        </div>
-      </div>
-      <div class="edu-card reveal">
-        <div>
-          <h3>BSc Computer Science – Software Development</h3>
-          <p>Batangas State University, Alangilan Campus · Batangas City, Philippines</p>
-        </div>
-        <span class="edu-date mono">Aug 2021 – Jul 2025</span>
-      </div>
-    </div>
-  </section>
-
 </BaseLayout>
