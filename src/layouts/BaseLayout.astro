@@ -2,6 +2,7 @@
 import '../styles/global.css';
 import Header from '../components/Header.astro';
 import CommandPalette from '../components/CommandPalette.astro';
+import { WEB3FORMS_ACCESS_KEY, CONTACT_EMAIL } from '../config';
 
 interface Props {
   title: string;
@@ -56,9 +57,6 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
 </head>
 <body>
 <a class="skip-link" href="#main">Skip to content</a>
-<div class="glow" id="glow" aria-hidden="true"></div>
-<div class="cursor-ring" id="cursorRing" aria-hidden="true"></div>
-<div class="cursor-dot" id="cursorDot" aria-hidden="true"></div>
 
 <div class="app-shell">
 <Header />
@@ -68,15 +66,43 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
   <slot />
 
   <section id="contact" class="contact">
-    <div class="wrap">
-      <span class="sec-kicker">Get in touch</span>
-      <h2>Let's automate your operations.</h2>
-      <p>Whether it's a GoHighLevel build, a CRM cleanup, an email deliverability rescue, or full operations management, tell me what's slowing your business down.</p>
-      <div class="contact-methods reveal">
-        <a href="mailto:gabb.alisasis@gmail.com">gabb.alisasis@gmail.com</a>
-        <a href="tel:+639661989672">+63 966 198 9672</a>
-        <span>Philippines · Remote</span>
+    <div class="wrap contact-grid">
+      <div class="contact-intro">
+        <span class="sec-kicker">Get in touch</span>
+        <h2>Let's automate your operations.</h2>
+        <p>GoHighLevel build, CRM cleanup, deliverability rescue, or full operations management — tell me what's slowing your business down and I'll reply personally with next steps.</p>
+        <ol class="contact-steps">
+          <li><b>1</b><span><strong>Send the form</strong>Two minutes, no prep needed.</span></li>
+          <li><b>2</b><span><strong>Free 15-minute audit call</strong>We map what's still manual today.</span></li>
+          <li><b>3</b><span><strong>A clear plan and quote</strong>What I'd build, and what it will change.</span></li>
+        </ol>
+        <div class="contact-direct">
+          <span>Prefer to message directly?</span>
+          <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>
+          <a href="https://wa.me/639661989672" target="_blank" rel="noopener">WhatsApp</a>
+        </div>
       </div>
+
+      <form class="contact-form reveal" id="contactForm" data-key={WEB3FORMS_ACCESS_KEY} data-email={CONTACT_EMAIL} novalidate>
+        <div class="field-row">
+          <label class="field"><span>Name</span><input name="name" type="text" autocomplete="name" required></label>
+          <label class="field"><span>Email</span><input name="email" type="email" autocomplete="email" required></label>
+        </div>
+        <label class="field"><span>Business or website <em>optional</em></span><input name="business" type="text" autocomplete="organization"></label>
+        <label class="field"><span>What's slowing your business down?</span><textarea name="message" rows="4" required placeholder="e.g. Leads from ads aren't followed up fast enough, our CRM is a mess…"></textarea></label>
+        <label class="field"><span>Budget range</span>
+          <select name="budget">
+            <option value="Not sure yet">Not sure yet</option>
+            <option value="Under $500">Under $500</option>
+            <option value="$500 – $1,500">$500 – $1,500</option>
+            <option value="$1,500 – $5,000">$1,500 – $5,000</option>
+            <option value="$5,000+">$5,000+</option>
+          </select>
+        </label>
+        <input type="checkbox" name="botcheck" class="sr-only" tabindex="-1" autocomplete="off" aria-hidden="true">
+        <button class="btn btn-primary contact-submit" type="submit">Send message →</button>
+        <p class="form-status" id="formStatus" role="status" aria-live="polite"></p>
+      </form>
     </div>
   </section>
 </main>

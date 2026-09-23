@@ -105,25 +105,13 @@ gsap.registerPlugin(ScrollTrigger);
   var revealEls = $$('.reveal');
   if (revealEls.length) {
     if (!reduce) {
-      var flatReveal = revealEls.filter(function (el) { return !el.classList.contains('bento-card'); });
-      var cardReveal = revealEls.filter(function (el) { return el.classList.contains('bento-card'); });
-      if (flatReveal.length) ScrollTrigger.batch(flatReveal, {
+      ScrollTrigger.batch(revealEls, {
         start: 'top 88%',
         once: true,
         onEnter: function (batch) {
           gsap.to(batch, { opacity: 1, y: 0, duration: 0.8, ease: 'power3.out', stagger: 0.08, clearProps: 'transform' });
         }
       });
-      if (cardReveal.length) {
-        gsap.set(cardReveal, { transformPerspective: 1100, rotationX: 22, y: 48, transformOrigin: '50% 100%' });
-        ScrollTrigger.batch(cardReveal, {
-          start: 'top 92%',
-          once: true,
-          onEnter: function (batch) {
-            gsap.to(batch, { opacity: 1, y: 0, rotationX: 0, duration: 1, ease: 'power3.out', stagger: 0.09, clearProps: 'transform' });
-          }
-        });
-      }
     } else {
       revealEls.forEach(function (el) { el.classList.add('in'); });
     }
@@ -135,7 +123,7 @@ gsap.registerPlugin(ScrollTrigger);
     var h1 = $('h1', hero);
     if (reduce || !h1) {
       if (h1) h1.style.visibility = 'visible';
-      $$('.hero-top, .hero p.lede, .hero-ctas, .hero-roster, .hero .figure', hero).forEach(function (el) { el.style.opacity = 1; });
+      $$('.hero .bento-status, .hero p.lede, .hero-ctas, .hero-note, .hero-demo', hero).forEach(function (el) { el.style.opacity = 1; });
       return;
     }
     function splitWords(el) {
@@ -162,14 +150,12 @@ gsap.registerPlugin(ScrollTrigger);
     }
     var words = splitWords(h1);
     h1.style.visibility = 'visible';
-    gsap.set(words, { yPercent: 110, rotationX: -85, transformPerspective: 700, transformOrigin: '50% 100%' });
+    gsap.set(words, { yPercent: 110 });
     var tl = gsap.timeline({ defaults: { ease: 'power4.out' } });
-    tl.to(words, { yPercent: 0, rotationX: 0, duration: 1.1, stagger: 0.05, clearProps: 'transform' })
-      .to('.hero-top', { opacity: 1, duration: 0.5 }, 0.15)
-      .to('.hero p.lede, .hero-ctas, .hero-roster', { opacity: 1, y: 0, duration: 0.6, stagger: 0.08 }, '-=0.6')
-      .fromTo('.hero .figure',
-        { opacity: 0, y: 40, rotationX: 14, transformPerspective: 1200 },
-        { opacity: 1, y: 0, rotationX: 0, duration: 1, ease: 'power3.out', clearProps: 'transform' }, '-=0.7');
+    tl.to(words, { yPercent: 0, duration: 1, stagger: 0.04, clearProps: 'transform' })
+      .to('.hero .bento-status', { opacity: 1, duration: 0.5 }, 0.1)
+      .fromTo('.hero p.lede, .hero-ctas, .hero-note', { y: 14 }, { opacity: 1, y: 0, duration: 0.7, stagger: 0.08, clearProps: 'transform' }, '-=0.6')
+      .fromTo('.hero-demo', { y: 28 }, { opacity: 1, y: 0, duration: 1, ease: 'power3.out', clearProps: 'transform' }, '-=0.8');
   })();
 
   /* ---------- image reveal wipe on scroll ---------- */
@@ -207,56 +193,65 @@ gsap.registerPlugin(ScrollTrigger);
     stats.forEach(function (el) { sio.observe(el); });
   }
 
-  /* ---------- hero canvas ---------- */
-  var flow = $('#flow');
-  if (flow) {
-    var nodes = $$('.flow-node', flow);
-    nodes.forEach(function (btn) {
-      btn.addEventListener('click', function () {
-        var panel = document.getElementById(btn.getAttribute('aria-controls'));
-        var open = btn.getAttribute('aria-expanded') === 'true';
-        nodes.forEach(function (o) {
-          if (o === btn) return;
-          o.setAttribute('aria-expanded', 'false');
-          var p = document.getElementById(o.getAttribute('aria-controls'));
-          if (p) p.classList.remove('open');
-        });
-        btn.setAttribute('aria-expanded', open ? 'false' : 'true');
-        if (panel) panel.classList.toggle('open', !open);
-      });
-      btn.addEventListener('keydown', function (e) {
-        var i = nodes.indexOf(btn);
-        if (e.key === 'ArrowDown') { e.preventDefault(); nodes[Math.min(nodes.length - 1, i + 1)].focus(); }
-        if (e.key === 'ArrowUp') { e.preventDefault(); nodes[Math.max(0, i - 1)].focus(); }
-      });
-    });
+  /* ---------- hero: live automation demo ---------- */
+  (function () {
+    var demo = $('#demo'); if (!demo) return;
+    var steps = $$('.demo-step', demo);
+    var toastSms = $('.demo-toast--sms', demo), toastBook = $('.demo-toast--booking', demo);
+    var countEl = $('#demoCount');
+    var leads = [['Sarah M.', 'Sarah'], ['James T.', 'James'], ['Priya K.', 'Priya'], ['Marco D.', 'Marco']];
+    var lead = 0, count = 1284, active = -1, timer = null, running = false;
 
-    var runBtn = $('#canvasRun');
-    if (runBtn) runBtn.addEventListener('click', function () {
-      runBtn.setAttribute('data-running', '1');
-      document.dispatchEvent(new CustomEvent('automation:run'));
-      var seq = $$('.flow-node, .flow-connector', flow);
-      seq.forEach(function (el) { el.classList.remove('firing'); });
+    function paint(n) {
+      steps.forEach(function (s, i) {
+        s.classList.toggle('is-done', i < n);
+        s.classList.toggle('is-active', i === n);
+      });
+      demo.style.setProperty('--progress', Math.max(0, Math.min(1, n / (steps.length - 1))));
+      toastSms.classList.toggle('show', n > 2);
+      toastBook.classList.toggle('show', n > 3);
+    }
+    if (reduce) { paint(steps.length); return; }
 
-      if (reduce) {
-        seq.forEach(function (el) { el.classList.add('firing'); });
-        setTimeout(function () {
-          seq.forEach(function (el) { el.classList.remove('firing'); });
-          runBtn.removeAttribute('data-running');
-        }, 900);
+    function tick() {
+      active++;
+      if (active > steps.length + 2) {
+        active = -1; lead = (lead + 1) % leads.length; count++;
+        demo.classList.add('is-resetting');
+        timer = setTimeout(function () {
+          $$('[data-name]', demo).forEach(function (el) { el.textContent = leads[lead][0]; });
+          $$('[data-first]', demo).forEach(function (el) { el.textContent = leads[lead][1]; });
+          if (countEl) countEl.textContent = count.toLocaleString('en-US');
+          paint(-1);
+          demo.classList.remove('is-resetting');
+          timer = setTimeout(tick, 500);
+        }, 450);
         return;
       }
-
-      var i = 0;
-      (function tick() {
-        if (i > 0) seq[i - 1].classList.remove('firing');
-        if (i >= seq.length) { runBtn.removeAttribute('data-running'); return; }
-        seq[i].classList.add('firing');
-        i++;
-        setTimeout(tick, 420);
-      })();
+      paint(active);
+      timer = setTimeout(tick, 1100);
+    }
+    function start() { if (!running) { running = true; timer = setTimeout(tick, 700); } }
+    function stop() { running = false; clearTimeout(timer); }
+    paint(-1);
+    new IntersectionObserver(function (en) { en[0].isIntersecting ? start() : stop(); }).observe(demo);
+    document.addEventListener('visibilitychange', function () {
+      if (document.hidden) stop(); else if (demo.getBoundingClientRect().top < window.innerHeight) start();
     });
-  }
+
+    if (fine) {
+      var hero = $('.hero'), pending = false, px = 0, py = 0;
+      hero.addEventListener('pointermove', function (e) {
+        px = (e.clientX / window.innerWidth) * 2 - 1; py = (e.clientY / window.innerHeight) * 2 - 1;
+        if (pending) return; pending = true;
+        requestAnimationFrame(function () {
+          demo.style.setProperty('--px', px.toFixed(3)); demo.style.setProperty('--py', py.toFixed(3));
+          pending = false;
+        });
+      });
+      hero.addEventListener('pointerleave', function () { demo.style.setProperty('--px', 0); demo.style.setProperty('--py', 0); });
+    }
+  })();
 
   /* ---------- case study diagrams: animate when scrolled into view ---------- */
   var diagrams = $$('.diagram');
@@ -548,84 +543,38 @@ gsap.registerPlugin(ScrollTrigger);
     }
   });
 
-  /* ---------- custom cursor + magnetic buttons (spring physics via GSAP) ---------- */
-  if (!reduce && fine) {
-    document.documentElement.classList.add('has-custom-cursor');
-    var cDot = $('#cursorDot'), cRing = $('#cursorRing');
-    if (cDot && cRing) {
-      var dotX = gsap.quickTo(cDot, 'x', { duration: 0.12, ease: 'power3.out' });
-      var dotY = gsap.quickTo(cDot, 'y', { duration: 0.12, ease: 'power3.out' });
-      var ringX = gsap.quickTo(cRing, 'x', { duration: 0.35, ease: 'power3.out' });
-      var ringY = gsap.quickTo(cRing, 'y', { duration: 0.35, ease: 'power3.out' });
-      window.addEventListener('mousemove', function (e) {
-        dotX(e.clientX); dotY(e.clientY);
-        ringX(e.clientX); ringY(e.clientY);
-      }, { passive: true });
-      $$('a, button, .zoomable, .flow-node, .chip').forEach(function (el) {
-        el.addEventListener('mouseenter', function () { cRing.classList.add('hover'); });
-        el.addEventListener('mouseleave', function () { cRing.classList.remove('hover'); });
-      });
-    }
-
-    $$('.magnetic').forEach(function (el) {
-      var mx = gsap.quickTo(el, 'x', { duration: 0.5, ease: 'elastic.out(1, 0.4)' });
-      var my = gsap.quickTo(el, 'y', { duration: 0.5, ease: 'elastic.out(1, 0.4)' });
-      el.addEventListener('mousemove', function (e) {
-        var r = el.getBoundingClientRect();
-        mx((e.clientX - r.left - r.width / 2) * 0.32);
-        my((e.clientY - r.top - r.height / 2) * 0.4);
-      });
-      el.addEventListener('mouseleave', function () { mx(0); my(0); });
-    });
-
-    var glow = $('#glow');
-    if (glow) {
-      window.addEventListener('mousemove', function (e) {
-        glow.classList.add('on');
-        glow.style.left = e.clientX + 'px';
-        glow.style.top = e.clientY + 'px';
-      }, { passive: true });
-    }
-
-    /* ---------- 3D tilt: spring-driven, writes CSS vars only ---------- */
-    function attachTilt(el, max) {
-      var rx = 0, ry = 0, vx = 0, vy = 0, tRx = 0, tRy = 0, raf = null;
-      function step() {
-        vx = (vx + (tRx - rx) * 0.09) * 0.74;
-        vy = (vy + (tRy - ry) * 0.09) * 0.74;
-        rx += vx; ry += vy;
-        el.style.setProperty('--rx', rx.toFixed(2) + 'deg');
-        el.style.setProperty('--ry', ry.toFixed(2) + 'deg');
-        el.style.setProperty('--sx', (-ry * 1.4).toFixed(1) + 'px');
-        el.style.setProperty('--sy', (rx * 1.4 + 18).toFixed(1) + 'px');
-        var settled = Math.abs(tRx - rx) < 0.01 && Math.abs(tRy - ry) < 0.01 && Math.abs(vx) < 0.01 && Math.abs(vy) < 0.01;
-        raf = settled ? null : requestAnimationFrame(step);
+  /* ---------- contact form (Web3Forms, falls back to a pre-filled email) ---------- */
+  (function () {
+    var form = $('#contactForm'); if (!form) return;
+    var status = $('#formStatus'), btn = $('.contact-submit', form);
+    var inbox = form.getAttribute('data-email'), key = form.getAttribute('data-key');
+    function say(msg, kind) { status.textContent = msg; status.className = 'form-status' + (kind ? ' is-' + kind : ''); }
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+      if (!form.checkValidity()) { form.reportValidity(); return; }
+      var d = new FormData(form);
+      if (d.get('botcheck')) return;
+      var f = { name: d.get('name'), email: d.get('email'), business: d.get('business') || '—', budget: d.get('budget'), message: d.get('message') };
+      if (!key) {
+        var body = 'Name: ' + f.name + '\nEmail: ' + f.email + '\nBusiness: ' + f.business + '\nBudget: ' + f.budget + '\n\n' + f.message;
+        window.location.href = 'mailto:' + inbox + '?subject=' + encodeURIComponent('Automation enquiry from ' + f.name) + '&body=' + encodeURIComponent(body);
+        say('Opening your email app with your message filled in…', 'ok');
+        return;
       }
-      el.addEventListener('pointermove', function (e) {
-        if (e.pointerType !== 'mouse') return;
-        var r = el.getBoundingClientRect();
-        var px = (e.clientX - r.left) / r.width, py = (e.clientY - r.top) / r.height;
-        tRy = (px - 0.5) * 2 * max;
-        tRx = -(py - 0.5) * 2 * max;
-        el.style.setProperty('--mx', (px * 100).toFixed(1) + '%');
-        el.style.setProperty('--my', (py * 100).toFixed(1) + '%');
-        if (!raf) raf = requestAnimationFrame(step);
-      });
-      el.addEventListener('pointerleave', function () {
-        tRx = 0; tRy = 0;
-        if (!raf) raf = requestAnimationFrame(step);
-      });
-    }
-    $$('.bento-card').forEach(function (card) { attachTilt(card, card.classList.contains('span-3') ? 3.5 : 8); });
-    var heroFigure = $('.hero .figure');
-    if (heroFigure) attachTilt(heroFigure, 5);
-  }
-
-  /* ---------- WebGL hero: 3D TechyOps mark ---------- */
-  var heroCanvas = $('#heroWebgl');
-  if (heroCanvas && window.WebGLRenderingContext) {
-    import('./webgl-hero.js').then(function (mod) {
-      mod.initHeroScene(heroCanvas, { reduce: reduce });
-    }).catch(function () {});
-  }
+      btn.disabled = true; say('Sending…');
+      fetch('https://api.web3forms.com/submit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+        body: JSON.stringify(Object.assign({ access_key: key, subject: 'New enquiry from ' + f.name, from_name: 'Portfolio contact form' }, f))
+      })
+        .then(function (r) { return r.json(); })
+        .then(function (res) {
+          if (!res.success) throw new Error(res.message);
+          form.reset();
+          say("Thanks — your message is in. I'll reply personally soon.", 'ok');
+        })
+        .catch(function () { say('That didn’t send. Please email ' + inbox + ' directly.', 'err'); })
+        .then(function () { btn.disabled = false; });
+    });
+  })();
 })();
