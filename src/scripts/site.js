@@ -314,6 +314,25 @@ gsap.registerPlugin(ScrollTrigger);
     });
   }
 
+  /* ---------- case study filter ---------- */
+  (function () {
+    var grid = $('#caseGrid'); if (!grid) return;
+    var chips = $$('.case-chip'), cards = $$('.case-card', grid), empty = $('#caseEmpty');
+    chips.forEach(function (chip) {
+      chip.addEventListener('click', function () {
+        var f = chip.getAttribute('data-case-filter'), shown = 0;
+        chips.forEach(function (c) { c.setAttribute('aria-pressed', c === chip ? 'true' : 'false'); });
+        cards.forEach(function (card) {
+          var show = f === 'all' || card.getAttribute('data-tags').split(' ').indexOf(f) !== -1;
+          card.hidden = !show; if (show) shown++;
+          if (show && !reduce && card.animate) card.animate([{ opacity: 0, transform: 'translateY(10px)' }, { opacity: 1, transform: 'none' }], { duration: 320, easing: 'ease-out' });
+        });
+        grid.classList.toggle('is-filtered', f !== 'all');
+        if (empty) empty.hidden = shown > 0;
+      });
+    });
+  })();
+
   /* ---------- focus trap helper ---------- */
   var FOCUSABLE = 'a[href],button:not([disabled]),input,select,textarea,[tabindex]:not([tabindex="-1"])';
   function trap(container, e) {
@@ -378,7 +397,7 @@ gsap.registerPlugin(ScrollTrigger);
     if (!overlay || !stage || !trigger) return;
     var fanReturn = null;
     function buildCards() {
-      var imgs = $$('.case-shot img, .case-gallery img');
+      var imgs = $$('.cs-shot img, .case-shot img, .case-gallery img');
       $$('.fan-card', stage).forEach(function (c) { c.remove(); });
       var n = imgs.length;
       imgs.forEach(function (img, i) {

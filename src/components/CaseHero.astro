@@ -1,0 +1,32 @@
+---
+import { cases, caseIndex } from '../data/cases';
+interface Props { slug: string }
+const i = caseIndex(Astro.props.slug);
+const c = cases[i];
+---
+<div class="cs-hero">
+  <div class="cs-head reveal">
+    <div class="case-meta"><span class="case-client">{c.client}</span><span>{c.sector}</span><span>Case {String(i + 1).padStart(2, '0')} / {String(cases.length).padStart(2, '0')}</span></div>
+    <h1>{c.headline}</h1>
+    <p class="cs-lede" set:html={c.intro} />
+    <ul class="case-metrics cs-metrics">
+      {c.metrics.map(([v, l]) => <li><strong>{v}</strong><span>{l}</span></li>)}
+    </ul>
+    <div class="cs-actions">
+      <a class="btn btn-primary" href={`https://${c.url}`} target="_blank" rel="noopener">Visit the live site ↗</a>
+      <a class="btn btn-ghost" href="#contact">Get something similar built</a>
+    </div>
+  </div>
+  <figure class="cs-shot reveal">
+    <div class="browser">
+      <div class="browser-bar"><i></i><i></i><i></i><span>{c.url}</span></div>
+      <img class="zoomable" src={`/images/work/${c.img}.webp`} width={c.w} height={c.h} alt={c.alt} loading="eager" fetchpriority="high" decoding="async" />
+    </div>
+  </figure>
+  <div class="cs-facts reveal">
+    <blockquote class="cs-quote" set:html={c.quote} />
+    <dl class="cs-details">
+      {c.details.map(([k, v]) => <div><dt>{k}</dt><dd>{v}</dd></div>)}
+    </dl>
+  </div>
+</div>

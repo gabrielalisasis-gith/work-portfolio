@@ -1,0 +1,16 @@
+---
+import { cases, caseIndex } from '../data/cases';
+interface Props { slug: string }
+const next = cases[(caseIndex(Astro.props.slug) + 1) % cases.length];
+---
+<nav class="cs-next reveal" aria-label="Next case study">
+  <a href="/work" class="cs-next-all">← All work</a>
+  <a href={`/work/${next.slug}`} class="cs-next-card">
+    <img src={`/images/work/${next.img}.webp`} width={next.w} height={next.h} alt="" loading="lazy" decoding="async" />
+    <span class="cs-next-text">
+      <span class="cs-next-label">Next case study · {next.client}</span>
+      <strong>{next.headline}</strong>
+    </span>
+    <span class="cs-next-arrow" aria-hidden="true">→</span>
+  </a>
+</nav>
