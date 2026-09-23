@@ -84,37 +84,10 @@ const workflows = [
     </div>
   </section>
 
-  <section id="workflows">
-    <div class="wrap">
-      <div class="sec-head reveal">
-        <span class="sec-num">01</span>
-        <div>
-          <span class="sec-kicker">Automation library</span>
-          <h2>Inside the automations</h2>
-          <p>Real builds pulled straight from GoHighLevel and Zapier – the trigger, the branching logic, and where the data ends up. Click any screenshot to enlarge.</p>
-        </div>
-      </div>
-      <div class="wf-grid">
-        {workflows.map((f, n) => (
-          <article class="wf-tile reveal">
-            <div class="wf-frame">
-              <img class="zoomable" src={`/images/work/${f.img}.webp`} width={f.w} height={f.h} alt={alts[f.img]} loading="lazy" decoding="async" />
-            </div>
-            <div class="wf-tile-body">
-              <div class="wf-meta"><span class="n">{String(n + 1).padStart(2, '0')} / 04</span><span class={`tag ${f.cls}`}>{f.tag}</span></div>
-              <h3>{f.title}</h3>
-              <p>{f.body}</p>
-            </div>
-          </article>
-        ))}
-      </div>
-    </div>
-  </section>
-
   <section id="experience">
     <div class="wrap">
       <div class="sec-head reveal">
-        <span class="sec-num">02</span>
+        <span class="sec-num">01</span>
         <div>
           <span class="sec-kicker">Experience</span>
           <h2>Work history</h2>
@@ -205,6 +178,33 @@ const workflows = [
             </div>
           </div>
         </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="workflows">
+    <div class="wrap">
+      <div class="sec-head reveal">
+        <span class="sec-num">02</span>
+        <div>
+          <span class="sec-kicker">Automation library</span>
+          <h2>Inside the automations</h2>
+          <p>Real builds pulled straight from GoHighLevel and Zapier – the trigger, the branching logic, and where the data ends up. Click any screenshot to enlarge.</p>
+        </div>
+      </div>
+      <div class="wf-grid">
+        {workflows.map((f, n) => (
+          <article class="wf-tile reveal">
+            <div class="wf-frame">
+              <img class="zoomable" src={`/images/work/${f.img}.webp`} width={f.w} height={f.h} alt={alts[f.img]} loading="lazy" decoding="async" />
+            </div>
+            <div class="wf-tile-body">
+              <div class="wf-meta"><span class="n">{String(n + 1).padStart(2, '0')} / 04</span><span class={`tag ${f.cls}`}>{f.tag}</span></div>
+              <h3>{f.title}</h3>
+              <p>{f.body}</p>
+            </div>
+          </article>
+        ))}
       </div>
     </div>
   </section>
