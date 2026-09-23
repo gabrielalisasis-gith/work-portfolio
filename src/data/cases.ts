@@ -61,3 +61,39 @@ export const cases: Case[] = [
 ];
 
 export const caseIndex = (slug: string) => cases.findIndex((c) => c.slug === slug);
+
+export interface Role {
+  client: string; role: string; dates: string; sector: string; url: string; tags: string;
+  img: string; w: number; h: number; alt: string;
+  headline: string; summary: string; metrics: [string, string][]; stack: string[];
+}
+
+export const roles: Role[] = [
+  {
+    client: 'LiveHowYouWant', role: 'Operations Support Analyst', dates: 'Mar 2025 – Jun 2026', sector: 'Festivals & travel · USA',
+    url: 'livehowyouwant.com', tags: 'ghl', img: 'xp-livehowyouwant', w: 1200, h: 760,
+    alt: 'Live How You Want homepage – the CRM and community platform',
+    headline: 'Scaled online communities from 900 to 36,000+ members in 8 months',
+    summary: 'Ran the GoHighLevel CRM, workflows, forms and automations day to day, maintained Bubble backend workflows and customer data, and kept operations smooth as the community grew.',
+    metrics: [['36,000+', 'community members'], ['8 mo', 'from 900 members']],
+    stack: ['GoHighLevel', 'Bubble', 'Operations'],
+  },
+  {
+    client: 'Supreme Club Tours', role: 'Marketing Automation Specialist', dates: 'Oct 2024 – Aug 2025', sector: 'Nightlife & events · Las Vegas',
+    url: 'supremeclubtours.com', tags: 'ghl', img: 'xp-supreme-club-tours', w: 1200, h: 675,
+    alt: 'Supreme Club Tours homepage – Las Vegas nightlife and events booking site',
+    headline: 'Automated lead capture and nurturing through growth to 3,000+ customers',
+    summary: 'Built GoHighLevel automations for lead capture, nurturing and customer communication, managed CRM operations, and supported partnerships with brands including Insomniac.',
+    metrics: [['3,000+', 'customers'], ['5 mo', 'to get there']],
+    stack: ['GoHighLevel', 'CRM ops', 'Campaign design'],
+  },
+  {
+    client: 'BSU STEER HUB', role: 'Front-End Developer', dates: 'Apr 2023 – Sep 2023', sector: 'University web app · Philippines',
+    url: 'steerhub.batstateu.edu.ph', tags: 'apps', img: 'xp-steer-hub', w: 1200, h: 676,
+    alt: 'BSU STEER HUB homepage – the university web application I helped develop',
+    headline: 'Built and tested real-time features for a university web application',
+    summary: 'Developed and tested real-time features, improved UI functionality and usability, and kept responsive front-end components performing well.',
+    metrics: [['Real-time', 'app features'], ['Responsive', 'UI components']],
+    stack: ['JavaScript', 'Front-end', 'Analytics'],
+  },
+];

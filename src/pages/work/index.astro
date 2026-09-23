@@ -1,6 +1,6 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import { cases } from '../../data/cases';
+import { cases, roles } from '../../data/cases';
 
 const alts: Record<string, string> = {
     "workflow-edc-ghl": "GoHighLevel workflow builder showing the EDC time-slot form submission trigger branching into contact-tag actions",
@@ -11,7 +11,8 @@ const alts: Record<string, string> = {
 const filters = [
   ['all', 'All work'], ['ghl', 'GoHighLevel'], ['email', 'Email & Klaviyo'], ['shopify', 'Shopify'], ['apps', 'Custom apps'],
 ];
-const countFor = (f: string) => f === 'all' ? cases.length : cases.filter((c) => c.tags.split(' ').includes(f)).length;
+const all = [...cases, ...roles];
+const countFor = (f: string) => f === 'all' ? all.length : all.filter((c) => c.tags.split(' ').includes(f)).length;
 
 const workflows = [
   { img: 'workflow-edc-ghl', w: 1200, h: 633, tag: 'GoHighLevel', cls: 'tag-trigger',
@@ -36,7 +37,7 @@ const workflows = [
     <div class="wrap">
       <span class="sec-kicker reveal">Selected work</span>
       <h1 class="reveal">Systems that are live, <span class="accent">and doing the work.</span></h1>
-      <p class="work-lede reveal">Four client builds across GoHighLevel, Klaviyo, Shopify and custom software. Each one opens into the full record — what was broken, how I diagnosed it, what shipped, and the work that has continued since.</p>
+      <p class="work-lede reveal">Client builds and long-term engagements across GoHighLevel, Klaviyo, Shopify and custom software. The case studies open into the full record — what was broken, how I diagnosed it, what shipped, and the work that has continued since.</p>
       <div class="proof-stats work-stats reveal">
         <div class="proof-stat"><strong>4</strong><span>client systems live in production</span></div>
         <div class="proof-stat"><strong>8</strong><span>failing email flows recovered</span></div>
@@ -79,113 +80,38 @@ const workflows = [
             </div>
           </article>
         ))}
+        {roles.map((r) => (
+          <article class="case-card is-compact reveal" data-tags={r.tags}>
+            <div class="case-media">
+              <div class="browser">
+                <div class="browser-bar"><i></i><i></i><i></i><span>{r.url}</span></div>
+                <img src={`/images/work/${r.img}.webp`} width={r.w} height={r.h} alt={r.alt} loading="lazy" decoding="async" />
+              </div>
+            </div>
+            <div class="case-body">
+              <div class="case-meta"><span class="case-client">{r.client}</span><span>{r.dates}</span></div>
+              <p class="case-role">{r.role} · {r.sector}</p>
+              <h2 class="case-title"><a class="case-link" href={`https://${r.url}`} target="_blank" rel="noopener">{r.headline}</a></h2>
+              <p class="case-summary">{r.summary}</p>
+              <ul class="case-metrics">
+                {r.metrics.map(([v, l]) => <li><strong>{v}</strong><span>{l}</span></li>)}
+              </ul>
+              <div class="case-foot">
+                <div class="bento-tags">{r.stack.map((t) => <span class="bento-pill">{t}</span>)}</div>
+                <span class="case-cta">Visit site ↗</span>
+              </div>
+            </div>
+          </article>
+        ))}
       </div>
       <p class="case-empty" id="caseEmpty" hidden>No case studies in this category yet.</p>
-    </div>
-  </section>
-
-  <section id="experience">
-    <div class="wrap">
-      <div class="sec-head reveal">
-        <span class="sec-num">01</span>
-        <div>
-          <span class="sec-kicker">Experience</span>
-          <h2>Work history</h2>
-        </div>
-      </div>
-
-      <div class="xp">
-        <div class="reveal">
-          <div>
-            <span class="xp-when">Mar 2025 – Jun 2026</span>
-            <span class="xp-where">LiveHowYouWantUSA<br>United States</span>
-          </div>
-          <div>
-            <h3>Operations Support Analyst</h3>
-            <ul>
-              <li>Managed <strong>GoHighLevel CRM</strong>, workflows, forms, automations, and daily operational processes.</li>
-              <li>Maintained Bubble backend workflows and customer data for seamless platform performance.</li>
-              <li>Built and managed online communities that scaled from <strong>900 to 36,000+ members in 8 months</strong>.</li>
-              <li>Resolved operational issues while improving customer experience and internal efficiency.</li>
-            </ul>
-            <div class="site-preview">
-              <div class="chrome">
-                <span class="dot"></span><span class="dot"></span><span class="dot"></span>
-                <span class="urlbar">livehowyouwant.com</span>
-              </div>
-              <img class="zoomable site-shot" src="/images/work/xp-livehowyouwant.webp" width="1200" height="760" loading="lazy" decoding="async"
-                   alt="Live How You Want homepage – the CRM and community platform">
-              <div class="site-body">
-                <span>CRM &amp; community platform I helped run</span>
-                <a class="visit-btn" href="https://livehowyouwant.com" target="_blank" rel="noopener">Visit ↗</a>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="reveal">
-          <div>
-            <span class="xp-when">Oct 2024 – Aug 2025</span>
-            <span class="xp-where">Supreme Club Tours<br>United States</span>
-          </div>
-          <div>
-            <h3>Marketing Automation Specialist</h3>
-            <ul>
-              <li>Built GoHighLevel automations for lead capture, nurturing, and customer communication.</li>
-              <li>Managed CRM operations supporting growth to <strong>3,000+ customers within 5 months</strong>.</li>
-              <li>Managed partnerships with brands including Insomniac, supporting audience growth and bookings.</li>
-              <li>Designed marketing assets and promotional materials for Las Vegas nightlife campaigns.</li>
-            </ul>
-            <div class="site-preview">
-              <div class="chrome">
-                <span class="dot"></span><span class="dot"></span><span class="dot"></span>
-                <span class="urlbar">supremeclubtours.com</span>
-              </div>
-              <img class="zoomable site-shot" src="/images/work/xp-supreme-club-tours.webp" width="1200" height="675" loading="lazy" decoding="async"
-                   alt="Supreme Club Tours homepage – Las Vegas nightlife and events booking site">
-              <div class="site-body">
-                <span>Las Vegas nightlife &amp; events site I supported</span>
-                <a class="visit-btn" href="https://supremeclubtours.com" target="_blank" rel="noopener">Visit ↗</a>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="reveal">
-          <div>
-            <span class="xp-when">Apr 2023 – Sep 2023</span>
-            <span class="xp-where">BSU STEER HUB<br>Philippines</span>
-          </div>
-          <div>
-            <h3>Front-End Developer</h3>
-            <ul>
-              <li>Developed and tested real-time web application features.</li>
-              <li>Improved user interface functionality and usability.</li>
-              <li>Maintained responsive front-end components and system performance.</li>
-              <li>Used performance analytics to optimize content strategy and engagement.</li>
-            </ul>
-            <div class="site-preview">
-              <div class="chrome">
-                <span class="dot"></span><span class="dot"></span><span class="dot"></span>
-                <span class="urlbar">steerhub.batstateu.edu.ph</span>
-              </div>
-              <img class="zoomable site-shot" src="/images/work/xp-steer-hub.webp" width="1200" height="676" loading="lazy" decoding="async"
-                   alt="BSU STEER HUB homepage – the university web application I helped develop">
-              <div class="site-body">
-                <span>University web app I helped develop</span>
-                <a class="visit-btn" href="https://steerhub.batstateu.edu.ph" target="_blank" rel="noopener">Visit ↗</a>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
     </div>
   </section>
 
   <section id="workflows">
     <div class="wrap">
       <div class="sec-head reveal">
-        <span class="sec-num">02</span>
+        <span class="sec-num">01</span>
         <div>
           <span class="sec-kicker">Automation library</span>
           <h2>Inside the automations</h2>
@@ -212,7 +138,7 @@ const workflows = [
   <section id="projects">
     <div class="wrap">
       <div class="sec-head reveal">
-        <span class="sec-num">03</span>
+        <span class="sec-num">02</span>
         <div>
           <span class="sec-kicker">Selected projects</span>
           <h2>Things I've built</h2>
