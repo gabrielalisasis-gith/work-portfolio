@@ -13,6 +13,7 @@
     --pos:#5AD1A0; --pos-soft:rgba(90,209,160,0.12); --pos-line:rgba(90,209,160,0.38);
     --neg:#F0796B; --neg-soft:rgba(240,121,107,0.12);
     --grid-dot:rgba(76,141,246,0.07); --plate-dot:rgba(233,237,250,0.05);
+    --float-shadow:rgba(3,6,20,0.75);
     --radius:18px; --radius-sm:11px;
   }
   :root[data-theme="light"]{
@@ -24,7 +25,7 @@
     --on-accent:#FFFFFF;
     --pos:#12805A; --pos-soft:rgba(18,128,90,0.09); --pos-line:rgba(18,128,90,0.36);
     --neg:#C2410C; --neg-soft:rgba(194,65,12,0.09);
-    --grid-dot:rgba(37,99,235,0.07); --plate-dot:rgba(15,26,56,0.05);
+    --grid-dot:rgba(37,99,235,0.07); --plate-dot:rgba(15,26,56,0.05); --float-shadow:rgba(30,58,138,0.22);
   }
   @media (prefers-color-scheme: light){
     :root:not([data-theme="dark"]){
@@ -36,7 +37,7 @@
       --on-accent:#FFFFFF;
       --pos:#12805A; --pos-soft:rgba(18,128,90,0.09); --pos-line:rgba(18,128,90,0.36);
       --neg:#C2410C; --neg-soft:rgba(194,65,12,0.09);
-      --grid-dot:rgba(37,99,235,0.07); --plate-dot:rgba(15,26,56,0.05);
+      --grid-dot:rgba(37,99,235,0.07); --plate-dot:rgba(15,26,56,0.05); --float-shadow:rgba(30,58,138,0.22);
     }
   }
 
@@ -81,7 +82,7 @@
     display:flex; flex-direction:column; gap:22px;
     padding:28px 22px; border-right:1px solid var(--line); overflow-y:auto;
   }
-  .content-area{ flex:1; min-width:0; }
+  .content-area{ flex:1; min-width:0; overflow-x:clip; }
   nav{ display:flex; flex-direction:column; height:100%; }
   .logo{
     font-family:'Open Sans','Public Sans',sans-serif; font-size:1.02rem; font-weight:700;
@@ -188,7 +189,7 @@
   .js .reveal.in{ opacity:1; transform:none; }
 
   /* ============ HERO ============ */
-  .hero{ padding:8px 0 0; position:relative; overflow:hidden; }
+  .hero{ padding:8px 0 56px; position:relative; overflow:hidden; overflow:clip; }
   .hero::before{
     content:''; position:absolute; inset:0; z-index:0; pointer-events:none;
     background-image:radial-gradient(var(--grid-dot) 1px, transparent 1px);
@@ -198,12 +199,15 @@
   }
   .hero .wrap{ position:relative; z-index:1; }
   .hero-webgl{
-    position:absolute; inset:0; z-index:0; width:100%; height:100%;
-    display:block; pointer-events:none; opacity:.65;
-    mask-image:linear-gradient(180deg,#000 0%,#000 55%,transparent 92%);
-    -webkit-mask-image:linear-gradient(180deg,#000 0%,#000 55%,transparent 92%);
+    position:absolute; z-index:0; pointer-events:none; display:block;
+    top:-30px; right:-70px; width:min(620px, 46vw); height:min(620px, 46vw);
+    opacity:0; transition:opacity 1.4s ease;
   }
-  @media (prefers-reduced-motion: reduce){ .hero-webgl{ display:none; } }
+  .hero-webgl.ready{ opacity:1; }
+  @media(max-width:960px){
+    .hero-webgl{ width:340px; height:340px; top:-60px; right:-120px; }
+    .hero-webgl.ready{ opacity:.5; }
+  }
   .hero-top{
     display:flex; justify-content:space-between; align-items:baseline;
     gap:20px; flex-wrap:wrap;
@@ -251,6 +255,20 @@
   .btn-ghost:hover{ background:var(--panel); color:var(--accent); }
 
   .figure{ border:1px solid var(--line); background:var(--panel); }
+  /* hero figure: frosted glass pane floating in front of the 3D mark */
+  .hero .figure{
+    --rx:0deg; --ry:0deg; --sx:0px; --sy:18px; --mx:50%; --my:0%;
+    position:relative; border-radius:var(--radius); border-color:var(--line-strong);
+    background:color-mix(in srgb, var(--panel) 68%, transparent);
+    -webkit-backdrop-filter:blur(18px) saturate(150%); backdrop-filter:blur(18px) saturate(150%);
+    transform:perspective(1200px) rotateX(var(--rx)) rotateY(var(--ry));
+    box-shadow:var(--sx) var(--sy) 60px -22px var(--float-shadow), inset 0 1px 0 color-mix(in srgb, #fff 8%, transparent);
+  }
+  .hero .figure::after{
+    content:''; position:absolute; inset:0; border-radius:inherit; pointer-events:none;
+    background:radial-gradient(360px circle at var(--mx) var(--my), color-mix(in srgb, #fff 7%, transparent), transparent 60%);
+  }
+  .hero .figure .flow-node{ background:color-mix(in srgb, var(--panel-2) 72%, transparent); border-radius:var(--radius-sm); }
   .figure-head{
     display:flex; align-items:center; justify-content:space-between; gap:12px;
     padding:9px 14px; border-bottom:1px solid var(--line);
@@ -718,7 +736,7 @@
   @media(max-width:640px){
     .wrap{ padding:0 20px; }
     .nav-links a{ padding:16px 20px; }
-    .hero{ padding:8px 0 0; }
+    .hero{ padding:8px 0 40px; }
     .sec-head{ grid-template-columns:1fr; gap:10px; }
     .sec-num{ padding-top:0; }
     .ledger > li{ grid-template-columns:52px 1fr; }
@@ -813,30 +831,44 @@
   .bento{
     display:grid; grid-template-columns:repeat(3,1fr); gap:16px;
     grid-auto-rows:minmax(150px, auto);
-    perspective:1400px;
   }
+  /* perspective lives in each card's own transform so depth is centred on the card, not the grid.
+     No overflow:hidden here: it would flatten preserve-3d and kill the layered depth. */
   .bento-card{
-    --rx:0deg; --ry:0deg; --mx:50%; --my:50%; --tilt-shadow:0 1px 2px rgba(0,0,0,0);
+    --rx:0deg; --ry:0deg; --sx:0px; --sy:18px; --mx:50%; --my:50%;
     position:relative; background:var(--panel); border:1px solid var(--line); border-radius:var(--radius);
     padding:24px; display:flex; flex-direction:column;
-    transform-style:preserve-3d; transform:rotateX(var(--rx)) rotateY(var(--ry)) translateZ(0);
-    transition:border-color .2s, box-shadow .4s ease;
-    box-shadow:var(--tilt-shadow); will-change:transform;
-    overflow:hidden;
+    transform-style:preserve-3d;
+    transform:perspective(1000px) rotateX(var(--rx)) rotateY(var(--ry));
+    box-shadow:0 1px 0 color-mix(in srgb, #fff 4%, transparent) inset, 0 0 0 0 transparent;
+    transition:border-color .25s, box-shadow .45s ease;
+  }
+  .bento-card:hover{
+    border-color:var(--line-strong);
+    box-shadow:0 1px 0 color-mix(in srgb, #fff 6%, transparent) inset, var(--sx) var(--sy) 50px -18px var(--float-shadow);
+  }
+  .bento-card::before{
+    content:''; position:absolute; inset:-1px; border-radius:inherit; padding:1px; pointer-events:none;
+    background:radial-gradient(240px circle at var(--mx) var(--my), var(--accent), transparent 65%);
+    -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite:xor; mask-composite:exclude;
+    opacity:0; transition:opacity .35s ease;
   }
   .bento-card::after{
-    content:''; position:absolute; inset:0; border-radius:inherit; pointer-events:none; z-index:2;
+    content:''; position:absolute; inset:0; border-radius:inherit; pointer-events:none;
+    background:radial-gradient(380px circle at var(--mx) var(--my), var(--accent-soft), transparent 62%);
     opacity:0; transition:opacity .35s ease;
-    background:radial-gradient(420px circle at var(--mx) var(--my), var(--accent-soft), transparent 62%);
   }
-  .bento-card:hover::after{ opacity:1; }
-  a.bento-card:hover{ border-color:var(--line-strong); }
+  .bento-card:hover::before, .bento-card:hover::after{ opacity:1; }
   .bento-card.span-2{ grid-column:span 2; }
   .bento-card.span-3{ grid-column:span 3; }
-  .bento-card > *{ position:relative; z-index:1; transform:translateZ(24px); }
+  /* content lifts off the card on hover; flat (and crisp) at rest */
+  .bento-card > *{ position:relative; z-index:1; transition:transform .5s cubic-bezier(.22,1,.36,1); }
+  .bento-card:hover > *{ transform:translateZ(22px); }
+  .bento-card:hover > .bento-icon{ transform:translateZ(46px); }
+  .bento-card:hover > .bento-more{ transform:translateZ(34px); }
   @media (prefers-reduced-motion: reduce){
-    .bento-card{ transform:none !important; transition:border-color .2s; }
-    .bento-card > *{ transform:none; }
+    .bento-card, .bento-card:hover > *{ transform:none !important; }
   }
   .bento-icon{
     width:38px; height:38px; border-radius:var(--radius-sm); flex-shrink:0;

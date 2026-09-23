@@ -105,13 +105,25 @@ gsap.registerPlugin(ScrollTrigger);
   var revealEls = $$('.reveal');
   if (revealEls.length) {
     if (!reduce) {
-      ScrollTrigger.batch(revealEls, {
+      var flatReveal = revealEls.filter(function (el) { return !el.classList.contains('bento-card'); });
+      var cardReveal = revealEls.filter(function (el) { return el.classList.contains('bento-card'); });
+      if (flatReveal.length) ScrollTrigger.batch(flatReveal, {
         start: 'top 88%',
         once: true,
         onEnter: function (batch) {
           gsap.to(batch, { opacity: 1, y: 0, duration: 0.8, ease: 'power3.out', stagger: 0.08, clearProps: 'transform' });
         }
       });
+      if (cardReveal.length) {
+        gsap.set(cardReveal, { transformPerspective: 1100, rotationX: 22, y: 48, transformOrigin: '50% 100%' });
+        ScrollTrigger.batch(cardReveal, {
+          start: 'top 92%',
+          once: true,
+          onEnter: function (batch) {
+            gsap.to(batch, { opacity: 1, y: 0, rotationX: 0, duration: 1, ease: 'power3.out', stagger: 0.09, clearProps: 'transform' });
+          }
+        });
+      }
     } else {
       revealEls.forEach(function (el) { el.classList.add('in'); });
     }
@@ -150,12 +162,14 @@ gsap.registerPlugin(ScrollTrigger);
     }
     var words = splitWords(h1);
     h1.style.visibility = 'visible';
-    gsap.set(words, { yPercent: 120 });
+    gsap.set(words, { yPercent: 110, rotationX: -85, transformPerspective: 700, transformOrigin: '50% 100%' });
     var tl = gsap.timeline({ defaults: { ease: 'power4.out' } });
-    tl.to(words, { yPercent: 0, duration: 1, stagger: 0.032 })
+    tl.to(words, { yPercent: 0, rotationX: 0, duration: 1.1, stagger: 0.05, clearProps: 'transform' })
       .to('.hero-top', { opacity: 1, duration: 0.5 }, 0.15)
       .to('.hero p.lede, .hero-ctas, .hero-roster', { opacity: 1, y: 0, duration: 0.6, stagger: 0.08 }, '-=0.6')
-      .fromTo('.hero .figure', { opacity: 0, x: 24 }, { opacity: 1, x: 0, duration: 0.7, ease: 'power3.out' }, '-=0.6');
+      .fromTo('.hero .figure',
+        { opacity: 0, y: 40, rotationX: 14, transformPerspective: 1200 },
+        { opacity: 1, y: 0, rotationX: 0, duration: 1, ease: 'power3.out', clearProps: 'transform' }, '-=0.7');
   })();
 
   /* ---------- image reveal wipe on scroll ---------- */
@@ -220,6 +234,7 @@ gsap.registerPlugin(ScrollTrigger);
     var runBtn = $('#canvasRun');
     if (runBtn) runBtn.addEventListener('click', function () {
       runBtn.setAttribute('data-running', '1');
+      document.dispatchEvent(new CustomEvent('automation:run'));
       var seq = $$('.flow-node, .flow-connector', flow);
       seq.forEach(function (el) { el.classList.remove('firing'); });
 
@@ -572,46 +587,45 @@ gsap.registerPlugin(ScrollTrigger);
       }, { passive: true });
     }
 
-    /* ---------- 3D tilt for bento cards ---------- */
-    $$('.bento-card').forEach(function (card) {
-      var rx = 0, ry = 0, tRx = 0, tRy = 0, raf = null;
-      function loop() {
-        rx += (tRx - rx) * 0.14;
-        ry += (tRy - ry) * 0.14;
-        card.style.setProperty('--rx', rx.toFixed(2) + 'deg');
-        card.style.setProperty('--ry', ry.toFixed(2) + 'deg');
-        var depth = (Math.abs(rx) + Math.abs(ry)) / 14;
-        card.style.setProperty('--tilt-shadow',
-          (-ry * 1.6).toFixed(1) + 'px ' + (rx * 1.6).toFixed(1) + 'px ' + (18 + depth * 20).toFixed(0) + 'px rgba(0,0,0,' + (0.08 + depth * 0.1).toFixed(2) + ')');
-        if (Math.abs(tRx - rx) > 0.02 || Math.abs(tRy - ry) > 0.02) {
-          raf = requestAnimationFrame(loop);
-        } else { raf = null; }
+    /* ---------- 3D tilt: spring-driven, writes CSS vars only ---------- */
+    function attachTilt(el, max) {
+      var rx = 0, ry = 0, vx = 0, vy = 0, tRx = 0, tRy = 0, raf = null;
+      function step() {
+        vx = (vx + (tRx - rx) * 0.09) * 0.74;
+        vy = (vy + (tRy - ry) * 0.09) * 0.74;
+        rx += vx; ry += vy;
+        el.style.setProperty('--rx', rx.toFixed(2) + 'deg');
+        el.style.setProperty('--ry', ry.toFixed(2) + 'deg');
+        el.style.setProperty('--sx', (-ry * 1.4).toFixed(1) + 'px');
+        el.style.setProperty('--sy', (rx * 1.4 + 18).toFixed(1) + 'px');
+        var settled = Math.abs(tRx - rx) < 0.01 && Math.abs(tRy - ry) < 0.01 && Math.abs(vx) < 0.01 && Math.abs(vy) < 0.01;
+        raf = settled ? null : requestAnimationFrame(step);
       }
-      card.addEventListener('pointermove', function (e) {
-        if (e.pointerType && e.pointerType !== 'mouse') return;
-        var r = card.getBoundingClientRect();
-        var px = (e.clientX - r.left) / r.width;
-        var py = (e.clientY - r.top) / r.height;
-        tRy = (px - 0.5) * 14;
-        tRx = -(py - 0.5) * 14;
-        card.style.setProperty('--mx', (px * 100).toFixed(1) + '%');
-        card.style.setProperty('--my', (py * 100).toFixed(1) + '%');
-        if (!raf) raf = requestAnimationFrame(loop);
+      el.addEventListener('pointermove', function (e) {
+        if (e.pointerType !== 'mouse') return;
+        var r = el.getBoundingClientRect();
+        var px = (e.clientX - r.left) / r.width, py = (e.clientY - r.top) / r.height;
+        tRy = (px - 0.5) * 2 * max;
+        tRx = -(py - 0.5) * 2 * max;
+        el.style.setProperty('--mx', (px * 100).toFixed(1) + '%');
+        el.style.setProperty('--my', (py * 100).toFixed(1) + '%');
+        if (!raf) raf = requestAnimationFrame(step);
       });
-      card.addEventListener('pointerleave', function () {
+      el.addEventListener('pointerleave', function () {
         tRx = 0; tRy = 0;
-        if (!raf) raf = requestAnimationFrame(loop);
+        if (!raf) raf = requestAnimationFrame(step);
       });
-    });
+    }
+    $$('.bento-card').forEach(function (card) { attachTilt(card, card.classList.contains('span-3') ? 3.5 : 8); });
+    var heroFigure = $('.hero .figure');
+    if (heroFigure) attachTilt(heroFigure, 5);
   }
 
-  /* ---------- WebGL hero moment ---------- */
-  if (!reduce) {
-    var heroCanvas = $('#heroWebgl');
-    if (heroCanvas && window.WebGLRenderingContext) {
-      import('./webgl-hero.js').then(function (mod) {
-        mod.initHeroScene(heroCanvas);
-      }).catch(function () {});
-    }
+  /* ---------- WebGL hero: 3D TechyOps mark ---------- */
+  var heroCanvas = $('#heroWebgl');
+  if (heroCanvas && window.WebGLRenderingContext) {
+    import('./webgl-hero.js').then(function (mod) {
+      mod.initHeroScene(heroCanvas, { reduce: reduce });
+    }).catch(function () {});
   }
 })();
