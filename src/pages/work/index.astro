@@ -36,7 +36,7 @@ const workflows = [
     <div class="wrap">
       <span class="sec-kicker reveal">Selected work</span>
       <h1 class="reveal">Systems that are live, <span class="accent">and doing the work.</span></h1>
-      <p class="work-lede reveal">Four client builds across GoHighLevel, Klaviyo, Shopify and custom software. Each one opens into the full record — what was broken, how I diagnosed it, and what shipped.</p>
+      <p class="work-lede reveal">Four client builds across GoHighLevel, Klaviyo, Shopify and custom software. Each one opens into the full record — what was broken, how I diagnosed it, what shipped, and the work that has continued since.</p>
       <div class="proof-stats work-stats reveal">
         <div class="proof-stat"><strong>4</strong><span>client systems live in production</span></div>
         <div class="proof-stat"><strong>8</strong><span>failing email flows recovered</span></div>
@@ -63,7 +63,7 @@ const workflows = [
               </div>
             </div>
             <div class="case-body">
-              <div class="case-meta"><span class="case-client">{c.client}</span><span>{c.sector}</span></div>
+              <div class="case-meta"><span class="case-client">{c.client}</span><span>{c.sector}</span>{c.ongoing && <span class="ongoing-badge"><b></b>Ongoing</span>}</div>
               <h2 class="case-title"><a class="case-link" href={`/work/${c.slug}`}>{c.headline}</a></h2>
               <p class="case-summary">{c.summary}</p>
               <ul class="case-metrics">

@@ -1,0 +1,23 @@
+---
+import { cases, caseIndex } from '../data/cases';
+interface Props { slug: string }
+const c = cases[caseIndex(Astro.props.slug)];
+const o = c.ongoing;
+---
+{o && (
+  <section class="cs-ongoing reveal" aria-labelledby="ongoing-title">
+    <div class="cs-ongoing-head">
+      <span class="ongoing-badge"><b></b>Ongoing engagement</span>
+      <h2 id="ongoing-title">Since launch: still shipping</h2>
+      <p>{o.summary}</p>
+    </div>
+    <ul class="cs-ongoing-list">
+      {o.items.map((item) => (
+        <li>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
+          <span>{item}</span>
+        </li>
+      ))}
+    </ul>
+  </section>
+)}

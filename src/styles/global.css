@@ -1078,3 +1078,26 @@
     .case-metrics li:nth-child(n+3){ border-top:1px solid var(--line); }
     .case-metrics li:last-child:nth-child(odd){ grid-column:1 / -1; }
   }
+
+  /* ============ ONGOING ENGAGEMENTS ============ */
+  .ongoing-badge{
+    display:inline-flex; align-items:center; gap:7px; padding:3px 10px; border-radius:999px;
+    font-size:.68rem; font-weight:700; letter-spacing:.06em; text-transform:uppercase;
+    color:var(--pos); background:var(--pos-soft); border:1px solid var(--pos-line);
+  }
+  .ongoing-badge b{ width:6px; height:6px; border-radius:50%; background:var(--pos); animation:livePulse 1.8s ease-out infinite; }
+  .case-meta .ongoing-badge{ margin-left:auto; }
+  .cs-ongoing{
+    margin-top:48px; padding:32px; border-radius:var(--radius); border:1px solid var(--pos-line);
+    background:linear-gradient(160deg, var(--pos-soft), transparent 55%), var(--panel);
+  }
+  .cs-ongoing-head{ max-width:640px; margin-bottom:24px; }
+  .cs-ongoing-head h2{ font-size:clamp(1.4rem, 2.6vw, 1.9rem); letter-spacing:-.025em; margin:14px 0 10px; }
+  .cs-ongoing-head p{ color:var(--muted); }
+  .cs-ongoing-list{ display:grid; grid-template-columns:repeat(auto-fill, minmax(230px, 1fr)); gap:12px; }
+  .cs-ongoing-list li{
+    display:flex; align-items:flex-start; gap:10px; padding:14px 16px; border-radius:12px;
+    background:var(--ink); border:1px solid var(--line); font-size:.9rem; font-weight:600; line-height:1.45;
+  }
+  .cs-ongoing-list svg{ width:16px; height:16px; flex-shrink:0; margin-top:2px; color:var(--pos); }
+  @media(max-width:640px){ .cs-ongoing{ padding:22px; } }

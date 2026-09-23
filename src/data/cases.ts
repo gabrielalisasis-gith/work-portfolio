@@ -3,11 +3,13 @@ export interface Case {
   tags: string; img: string; w: number; h: number;
   headline: string; summary: string; intro: string; quote: string; alt: string;
   details: [string, string][]; metrics: [string, string][]; stack: string[];
+  ongoing?: { summary: string; items: string[] };
 }
 
 export const cases: Case[] = [
   {
     slug: 'cordelia-arc',
+    ongoing: {"summary": "The platform keeps growing with the agency. I continue to ship new features and refinements across the public site, the compliance portal and the admin back office.", "items": ["New features across the admin back office", "Workflow and form improvements for staff", "UI and usability refinements platform-wide", "Fixes, hardening and ongoing maintenance"]},
     intro: "A California supportive-living agency serving adults with intellectual disabilities across Alameda and Contra Costa counties. What began as a marketing site became the software the agency runs on – referrals, hiring, compliance, and billing.",
     quote: "The same referral and intake operations I usually automate inside a CRM – this time built as an actual application.",
     details: [["Sector", "Healthcare · HIPAA-regulated"], ["Stack", "React · TypeScript · Supabase"], ["Scale", "91 migrations · ~50 edge functions"], ["Surface", "40+ routed pages"]],
@@ -20,6 +22,7 @@ export const cases: Case[] = [
   },
   {
     slug: 'kemp-beauty',
+    ongoing: {"summary": "The deliverability fix was the start. I've stayed on for Kemp Beauty's storefront and marketing work, shipping improvements on a continuing basis.", "items": ["UI/UX improvements across the storefront", "New landing pages, including a team affiliate page", "Product and content page refinements", "Fixes and continuous iteration on the live theme"]},
     intro: "A DTC lash brand with eight live Klaviyo flows and a storefront that needed real product-page work. The flows all showed green in the dashboard. Almost none of the email was reaching anyone.",
     quote: "All eight flows showed live. None of them were being delivered.",
     details: [["Sector", "DTC beauty · Shopify"], ["Scope", "Deliverability · theme dev"], ["Fixed", "26 messages across 8 flows"], ["Root cause", "DMARC p=reject, unsigned domain"]],
@@ -32,6 +35,7 @@ export const cases: Case[] = [
   },
   {
     slug: 'sell-ready-ai',
+    ongoing: {"summary": "I continue to maintain and extend the site as the business grows, with every change tracked in Git against the live theme.", "items": ["Mobile UX improvements, including mobile filtering", "New sections and page updates", "Ongoing fixes and polish across templates"]},
     intro: "An AI-systems consultancy whose Shopify theme had to behave like a full marketing site: two dozen service and resource pages, a searchable podcast archive, and a video-led homepage – all in Liquid.",
     quote: "Shopify gives you a storefront. Everything that makes this feel like a content platform had to be built.",
     details: [["Sector", "B2B consultancy"], ["Stack", "Shopify Liquid · JS · CSS"], ["Scale", "87 sections · 23 templates"], ["Built", "Podcast archive, search, tags"]],
