@@ -34,17 +34,6 @@ const toolbox = [
   description="Gabriel Alisasis builds and runs CRM, automation and web systems for US businesses from Batangas, Philippines. How he works, the tools he uses, and when he's online."
 >
   <section class="about-hero" id="about">
-    <svg class="about-mark" viewBox="0 0 64 64" aria-hidden="true">
-      <g fill="none" stroke="currentColor" stroke-linecap="round" stroke-width=".35">
-        <path d="M38.41 8.87 A24 24 0 1 1 8.32 28.12"/>
-        <path d="M39.35 5.50 A27.5 27.5 0 1 1 4.86 27.56"/>
-        <path d="M37.48 12.25 A20.5 20.5 0 1 1 11.77 28.69"/>
-        <path d="M22.81 41.19 A13 13 0 1 1 41.96 23.64"/>
-        <path d="M20.69 43.31 A16 16 0 1 1 44.26 21.72"/>
-        <path d="M24.93 39.07 A10 10 0 1 1 39.66 25.57"/>
-      </g>
-      <circle cx="32" cy="32" r="4.2" fill="currentColor" opacity=".5"/>
-    </svg>
     <div class="wrap about-hero-grid">
       <div class="about-intro">
         <span class="sec-kicker reveal">About</span>
@@ -53,15 +42,36 @@ const toolbox = [
         <p class="about-sub reveal">I work from Batangas in the Philippines, on US business hours, under the name TechyOps.</p>
       </div>
 
-      <aside class="clock-card reveal" id="clockCard" data-tz={WORK_HOURS.timeZone} data-start={WORK_HOURS.start} data-end={WORK_HOURS.end} data-days={WORK_HOURS.days.join(',')} aria-label="Current time and availability">
-        <div class="clock-status" id="clockStatus"><b></b><span>Checking availability…</span></div>
-        <dl class="clock-rows">
-          <div class="clock-row is-home"><dt>Batangas, PH</dt><dd data-clock="Asia/Manila">--:--</dd></div>
-          <div class="clock-row"><dt>New York</dt><dd data-clock="America/New_York">--:--</dd></div>
-          <div class="clock-row"><dt>Los Angeles</dt><dd data-clock="America/Los_Angeles">--:--</dd></div>
-        </dl>
-        <p class="clock-note">I work {WORK_HOURS.start} AM to {WORK_HOURS.end - 12} PM {WORK_HOURS.label}, Monday to Friday.</p>
-      </aside>
+      <div class="portrait-wrap reveal">
+        <figure class="portrait" id="portrait" style="--eye-x:44.7%; --eye-y:19.8%">
+          <svg class="portrait-halo" viewBox="0 0 64 64" aria-hidden="true">
+              <g fill="none" stroke="currentColor" stroke-linecap="round" stroke-width=".35">
+                <path d="M38.41 8.87 A24 24 0 1 1 8.32 28.12"/>
+                <path d="M39.35 5.50 A27.5 27.5 0 1 1 4.86 27.56"/>
+                <path d="M37.48 12.25 A20.5 20.5 0 1 1 11.77 28.69"/>
+                <path d="M22.81 41.19 A13 13 0 1 1 41.96 23.64"/>
+                <path d="M20.69 43.31 A16 16 0 1 1 44.26 21.72"/>
+                <path d="M24.93 39.07 A10 10 0 1 1 39.66 25.57"/>
+              </g>
+              <circle cx="32" cy="32" r="4.2" fill="currentColor" opacity=".5"/>
+            </svg>
+          <div class="portrait-stage">
+            <div class="portrait-zoom">
+              <img class="p-img p-off" src="/images/about/gab-no-glasses.webp" srcset="/images/about/gab-no-glasses-640.webp 543w, /images/about/gab-no-glasses.webp 934w" sizes="(max-width: 960px) 420px, 36vw" width="934" height="1100" alt="" aria-hidden="true" fetchpriority="low" decoding="async" />
+              <img class="p-img p-on" src="/images/about/gab-glasses.webp" srcset="/images/about/gab-glasses-640.webp 543w, /images/about/gab-glasses.webp 934w" sizes="(max-width: 960px) 420px, 36vw" width="934" height="1100" alt="Gabriel Alisasis in a black leather jacket" fetchpriority="high" decoding="async" />
+            </div>
+          </div>
+        </figure>
+        <aside class="clock-card" id="clockCard" data-tz={WORK_HOURS.timeZone} data-start={WORK_HOURS.start} data-end={WORK_HOURS.end} data-days={WORK_HOURS.days.join(',')} aria-label="Current time and availability">
+          <div class="clock-status" id="clockStatus"><b></b><span>Checking availability…</span></div>
+          <p class="clock-note">Working hours: {WORK_HOURS.start} AM–{WORK_HOURS.end - 12} PM {WORK_HOURS.label}, Mon–Fri</p>
+          <dl class="clock-rows">
+            <div class="clock-row is-home"><dt>Batangas, PH</dt><dd data-clock="Asia/Manila">--:--</dd></div>
+            <div class="clock-row"><dt>New York</dt><dd data-clock="America/New_York">--:--</dd></div>
+            <div class="clock-row"><dt>Los Angeles</dt><dd data-clock="America/Los_Angeles">--:--</dd></div>
+          </dl>
+        </aside>
+      </div>
     </div>
   </section>
 

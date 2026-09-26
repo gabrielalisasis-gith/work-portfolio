@@ -358,6 +358,42 @@ gsap.registerPlugin(ScrollTrigger);
     setInterval(tick, 30000);
   })();
 
+  /* ---------- about: portrait (glasses off + zoom, 3D depth) ---------- */
+  (function () {
+    var fig = $('#portrait'); if (!fig) return;
+    var wrap = fig.parentNode, stage = $('.portrait-stage', fig);
+    function set(on) { fig.classList.toggle('is-off', on); }
+    if (window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
+      fig.addEventListener('mouseenter', function () { set(true); });
+      fig.addEventListener('mouseleave', function () { set(false); });
+      if (reduce) return;
+      var hero = fig.closest('section') || document.body, x = 0, y = 0, tx = 0, ty = 0, raf = null;
+      function step() {
+        x += (tx - x) * 0.08; y += (ty - y) * 0.08;
+        stage.style.setProperty('--rx', (-y * 5).toFixed(2) + 'deg');
+        stage.style.setProperty('--ry', (x * 7).toFixed(2) + 'deg');
+        wrap.style.setProperty('--px', x.toFixed(3));
+        wrap.style.setProperty('--py', y.toFixed(3));
+        raf = Math.abs(tx - x) > 0.001 || Math.abs(ty - y) > 0.001 ? requestAnimationFrame(step) : null;
+      }
+      hero.addEventListener('pointermove', function (e) {
+        var r = fig.getBoundingClientRect();
+        tx = Math.max(-1, Math.min(1, (e.clientX - r.left - r.width / 2) / r.width));
+        ty = Math.max(-1, Math.min(1, (e.clientY - r.top - r.height / 2) / r.height));
+        if (!raf) raf = requestAnimationFrame(step);
+      });
+      hero.addEventListener('pointerleave', function () { tx = 0; ty = 0; if (!raf) raf = requestAnimationFrame(step); });
+    } else {
+      var io = new IntersectionObserver(function (entries) {
+        if (entries[0].intersectionRatio < 0.6) return;
+        io.disconnect();
+        setTimeout(function () { set(true); }, 600);
+      }, { threshold: 0.6 });
+      io.observe(fig);
+      fig.addEventListener('click', function () { set(!fig.classList.contains('is-off')); });
+    }
+  })();
+
   /* ---------- focus trap helper ---------- */
   var FOCUSABLE = 'a[href],button:not([disabled]),input,select,textarea,[tabindex]:not([tabindex="-1"])';
   function trap(container, e) {
