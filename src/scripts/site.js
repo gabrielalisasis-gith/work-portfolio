@@ -363,6 +363,14 @@ gsap.registerPlugin(ScrollTrigger);
     var fig = $('#portrait'); if (!fig) return;
     var wrap = fig.parentNode, stage = $('.portrait-stage', fig);
     function set(on) { fig.classList.toggle('is-off', on); }
+    // real-photo 3D (depth mesh + automation network) when WebGL2 is available; the <img> pair is the fallback
+    var gl2 = false;
+    try { var tc = document.createElement('canvas').getContext('webgl2'); gl2 = !!tc; if (tc) { var lc = tc.getExtension('WEBGL_lose_context'); if (lc) lc.loseContext(); } } catch (e) { }
+    if (gl2) {
+      fig.classList.add('is-3d');
+      import('./portrait3d.js').then(function (m) { return m.default(fig, { reduce: reduce }); })
+        .catch(function () { fig.classList.remove('is-3d', 'is-3d-ready'); });
+    }
     if (window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
       fig.addEventListener('mouseenter', function () { set(true); });
       fig.addEventListener('mouseleave', function () { set(false); });
@@ -370,8 +378,10 @@ gsap.registerPlugin(ScrollTrigger);
       var hero = fig.closest('section') || document.body, x = 0, y = 0, tx = 0, ty = 0, raf = null;
       function step() {
         x += (tx - x) * 0.08; y += (ty - y) * 0.08;
-        stage.style.setProperty('--rx', (-y * 5).toFixed(2) + 'deg');
-        stage.style.setProperty('--ry', (x * 7).toFixed(2) + 'deg');
+        if (!fig.classList.contains('is-3d')) {
+          stage.style.setProperty('--rx', (-y * 5).toFixed(2) + 'deg');
+          stage.style.setProperty('--ry', (x * 7).toFixed(2) + 'deg');
+        }
         wrap.style.setProperty('--px', x.toFixed(3));
         wrap.style.setProperty('--py', y.toFixed(3));
         raf = Math.abs(tx - x) > 0.001 || Math.abs(ty - y) > 0.001 ? requestAnimationFrame(step) : null;

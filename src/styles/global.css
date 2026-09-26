@@ -1130,21 +1130,19 @@
   .about-hero .wrap{ position:relative; z-index:1; }
   .about-hero-grid{ display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:40px; align-items:end; }
 
-  /* portrait: three depth layers (halo, photo, clock card) */
+  /* portrait: network canvas, photo (3D canvas or <img> fallback), clock card */
   .portrait-wrap{ --px:0; --py:0; position:relative; width:100%; max-width:540px; justify-self:end; padding-bottom:64px; }
   .portrait{ --rx:0deg; --ry:0deg; position:relative; margin:0; aspect-ratio:934 / 1100; }
-  .portrait::before{
-    content:''; position:absolute; z-index:0; pointer-events:none; left:var(--eye-x); top:var(--eye-y);
-    width:95%; aspect-ratio:1; transform:translate(-50%,-38%); border-radius:50%;
-    background:radial-gradient(circle, var(--accent-soft) 0%, color-mix(in srgb, var(--accent) 6%, transparent) 38%, transparent 68%);
+  /* WebGL layers bleed past the figure: room for the head turn, push-in and the network */
+  .portrait-net, .portrait-gl{ position:absolute; pointer-events:none; display:block; }
+  .portrait-net{ z-index:0; left:-40%; top:-24%; width:170%; height:130%; }
+  .portrait-gl{
+    z-index:2; left:-14%; top:-10%; width:128%; height:116%;
+    filter:drop-shadow(0 0 1.2px var(--portrait-rim)) drop-shadow(-20px 14px 26px var(--portrait-shadow)) drop-shadow(20px 14px 26px var(--portrait-shadow));
   }
-  .portrait-halo{
-    position:absolute; z-index:0; pointer-events:none; left:-20.3%; top:-35.2%; width:130%;
-    color:var(--accent); opacity:.34;
-    translate:calc(var(--px) * -14px) calc(var(--py) * -10px);
-    transition:rotate 1.4s cubic-bezier(.22,1,.36,1), scale 1.4s cubic-bezier(.22,1,.36,1), opacity .6s;
-  }
-  .portrait.is-off .portrait-halo{ rotate:14deg; scale:1.05; opacity:.5; }
+  .portrait{ isolation:isolate; }
+  /* images stay in the DOM (alt text, no-WebGL fallback) but hide once 3D takes over */
+  .portrait.is-3d .portrait-stage{ opacity:0; }
   .portrait-stage{
     position:absolute; inset:0; z-index:1;
     transform:perspective(1100px) rotateX(var(--rx)) rotateY(var(--ry));
@@ -1263,5 +1261,4 @@
 
 @media (prefers-reduced-motion: reduce){
   .portrait.is-off .portrait-zoom{ transform:none; }
-  .portrait.is-off .portrait-halo{ rotate:0deg; scale:1; }
 }
