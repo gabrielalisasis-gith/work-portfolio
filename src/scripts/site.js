@@ -598,15 +598,17 @@ gsap.registerPlugin(ScrollTrigger);
       if (!form.checkValidity()) { form.reportValidity(); return; }
       var d = new FormData(form);
       if (d.get('botcheck')) return;
+      var payload = {};
+      d.forEach(function (v, k) { payload[k] = v; });
       btn.disabled = true; say('Sending…');
       fetch('https://formsubmit.co/ajax/' + inbox, {
         method: 'POST',
-        headers: { Accept: 'application/json' },
-        body: d
+        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+        body: JSON.stringify(payload)
       })
-        .then(function (r) { return r.json(); })
+        .then(function (r) { return r.json().catch(function () { throw new Error('bad response'); }); })
         .then(function (res) {
-          if (res.success !== 'true' && res.success !== true) throw new Error('not sent');
+          if (!res || (res.success !== 'true' && res.success !== true)) throw new Error('not sent');
           form.reset();
           say("Thanks — your message is in. I'll reply personally soon.", 'ok');
         })
