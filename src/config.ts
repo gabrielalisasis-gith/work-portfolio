@@ -1,7 +1,5 @@
-// Public by design: Web3Forms keys only allow submitting to the owner's inbox.
-// Empty = the contact form falls back to opening a pre-filled email instead.
-export const WEB3FORMS_ACCESS_KEY = '';
-
+// Contact form submissions are emailed here via formsubmit.co (see src/scripts/site.js).
+// First submission after this changes triggers a one-time confirmation email to click.
 export const CONTACT_EMAIL = 'gabb.alisasis@gmail.com';
 
 // Working hours shown by the About page availability widget (in the US client time zone).

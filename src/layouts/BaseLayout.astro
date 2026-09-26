@@ -2,7 +2,7 @@
 import '../styles/global.css';
 import Header from '../components/Header.astro';
 import CommandPalette from '../components/CommandPalette.astro';
-import { WEB3FORMS_ACCESS_KEY, CONTACT_EMAIL } from '../config';
+import { CONTACT_EMAIL } from '../config';
 
 interface Props {
   title: string;
@@ -83,7 +83,10 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
         </div>
       </div>
 
-      <form class="contact-form reveal" id="contactForm" data-key={WEB3FORMS_ACCESS_KEY} data-email={CONTACT_EMAIL} novalidate>
+      <form class="contact-form reveal" id="contactForm" data-email={CONTACT_EMAIL} novalidate>
+        <input type="hidden" name="_subject" value="New enquiry from the portfolio site">
+        <input type="hidden" name="_template" value="table">
+        <input type="hidden" name="_captcha" value="false">
         <div class="field-row">
           <label class="field"><span>Name</span><input name="name" type="text" autocomplete="name" required></label>
           <label class="field"><span>Email</span><input name="email" type="email" autocomplete="email" required></label>
@@ -99,6 +102,7 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
             <option value="$5,000+">$5,000+</option>
           </select>
         </label>
+        <input type="text" name="_honey" class="sr-only" tabindex="-1" autocomplete="off" aria-hidden="true">
         <input type="checkbox" name="botcheck" class="sr-only" tabindex="-1" autocomplete="off" aria-hidden="true">
         <button class="btn btn-primary contact-submit" type="submit">Send message →</button>
         <p class="form-status" id="formStatus" role="status" aria-live="polite"></p>

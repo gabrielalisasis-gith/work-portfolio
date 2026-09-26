@@ -587,33 +587,26 @@ gsap.registerPlugin(ScrollTrigger);
     }
   });
 
-  /* ---------- contact form (Web3Forms, falls back to a pre-filled email) ---------- */
+  /* ---------- contact form (FormSubmit.co — emails the inbox directly, no key needed) ---------- */
   (function () {
     var form = $('#contactForm'); if (!form) return;
     var status = $('#formStatus'), btn = $('.contact-submit', form);
-    var inbox = form.getAttribute('data-email'), key = form.getAttribute('data-key');
+    var inbox = form.getAttribute('data-email');
     function say(msg, kind) { status.textContent = msg; status.className = 'form-status' + (kind ? ' is-' + kind : ''); }
     form.addEventListener('submit', function (e) {
       e.preventDefault();
       if (!form.checkValidity()) { form.reportValidity(); return; }
       var d = new FormData(form);
       if (d.get('botcheck')) return;
-      var f = { name: d.get('name'), email: d.get('email'), business: d.get('business') || '—', budget: d.get('budget'), message: d.get('message') };
-      if (!key) {
-        var body = 'Name: ' + f.name + '\nEmail: ' + f.email + '\nBusiness: ' + f.business + '\nBudget: ' + f.budget + '\n\n' + f.message;
-        window.location.href = 'mailto:' + inbox + '?subject=' + encodeURIComponent('Automation enquiry from ' + f.name) + '&body=' + encodeURIComponent(body);
-        say('Opening your email app with your message filled in…', 'ok');
-        return;
-      }
       btn.disabled = true; say('Sending…');
-      fetch('https://api.web3forms.com/submit', {
+      fetch('https://formsubmit.co/ajax/' + inbox, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-        body: JSON.stringify(Object.assign({ access_key: key, subject: 'New enquiry from ' + f.name, from_name: 'Portfolio contact form' }, f))
+        headers: { Accept: 'application/json' },
+        body: d
       })
         .then(function (r) { return r.json(); })
         .then(function (res) {
-          if (!res.success) throw new Error(res.message);
+          if (res.success !== 'true' && res.success !== true) throw new Error('not sent');
           form.reset();
           say("Thanks — your message is in. I'll reply personally soon.", 'ok');
         })
