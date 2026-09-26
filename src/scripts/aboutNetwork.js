@@ -1,14 +1,14 @@
-/* About page: real-photo 3D portrait + live automation network.
-   The portrait is Gab's own photo pixels on a depth-displaced mesh (no redraw);
-   the network is a separate canvas behind him so the silhouette shadow only
-   applies to the portrait. Loaded lazily from site.js when WebGL2 is available. */
+/* About page: live automation network behind the portrait photo.
+   A WebGL canvas behind the <img> pair; the camera axis runs through his eyes so the
+   hover push-in zooms the network around the same point as the photo's CSS zoom.
+   Loaded lazily from site.js when WebGL2 is available. */
 import {
   WebGLRenderer, Scene, PerspectiveCamera, PlaneGeometry, BufferGeometry, BufferAttribute,
-  ShaderMaterial, Mesh, Points, Group, Sprite, SpriteMaterial, CanvasTexture, TextureLoader,
-  LinearFilter, LinearSRGBColorSpace, NoColorSpace, DoubleSide, Vector3, Euler, Quaternion
+  ShaderMaterial, Mesh, Points, Group, Sprite, SpriteMaterial, CanvasTexture,
+  LinearFilter, LinearSRGBColorSpace, NoColorSpace, DoubleSide, Vector3
 } from 'three';
 
-const FOV = 16, AR = 1100 / 934, DEPTH = 0.3;
+const FOV = 16;
 const TAN = Math.tan(FOV * Math.PI / 360);
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 const ease = (t) => 1 - Math.pow(1 - clamp(t, 0, 1), 4);
@@ -26,57 +26,6 @@ function color(str, fallback) {
   const m = v.match(/[\d.]+/g).map(Number);
   return [m[0] / 255, m[1] / 255, m[2] / 255, m.length > 3 ? m[3] : 1];
 }
-
-// pick the smallest srcset candidate that covers the needed pixel width
-function pickSrc(img, need) {
-  const list = (img.getAttribute('srcset') || '').split(',').map((s) => s.trim().split(/\s+/))
-    .filter((p) => p[0]).map((p) => ({ url: p[0], w: parseInt(p[1], 10) || 0 })).sort((a, b) => a.w - b.w);
-  const hit = list.find((c) => c.w >= need) || list[list.length - 1];
-  return hit ? hit.url : img.getAttribute('src');
-}
-
-const PORTRAIT_VS = /* glsl */`
-  uniform sampler2D uD0, uD1;
-  uniform float uDMix, uDepth;
-  uniform vec3 uNeck;
-  uniform vec2 uHead;
-  varying vec2 vUv;
-  mat3 rotY(float a){ float c = cos(a), s = sin(a); return mat3(c,0.,-s, 0.,1.,0., s,0.,c); }
-  mat3 rotX(float a){ float c = cos(a), s = sin(a); return mat3(1.,0.,0., 0.,c,s, 0.,-s,c); }
-  void main(){
-    vUv = uv;
-    float d = mix(texture2D(uD0, uv).r, texture2D(uD1, uv).r, uDMix);
-    vec3 p = position;
-    p.z += d * uDepth;
-    // the head turns further than the body, bending smoothly through the neck
-    float hw = smoothstep(0.64, 0.695, uv.y) * (1.0 - smoothstep(0.14, 0.23, abs(uv.x - (uNeck.x + 0.5))));
-    p = rotY(uHead.x * hw) * rotX(uHead.y * hw) * (p - uNeck) + uNeck;
-    gl_Position = projectionMatrix * modelViewMatrix * vec4(p, 1.0);
-  }
-`;
-
-const PORTRAIT_FS = /* glsl */`
-  uniform sampler2D uC0, uC1, uD0, uD1;
-  uniform float uCMix, uDMix, uDepth, uIntro, uLight, uKey;
-  uniform vec3 uL, uL0;
-  uniform vec2 uTexel;
-  varying vec2 vUv;
-  float dep(vec2 uv){ return mix(texture2D(uD0, uv).r, texture2D(uD1, uv).r, uDMix); }
-  void main(){
-    // colour textures are premultiplied on upload, so edges filter cleanly
-    vec4 c = mix(texture2D(uC0, vUv), texture2D(uC1, vUv), uCMix);
-    c *= smoothstep(0.02, 0.32, vUv.y) * smoothstep(0.0, 0.22, uIntro);
-    if (c.a < 0.003) discard;
-    vec2 e = uTexel * 7.0; // wide kernel: smooth, low-frequency shading only
-    float dx = (dep(vUv + vec2(e.x, 0.)) - dep(vUv - vec2(e.x, 0.))) / (2.0 * e.x) * uDepth;
-    float dy = (dep(vUv + vec2(0., e.y)) - dep(vUv - vec2(0., e.y))) / (2.0 * e.y * ${AR.toFixed(5)}) * uDepth;
-    vec3 n = normalize(vec3(-dx, -dy, 1.0));
-    // relight relative to the photo's own light: identical pixels when the light is centred
-    float shade = 1.0 + uLight * (max(dot(n, uL), 0.) - max(dot(n, uL0), 0.)) + uKey * max(dot(n, uL), 0.);
-    vec3 col = c.rgb * shade * mix(0.16, 1.0, smoothstep(0.12, 1.0, uIntro));
-    gl_FragColor = vec4(col, c.a);
-  }
-`;
 
 // shared by lines, nodes and pulses: fade the network away from the text column
 const NET_MASK = /* glsl */`
@@ -179,7 +128,7 @@ const LABELS = [
   { at: [0.07, 0.07], text: 'New lead', dot: 'accent', side: 1, layer: 0 },
   { at: [0.8, 0.02], text: 'Tagged · hot-lead', dot: 'accent', side: -1, layer: 1 },
   { at: [0.93, 0.22], text: 'SMS sent · 38s', dot: 'accent', side: -1, layer: 0 },
-  { at: [0.08, 0.27], text: 'Call booked', dot: 'pos', side: 1, layer: 0 },
+  { at: [0.04, 0.27], text: 'Call booked', dot: 'pos', side: 1, layer: 0 },
 ];
 // narrow screens: fewer labels, kept clear of his hair
 const LABELS_SMALL = [
@@ -190,54 +139,21 @@ const LABELS_SMALL = [
 const LAYERS = [-0.3, -0.75, -1.35];
 const LAYER_ALPHA = [0.6, 0.36, 0.2];
 
-export default function initPortrait3D(fig, { reduce = false } = {}) {
+export default function initAboutNetwork(fig, { reduce = false } = {}) {
   const hero = fig.closest('section') || document.body;
-  const imgOn = fig.querySelector('.p-on'), imgOff = fig.querySelector('.p-off');
   const ex = parseFloat(fig.dataset.eyeX) / 100, ey = parseFloat(fig.dataset.eyeY) / 100;
   const hover = matchMedia('(hover: hover) and (pointer: fine)').matches;
   const small = !hover || innerWidth < 700;
 
-  const netCv = document.createElement('canvas'), glCv = document.createElement('canvas');
-  netCv.className = 'portrait-net'; glCv.className = 'portrait-gl';
-  netCv.setAttribute('aria-hidden', 'true'); glCv.setAttribute('aria-hidden', 'true');
-  fig.insertBefore(netCv, fig.firstChild); fig.appendChild(glCv);
+  const netCv = document.createElement('canvas');
+  netCv.className = 'portrait-net'; netCv.setAttribute('aria-hidden', 'true');
+  fig.insertBefore(netCv, fig.firstChild);
 
-  const mkR = (cv) => {
-    const r = new WebGLRenderer({ canvas: cv, alpha: true, antialias: true, premultipliedAlpha: true, powerPreference: 'high-performance' });
-    r.setClearColor(0x000000, 0); r.outputColorSpace = LinearSRGBColorSpace;
-    cv.addEventListener('webglcontextlost', (e) => { e.preventDefault(); fig.classList.remove('is-3d', 'is-3d-ready'); });
-    return r;
-  };
-  const netR = mkR(netCv), glR = mkR(glCv);
-  const netScene = new Scene(), glScene = new Scene();
-  const cam = new PerspectiveCamera(FOV, 1, 0.05, 60), pcam = new PerspectiveCamera(FOV, 1, 0.05, 60);
-
-  /* ---------- portrait mesh ---------- */
-  const need = fig.offsetWidth * Math.min(devicePixelRatio || 1, 2);
-  const loader = new TextureLoader();
-  const load = (url, premult) => new Promise((res, rej) => loader.load(url, (t) => {
-    t.colorSpace = NoColorSpace; t.generateMipmaps = false; t.minFilter = t.magFilter = LinearFilter;
-    t.premultiplyAlpha = premult; res(t);
-  }, undefined, rej));
-
-  const uni = {
-    uC0: { value: null }, uC1: { value: null }, uD0: { value: null }, uD1: { value: null },
-    uCMix: { value: 0 }, uDMix: { value: 0 }, uDepth: { value: DEPTH }, uIntro: { value: reduce ? 1 : 0 },
-    uLight: { value: 0.16 }, uKey: { value: 0 },
-    uL: { value: new Vector3(0, 0.15, 1).normalize() }, uL0: { value: new Vector3(0, 0.15, 1).normalize() },
-    uTexel: { value: [1 / 467, 1 / 550] },
-    uNeck: { value: new Vector3(ex - 0.5, (0.5 - 0.32) * AR, DEPTH * 0.6) }, uHead: { value: [0, 0] },
-  };
-  const seg = small ? [150, 177] : [220, 259];
-  const mesh = new Mesh(new PlaneGeometry(1, AR, seg[0], seg[1]), new ShaderMaterial({
-    uniforms: uni, vertexShader: PORTRAIT_VS, fragmentShader: PORTRAIT_FS,
-    transparent: true, premultipliedAlpha: true, depthTest: true, depthWrite: true,
-  }));
-  mesh.frustumCulled = false;
-  const body = new Group(); body.add(mesh); glScene.add(body);
-  const pivot = new Vector3(ex - 0.5, (0.5 - 0.52) * AR, DEPTH * 0.5);
-  mesh.position.copy(pivot).negate();
-  const eyeLocal = new Vector3(ex - 0.5, (0.5 - ey) * AR, DEPTH * 0.96);
+  const netR = new WebGLRenderer({ canvas: netCv, alpha: true, antialias: true, premultipliedAlpha: true });
+  netR.setClearColor(0x000000, 0); netR.outputColorSpace = LinearSRGBColorSpace;
+  netCv.addEventListener('webglcontextlost', (e) => { e.preventDefault(); netCv.remove(); });
+  const netScene = new Scene();
+  const cam = new PerspectiveCamera(FOV, 1, 0.05, 60);
 
   /* ---------- network ---------- */
   const net = new Group(); netScene.add(net);
@@ -264,7 +180,6 @@ export default function initPortrait3D(fig, { reduce = false } = {}) {
   const PULSES = small ? 10 : 18;
   const pulses = [];
   let W = 1, H = 1, D = 5, fw = 1, fh = 1, fx = 0, fy = 0, VW = 1, VH = 1, offX = 0, offY = 0;
-  const planeC = new Vector3();
 
   function worldAt(sx, sy, z) { // net-canvas coords (0..1, y down) at depth z -> world
     const hh = (D - z) * TAN, hw = hh * (VW / VH);
@@ -402,34 +317,28 @@ export default function initPortrait3D(fig, { reduce = false } = {}) {
     if (sprites.length) drawLabels();
   }
 
-  /* ---------- layout: map the figure box exactly onto the mesh at rest ---------- */
-  const dprN = Math.min(devicePixelRatio || 1, 1.5), dprP = Math.min(devicePixelRatio || 1, 2);
+  /* ---------- layout ---------- */
+  const dprN = Math.min(devicePixelRatio || 1, 1.5);
   function layout() {
     W = netCv.offsetWidth; H = netCv.offsetHeight; fw = fig.offsetWidth; fh = fig.offsetHeight;
     if (!W || !H || !fw) return false;
     fx = -netCv.offsetLeft; fy = -netCv.offsetTop;
-    // the camera axis runs through his eyes (a virtual frame centred on them), so fine facial
-    // relief doesn't shift sideways in perspective and the rest pose matches the photo
+    // camera axis through his eyes (a virtual frame centred on them): the hover push-in then
+    // zooms the network around the same point as the photo's CSS zoom
     const eX = fx + ex * fw, eY = fy + ey * fh;
     VW = 2 * Math.max(eX, W - eX); VH = 2 * Math.max(eY, H - eY);
     offX = VW / 2 - eX; offY = VH / 2 - eY;
     D = VH / (fw * 2 * TAN);
-    cam.aspect = pcam.aspect = VW / VH;
-    cam.position.set(0, 0, D); pcam.position.set(0, 0, D);
+    cam.aspect = VW / VH; cam.position.set(0, 0, D);
     cam.setViewOffset(VW, VH, offX, offY, W, H);
-    pcam.setViewOffset(VW, VH, offX + glCv.offsetLeft + fx, offY + glCv.offsetTop + fy, glCv.offsetWidth, glCv.offsetHeight);
     netR.setPixelRatio(dprN); netR.setSize(W, H, false);
-    glR.setPixelRatio(dprP); glR.setSize(glCv.offsetWidth, glCv.offsetHeight, false);
-    // face sits on the z=0 plane, so at rest it matches the photo's size on the page
-    planeC.set(0.5 - ex, -(0.5 - ey) * AR, -DEPTH * 0.9);
-    body.position.copy(planeC).add(pivot);
     const stacked = getComputedStyle(fig.closest('.about-hero-grid') || fig).gridTemplateColumns.split(' ').length < 2;
     netUni.uFig.value = [fx / W, 1 - (fy + fh) / H, (fx + fw) / W, 1 - fy / H];
     netUni.uFade.value = stacked ? [0, 1] : [1, 0];
     netUni.uRes.value = [W * dprN / 2, H * dprN / 2];
     netUni.uW.value = 0.6 * dprN;
     netUni.uScale.value = dprN * D * 0.9;
-    const head = new Vector3(planeC.x + (0.44 - 0.5), planeC.y + (0.5 - 0.2) * AR, -0.4);
+    const head = worldAt((fx + 0.44 * fw) / W, (fy + 0.2 * fh) / H, -0.4);
     glow.position.copy(head); glow.scale.setScalar(1.25);
     buildNet();
     return true;
@@ -437,11 +346,8 @@ export default function initPortrait3D(fig, { reduce = false } = {}) {
 
   /* ---------- state ---------- */
   let tx = 0, ty = 0, x = 0, y = 0, off = 0, intro = reduce ? 1 : 0, introStart = null, ready = false;
-  let visible = false, ratio = 0, raf = 0, last = 0, time = 0, spawnAcc = 0, drawnOnce = false;
+  let visible = false, ratio = 0, raf = 0, last = 0, time = 0, spawnAcc = 0;
   const r2 = rng(99);
-  const q = new Quaternion(), eul = new Euler(), tmp = new Vector3(), eyeW = new Vector3();
-  const base = new Vector3();
-  let prevSig = '';
 
   function spawn() {
     const p = pulses.find((o) => o.e < 0);
@@ -459,32 +365,14 @@ export default function initPortrait3D(fig, { reduce = false } = {}) {
     const dt = last ? Math.min(0.05, (now - last) / 1000) : 1 / 60; last = now; time += dt;
     if (introStart !== null && intro < 1) intro = clamp((now - introStart) / 2400, 0, 1);
     const ie = ease(intro);
-    const offT = fig.classList.contains('is-off') && intro >= 0.85 ? 1 : 0;
+    const offT = fig.classList.contains('is-off') ? 1 : 0;
     off += (offT - off) * damp(dt, 3.6);
     if (!reduce) { x += (tx - x) * damp(dt, 5); y += (ty - y) * damp(dt, 5); }
     if (Math.abs(off - offT) < 0.0005) off = offT;
 
-    // body turn + extra head turn toward the pointer
-    // kept modest so his features stay true to the photo
-    body.rotation.set(y * 0.05, x * 0.15, 0);
-    uni.uHead.value = [x * 0.03, y * 0.02];
-    uni.uCMix.value = clamp((off - 0.12) / 0.6, 0, 1);
-    uni.uDMix.value = clamp((off - 0.05) / 0.9, 0, 1);
-    uni.uIntro.value = intro;
-    uni.uKey.value = 0.05 * off;
-    eul.set(body.rotation.x, body.rotation.y, 0); q.setFromEuler(eul).invert();
-    uni.uL.value.set(x * 0.9, 0.15 - y * 0.7, 1).normalize().applyQuaternion(q);
-    uni.uL0.value.set(0, 0.15, 1).normalize().applyQuaternion(q);
-
-    // camera dollies along the ray through the eyes: push in on hover, pull back for the intro
-    body.updateMatrixWorld(); mesh.updateMatrixWorld();
-    eyeW.copy(eyeLocal); mesh.localToWorld(eyeW);
-    base.set(0, 0, D);
-    const k = (reduce ? 0 : 0.12 * ease(off)) - (reduce ? 0 : 0.34 * (1 - ie));
-    tmp.copy(eyeW).sub(base).multiplyScalar(k).add(base);
-    cam.position.copy(tmp); pcam.position.copy(tmp);
-
-    net.rotation.set(-y * 0.05, -x * 0.09, 0);
+    // push in toward his eyes with the photo's zoom; pull back for the intro
+    cam.position.set(0, 0, D * (1 - (reduce ? 0 : 0.12 * ease(off) - 0.34 * (1 - ie))));
+    net.rotation.set(-y * 0.035, -x * 0.05, 0);
     netUni.uReveal.value = reduce ? 2 : intro * intro * (3 - 2 * intro) * 1.25; // draws out from behind him
     netUni.uTime.value = reduce ? 0 : time;
     glowUni.uA.value = glowBase * ie;
@@ -511,11 +399,6 @@ export default function initPortrait3D(fig, { reduce = false } = {}) {
     sprites.forEach((sp) => { sp.material.opacity = clamp((netUni.uReveal.value - sp.userData.node.key - 0.05) * 5, 0, 1); });
 
     netR.render(netScene, cam);
-    const sig = [x, y, off, intro, cam.position.z].map((v) => v.toFixed(4)).join();
-    if (sig !== prevSig || !drawnOnce) {
-      glR.render(glScene, pcam); prevSig = sig;
-      if (!drawnOnce) { drawnOnce = true; fig.classList.add('is-3d-ready'); }
-    }
     const moving = Math.abs(tx - x) > 0.0005 || Math.abs(ty - y) > 0.0005 || off !== offT || intro < 1;
     if (visible && !document.hidden && (moving || !reduce)) raf = requestAnimationFrame(frame);
   }
@@ -535,25 +418,9 @@ export default function initPortrait3D(fig, { reduce = false } = {}) {
       kick();
     });
     hero.addEventListener('pointerleave', () => { tx = 0; ty = 0; kick(); });
-  } else if (!reduce) {
-    let g0 = null, b0 = null;
-    const onOri = (e) => {
-      if (e.gamma == null) return;
-      if (g0 === null) { g0 = e.gamma; b0 = e.beta; }
-      g0 += (e.gamma - g0) * 0.01; b0 += (e.beta - b0) * 0.01; // slowly re-centre
-      tx = clamp((e.gamma - g0) / 16, -1, 1); ty = clamp((e.beta - b0) / 16, -1, 1);
-      kick();
-    };
-    const DOE = window.DeviceOrientationEvent;
-    if (DOE && typeof DOE.requestPermission === 'function') {
-      fig.addEventListener('click', function ask() {
-        fig.removeEventListener('click', ask);
-        DOE.requestPermission().then((s) => { if (s === 'granted') addEventListener('deviceorientation', onOri); }).catch(() => {});
-      });
-    } else addEventListener('deviceorientation', onOri);
   }
   new MutationObserver(kick).observe(fig, { attributes: true, attributeFilter: ['class'] });
-  const themeMO = () => { readTheme(); prevSig = ''; kick(); };
+  const themeMO = () => { readTheme(); kick(); if (reduce && ready && !raf) raf = requestAnimationFrame(frame); };
   new MutationObserver(themeMO).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
   matchMedia('(prefers-color-scheme: light)').addEventListener('change', themeMO);
   new IntersectionObserver((es) => {
@@ -563,21 +430,14 @@ export default function initPortrait3D(fig, { reduce = false } = {}) {
   let rT = 0;
   new ResizeObserver(() => {
     clearTimeout(rT);
-    rT = setTimeout(() => { if (layout()) { prevSig = ''; drawnOnce = false; if (!raf && ready) raf = requestAnimationFrame(frame); } }, 60);
+    rT = setTimeout(() => { if (layout() && ready && !raf) raf = requestAnimationFrame(frame); }, 60);
   }).observe(fig);
 
-  /* ---------- load ---------- */
-  return Promise.all([
-    load(pickSrc(imgOn, need), true), load(pickSrc(imgOff, need), true),
-    load(fig.dataset.depthOn, false), load(fig.dataset.depthOff, false),
-  ]).then(([c0, c1, d0, d1]) => {
-    uni.uC0.value = c0; uni.uC1.value = c1; uni.uD0.value = d0; uni.uD1.value = d1;
-    uni.uTexel.value = [1 / d0.image.width, 1 / d0.image.height];
-    readTheme();
-    if (!layout()) throw new Error('portrait3d: no layout');
-    ready = true;
-    if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { drawLabels(); prevSig = ''; kick(); });
-    maybeIntro();
-    if (reduce) raf = requestAnimationFrame(frame);
-  });
+  /* ---------- start ---------- */
+  readTheme();
+  if (!layout()) throw new Error('aboutNetwork: no layout');
+  ready = true;
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { drawLabels(); kick(); if (reduce && !raf) raf = requestAnimationFrame(frame); });
+  maybeIntro();
+  if (reduce) raf = requestAnimationFrame(frame);
 }
