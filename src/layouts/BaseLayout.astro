@@ -83,10 +83,11 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
         </div>
       </div>
 
-      <form class="contact-form reveal" id="contactForm" data-email={CONTACT_EMAIL} novalidate>
+      <form class="contact-form reveal" id="contactForm" data-email={CONTACT_EMAIL} action={`https://formsubmit.co/${CONTACT_EMAIL}`} method="POST" novalidate>
         <input type="hidden" name="_subject" value="New enquiry from the portfolio site">
         <input type="hidden" name="_template" value="table">
         <input type="hidden" name="_captcha" value="false">
+        <input type="hidden" name="_next" id="contactNext" value="">
         <div class="field-row">
           <label class="field"><span>Name</span><input name="name" type="text" autocomplete="name" required></label>
           <label class="field"><span>Email</span><input name="email" type="email" autocomplete="email" required></label>

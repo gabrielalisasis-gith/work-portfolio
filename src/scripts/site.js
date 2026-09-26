@@ -587,33 +587,27 @@ gsap.registerPlugin(ScrollTrigger);
     }
   });
 
-  /* ---------- contact form (FormSubmit.co — emails the inbox directly, no key needed) ---------- */
+  /* ---------- contact form (FormSubmit.co — real POST, so first-time email verification works) ---------- */
   (function () {
     var form = $('#contactForm'); if (!form) return;
-    var status = $('#formStatus'), btn = $('.contact-submit', form);
+    var status = $('#formStatus'), btn = $('.contact-submit', form), nextField = $('#contactNext', form);
     var inbox = form.getAttribute('data-email');
     function say(msg, kind) { status.textContent = msg; status.className = 'form-status' + (kind ? ' is-' + kind : ''); }
+
+    if (/[?&]sent=1\b/.test(window.location.search)) {
+      say("Thanks — your message is in. I'll reply personally soon.", 'ok');
+      var cleanUrl = window.location.pathname + window.location.hash;
+      history.replaceState(null, '', cleanUrl);
+    }
+
     form.addEventListener('submit', function (e) {
-      e.preventDefault();
-      if (!form.checkValidity()) { form.reportValidity(); return; }
+      if (!form.checkValidity()) { e.preventDefault(); form.reportValidity(); return; }
       var d = new FormData(form);
-      if (d.get('botcheck')) return;
-      var payload = {};
-      d.forEach(function (v, k) { payload[k] = v; });
+      if (d.get('botcheck')) { e.preventDefault(); return; }
+      if (nextField) nextField.value = window.location.origin + window.location.pathname + '?sent=1#contact';
       btn.disabled = true; say('Sending…');
-      fetch('https://formsubmit.co/ajax/' + inbox, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-        body: JSON.stringify(payload)
-      })
-        .then(function (r) { return r.json().catch(function () { throw new Error('bad response'); }); })
-        .then(function (res) {
-          if (!res || (res.success !== 'true' && res.success !== true)) throw new Error('not sent');
-          form.reset();
-          say("Thanks — your message is in. I'll reply personally soon.", 'ok');
-        })
-        .catch(function () { say('That didn’t send. Please email ' + inbox + ' directly.', 'err'); })
-        .then(function () { btn.disabled = false; });
+      // No preventDefault: this is a real form POST to formsubmit.co, which redirects back via _next.
+      // Required so a brand-new inbox can complete FormSubmit's one-time email verification.
     });
   })();
 })();
