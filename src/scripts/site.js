@@ -358,44 +358,6 @@ gsap.registerPlugin(ScrollTrigger);
     setInterval(tick, 30000);
   })();
 
-  /* ---------- about: portrait (glasses off + zoom) + automation network backdrop ---------- */
-  (function () {
-    var fig = $('#portrait'); if (!fig) return;
-    var wrap = fig.parentNode;
-    function set(on) { fig.classList.toggle('is-off', on); }
-    // the network backdrop is WebGL2 only; without it the photo simply sits on the page background
-    var gl2 = false;
-    try { var tc = document.createElement('canvas').getContext('webgl2'); gl2 = !!tc; if (tc) { var lc = tc.getExtension('WEBGL_lose_context'); if (lc) lc.loseContext(); } } catch (e) { }
-    if (gl2) import('./aboutNetwork.js').then(function (m) { m.default(fig, { reduce: reduce }); }).catch(function () { });
-    if (window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
-      fig.addEventListener('mouseenter', function () { set(true); });
-      fig.addEventListener('mouseleave', function () { set(false); });
-      if (reduce) return;
-      var hero = fig.closest('section') || document.body, x = 0, y = 0, tx = 0, ty = 0, raf = null;
-      function step() {
-        x += (tx - x) * 0.08; y += (ty - y) * 0.08;
-        wrap.style.setProperty('--px', x.toFixed(3));
-        wrap.style.setProperty('--py', y.toFixed(3));
-        raf = Math.abs(tx - x) > 0.001 || Math.abs(ty - y) > 0.001 ? requestAnimationFrame(step) : null;
-      }
-      hero.addEventListener('pointermove', function (e) {
-        var r = fig.getBoundingClientRect();
-        tx = Math.max(-1, Math.min(1, (e.clientX - r.left - r.width / 2) / r.width));
-        ty = Math.max(-1, Math.min(1, (e.clientY - r.top - r.height / 2) / r.height));
-        if (!raf) raf = requestAnimationFrame(step);
-      });
-      hero.addEventListener('pointerleave', function () { tx = 0; ty = 0; if (!raf) raf = requestAnimationFrame(step); });
-    } else {
-      var io = new IntersectionObserver(function (entries) {
-        if (entries[0].intersectionRatio < 0.6) return;
-        io.disconnect();
-        setTimeout(function () { set(true); }, 600);
-      }, { threshold: 0.6 });
-      io.observe(fig);
-      fig.addEventListener('click', function () { set(!fig.classList.contains('is-off')); });
-    }
-  })();
-
   /* ---------- focus trap helper ---------- */
   var FOCUSABLE = 'a[href],button:not([disabled]),input,select,textarea,[tabindex]:not([tabindex="-1"])';
   function trap(container, e) {

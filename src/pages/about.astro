@@ -2,74 +2,171 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { WORK_HOURS } from '../config';
 
-const short = [
-  { when: '2021–25', text: 'Studied Computer Science at Batangas State University, focused on software development.' },
-  { when: '2024–26', text: 'Ran CRM and automation for US businesses, including a community that grew from 900 to 36,000+ members in eight months.' },
-  { when: 'Now', text: 'Building and maintaining systems for clients in healthcare, e-commerce and consulting.' },
+// 24px line icons (lucide-style)
+const I = {
+  chat: '<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>',
+  copy: '<rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>',
+  mail: '<rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 6L2 7"/>',
+  merge: '<rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/>',
+  pages: '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M8 13h8M8 17h5"/>',
+  phone: '<path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.7 2z"/>',
+  map: '<path d="M9 3 3 6v15l6-3 6 3 6-3V3l-6 3z"/><path d="M9 3v15M15 6v15"/>',
+  wrench: '<path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.8-3.8a6 6 0 0 1-7.9 7.9l-6.9 6.9a2.1 2.1 0 0 1-3-3l6.9-6.9a6 6 0 0 1 7.9-7.9z"/>',
+  rocket: '<path d="M4.5 16.5c-1.5 1.3-2 5-2 5s3.7-.5 5-2c.7-.8.7-2.1-.1-2.9a2.2 2.2 0 0 0-2.9-.1z"/><path d="M12 15l-3-3a22 22 0 0 1 2-3.9A12.9 12.9 0 0 1 22 2c0 2.7-.8 7.5-6 11a22.4 22.4 0 0 1-4 2z"/><path d="M9 12H4s.6-3 2-4c1.6-1.1 5 0 5 0M12 15v5s3-.6 4-2c1.1-1.6 0-5 0-5"/>',
+  check: '<path d="M22 11.1V12a10 10 0 1 1-5.9-9.1"/><path d="M22 4 12 14l-3-3"/>',
+  talk: '<path d="M7.9 20A9 9 0 1 0 4 16.1L2 22z"/><path d="M12 8v4M12 16h.01"/>',
+  bolt: '<path d="M13 2 3 14h9l-1 8 10-12h-9z"/>',
+  code: '<path d="m16 18 6-6-6-6M8 6l-6 6 6 6"/>',
+};
+
+const hours = `${WORK_HOURS.start} AM–${WORK_HOURS.end - 12} PM ${WORK_HOURS.label}`;
+
+const facts = [
+  ['4', 'client systems live in production'],
+  ['36,000+', 'community members supported'],
+  ['3+ yrs', 'building CRM automations'],
+  ['BS CS', 'Batangas State University'],
+];
+
+// founder problems, in their words, and what each became, tied to a real engagement
+// founder problems -> what each became, tied to a real engagement
+const handoffs = [
+  { icon: 'chat', before: 'Leads wait hours', after: 'Answered instantly', where: 'Supreme Club Tours' },
+  { icon: 'copy', before: 'Orders copied by hand', after: 'Delivers itself', where: 'Orange Ashes' },
+  { icon: 'mail', before: 'Flows “live”, mail bouncing', after: 'Built, verified, in the inbox', where: 'Kemp Beauty' },
+  { icon: 'merge', before: '4 tools, no sync', after: '1 platform', where: 'Cordelia ARC' },
+  { icon: 'pages', before: 'Pages stuck in the queue', after: '23+ pages shipped', where: 'Sell Ready AI' },
+];
+
+const month = [
+  { icon: 'phone', when: 'Day 1', title: '15-min call' },
+  { icon: 'map', when: 'Week 1', title: 'Audit & plan' },
+  { icon: 'wrench', when: 'Weeks 2–3', title: 'Build & test' },
+  { icon: 'rocket', when: 'Week 4', title: 'Live & handed over' },
 ];
 
 const principles = [
-  { title: 'Done means tested with a real signup.',
-    body: 'At Kemp Beauty every Klaviyo flow showed green while almost none of the email arrived. I call a job finished when a real test goes through end to end, like a live signup landing in a Gmail inbox.' },
-  { title: 'Permissions belong in the database.',
-    body: 'On Cordelia ARC’s healthcare platform, every privileged action is checked by row-level security in Postgres. Hiding a button in the interface doesn’t protect anyone’s records.' },
-  { title: 'Every change goes through Git.',
-    body: 'Theme work for Sell Ready AI and Kemp Beauty is tracked in Git against the live store, so any fix can be reviewed or rolled back.' },
-  { title: 'You hear the trade-offs from me.',
-    body: 'When I moved Kemp Beauty’s email to an authenticated subdomain, I also flagged that replies to it would never reach the team, and recommended warming the domain slowly.' },
-  { title: 'If someone copies it by hand, I automate it.',
-    body: 'Orange Ashes orders deliver the moment they’re paid for. WooCommerce bookings open the right CRM opportunity without anyone retyping them.' },
-  { title: 'When the builder runs out, I write the code.',
-    body: 'GoHighLevel’s store couldn’t do what Orange Ashes needed, so I hand-coded the pieces on top. Cordelia ARC outgrew a CRM entirely, so it became a React and Supabase application.' },
+  { icon: 'check', title: 'Tested end to end' },
+  { icon: 'talk', title: 'Trade-offs, up front' },
+  { icon: 'bolt', title: 'Manual? Automated.' },
+  { icon: 'code', title: 'Code where tools stop' },
+];
+
+const path = [
+  { when: '2021', text: 'CS degree' },
+  { when: '2023', text: 'Front-end dev' },
+  { when: '2024', text: '3,000+ customers' },
+  { when: '2025', text: '900 → 36,000+ members' },
+  { when: 'Now', text: 'Client systems, live' },
+];
+
+const faq = [
+  { q: 'Will our hours overlap?', a: `Yes. I work US business hours: ${hours}, Mon–Fri.` },
+  { q: 'How do we communicate?', a: 'Email, video calls, and your team’s workspace (Slack, ClickUp, Monday).' },
+  { q: 'How fast do you reply?', a: 'Within 24 hours on weekdays.' },
+  { q: 'What do you need to start?', a: 'A 15-minute call, then access to the tools involved.' },
+  { q: 'Is this an agency?', a: 'No. You work directly with me.' },
+  { q: 'After launch?', a: 'You own everything. Most clients keep me on for improvements.' },
 ];
 
 const toolbox = [
-  ['Development', 'React, TypeScript, Next.js, JavaScript, Tailwind CSS, HTML and CSS, Shopify Liquid, Supabase, Postgres, Python, SQL, Git'],
-  ['CRM & marketing', 'GoHighLevel, Klaviyo, Zapier, HubSpot, Salesforce, Kommo, Shopify, WordPress, Meta Business Suite'],
-  ['Operations', 'ClickUp, Monday.com, Trello, Google Sheets, Excel, ChatGPT, Claude, Midjourney'],
+  ['Development', ['React', 'TypeScript', 'Next.js', 'Tailwind', 'Shopify Liquid', 'Supabase', 'Postgres', 'Python', 'Git']],
+  ['CRM & marketing', ['GoHighLevel', 'Klaviyo', 'Zapier', 'HubSpot', 'Salesforce', 'Kommo', 'Shopify', 'WordPress']],
+  ['Operations', ['ClickUp', 'Monday.com', 'Trello', 'Google Sheets', 'ChatGPT', 'Claude']],
 ];
 ---
 <BaseLayout
   title="About – Gabriel Alisasis"
-  description="Gabriel Alisasis builds and runs CRM, automation and web systems for US businesses from Batangas, Philippines. How he works, the tools he uses, and when he's online."
+  description="Gabriel Alisasis designs, builds and runs CRM, automation and web systems for founders and growing businesses, from the Philippines on US business hours. What he takes off your plate, how the first month works, and how to work together."
 >
   <section class="about-hero" id="about">
     <div class="wrap about-hero-grid">
       <div class="about-intro">
         <span class="sec-kicker reveal">About</span>
-        <h1 class="about-title reveal">Hi, I’m <span class="accent">Gab.</span></h1>
-        <p class="about-lead reveal">Gabriel Alisasis on paper. I set up and run the systems behind growing businesses: GoHighLevel CRMs, automations, email, storefronts, and the occasional full application.</p>
-        <p class="about-sub reveal">I work from Batangas in the Philippines, on US business hours, under the name TechyOps.</p>
+        <p class="about-hi reveal">Hi, I’m Gab.</p>
+        <h1 class="about-title reveal">You run the business. <span class="accent">I run the systems behind it.</span></h1>
+        <p class="about-lead reveal">CRMs, automations and web systems that run without you babysitting them.</p>
+        <div class="hero-ctas reveal">
+          <a href="#contact" class="btn btn-primary">Let's talk →</a>
+          <a href="/work" class="btn btn-ghost">See the work</a>
+        </div>
+        <dl class="about-facts reveal">
+          {facts.map(([n, l]) => (<div><dt>{n}</dt><dd>{l}</dd></div>))}
+        </dl>
       </div>
 
-      <div class="portrait-wrap reveal">
-        <figure class="portrait" id="portrait" style="--eye-x:44.7%; --eye-y:19.8%" data-eye-x="44.7" data-eye-y="19.8">
-          <div class="portrait-stage">
-            <div class="portrait-zoom">
-              <img class="p-img p-off" src="/images/about/gab-no-glasses.webp" srcset="/images/about/gab-no-glasses-640.webp 543w, /images/about/gab-no-glasses.webp 934w" sizes="(max-width: 960px) 420px, 36vw" width="934" height="1100" alt="" aria-hidden="true" fetchpriority="low" decoding="async" />
-              <img class="p-img p-on" src="/images/about/gab-glasses.webp" srcset="/images/about/gab-glasses-640.webp 543w, /images/about/gab-glasses.webp 934w" sizes="(max-width: 960px) 420px, 36vw" width="934" height="1100" alt="Gabriel Alisasis in a black leather jacket" fetchpriority="high" decoding="async" />
+      <div class="id-wrap reveal">
+        <div class="id-hang">
+        <span class="id-lanyard" aria-hidden="true"></span>
+        <aside class="id-card" id="clockCard" data-tz={WORK_HOURS.timeZone} data-start={WORK_HOURS.start} data-end={WORK_HOURS.end} data-days={WORK_HOURS.days.join(',')} aria-label="Gabriel Alisasis: operator card with live availability">
+          <div class="id-top">
+            <span class="id-slot" aria-hidden="true"></span>
+            <span class="id-org">TechyOps</span>
+            <span class="id-type">Operator</span>
+          </div>
+          <div class="id-body">
+            <div class="id-photo">
+              <img src="/images/about/gab-id.webp" srcset="/images/about/gab-id-240.webp 240w, /images/about/gab-id.webp 480w" sizes="132px" width="480" height="480" alt="Gabriel Alisasis" fetchpriority="high" decoding="async" />
+            </div>
+            <div class="id-who">
+              <strong class="id-name">Gabriel Alisasis</strong>
+              <span class="id-role">Systems &amp; Automation</span>
+              <div class="clock-status" id="clockStatus"><b></b><span>Checking availability…</span></div>
             </div>
           </div>
-        </figure>
-        <aside class="clock-card" id="clockCard" data-tz={WORK_HOURS.timeZone} data-start={WORK_HOURS.start} data-end={WORK_HOURS.end} data-days={WORK_HOURS.days.join(',')} aria-label="Current time and availability">
-          <div class="clock-status" id="clockStatus"><b></b><span>Checking availability…</span></div>
-          <p class="clock-note">Working hours: {WORK_HOURS.start} AM–{WORK_HOURS.end - 12} PM {WORK_HOURS.label}, Mon–Fri</p>
-          <dl class="clock-rows">
-            <div class="clock-row is-home"><dt>Batangas, PH</dt><dd data-clock="Asia/Manila">--:--</dd></div>
-            <div class="clock-row"><dt>New York</dt><dd data-clock="America/New_York">--:--</dd></div>
-            <div class="clock-row"><dt>Los Angeles</dt><dd data-clock="America/Los_Angeles">--:--</dd></div>
+          <dl class="id-meta">
+            <div><dt>Based</dt><dd>Batangas, PH</dd></div>
+            <div><dt>Hours</dt><dd>{WORK_HOURS.start} AM–{WORK_HOURS.end - 12} PM ET · Mon–Fri</dd></div>
+            <div><dt>Builds</dt><dd>CRM · Automation · Web</dd></div>
           </dl>
+          <dl class="id-clocks">
+            <div class="is-home"><dt>Batangas</dt><dd data-clock="Asia/Manila">--:--</dd></div>
+            <div><dt>New York</dt><dd data-clock="America/New_York">--:--</dd></div>
+            <div><dt>Los Angeles</dt><dd data-clock="America/Los_Angeles">--:--</dd></div>
+          </dl>
+          <div class="id-foot" aria-hidden="true">
+            <span class="id-code"></span>
+            <span class="id-no">GA · 2021 → NOW</span>
+          </div>
         </aside>
+        </div>
       </div>
     </div>
   </section>
 
-  <section class="short-version">
+  <section class="handoff">
     <div class="wrap">
-      <span class="sec-kicker reveal">The short version</span>
-      <ol class="short-list">
-        {short.map((s) => (
-          <li class="reveal"><span class="short-when">{s.when}</span><p>{s.text}</p></li>
+      <div class="principles-head reveal">
+        <span class="sec-kicker">What founders hand me</span>
+        <h2>Bring me the mess. <span class="accent">I’ll hand back a system.</span></h2>
+      </div>
+      <ul class="handoff-grid">
+        {handoffs.map((h) => (
+          <li class="handoff-card reveal">
+            <span class="handoff-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" set:html={I[h.icon]} /></span>
+            <span class="hchip is-before"><span class="sr-only">Before: </span>{h.before}</span>
+            <span class="handoff-arrow" aria-hidden="true">↓</span>
+            <span class="hchip is-after"><span class="sr-only">After: </span>{h.after}</span>
+            <span class="handoff-where">{h.where}</span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </section>
+
+  <section class="month">
+    <div class="wrap">
+      <div class="principles-head reveal">
+        <span class="sec-kicker">Working together</span>
+        <h2>What your first month looks like.</h2>
+      </div>
+      <ol class="month-steps">
+        {month.map((m) => (
+          <li class="month-step reveal">
+            <span class="month-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" set:html={I[m.icon]} /></span>
+            <span class="month-when">{m.when}</span>
+            <h3>{m.title}</h3>
+          </li>
         ))}
       </ol>
     </div>
@@ -79,16 +176,27 @@ const toolbox = [
     <div class="wrap">
       <div class="principles-head reveal">
         <span class="sec-kicker">How I work</span>
-        <h2>Six rules I don’t bend on.</h2>
+        <h2>Four rules I don’t bend on.</h2>
       </div>
-      <ol class="principle-grid">
-        {principles.map((p, i) => (
-          <li class="principle reveal">
-            <span class="principle-num" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
+      <ul class="rule-grid">
+        {principles.map((p) => (
+          <li class="rule reveal">
+            <span class="rule-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" set:html={I[p.icon]} /></span>
             <h3>{p.title}</h3>
-            <p>{p.body}</p>
           </li>
         ))}
+      </ul>
+    </div>
+  </section>
+
+  <section class="path">
+    <div class="wrap">
+      <div class="principles-head reveal">
+        <span class="sec-kicker">The path here</span>
+        <h2>The path here.</h2>
+      </div>
+      <ol class="path-list reveal">
+        {path.map((s) => (<li><span class="path-when">{s.when}</span><p>{s.text}</p></li>))}
       </ol>
     </div>
   </section>
@@ -98,7 +206,6 @@ const toolbox = [
       <div class="principles-head reveal">
         <span class="sec-kicker">Stack</span>
         <h2>The tools, and where they were used.</h2>
-        <p>Every dot is a real engagement.</p>
       </div>
       <div class="matrix-wrap matrix-card reveal">
         <table class="matrix">
@@ -137,7 +244,23 @@ const toolbox = [
       </div>
       <div class="toolbox reveal">
         {toolbox.map(([group, list]) => (
-          <div><h4>{group}</h4><p>{list}</p></div>
+          <div><h4>{group}</h4><ul class="tool-chips">{(list as string[]).map((t) => <li>{t}</li>)}</ul></div>
+        ))}
+      </div>
+    </div>
+  </section>
+  <section class="faq">
+    <div class="wrap faq-grid">
+      <div class="principles-head reveal">
+        <span class="sec-kicker">Questions</span>
+        <h2>Working together, answered.</h2>
+      </div>
+      <div class="faq-list reveal">
+        {faq.map((f) => (
+          <details class="faq-item">
+            <summary>{f.q}<span class="faq-icon" aria-hidden="true"></span></summary>
+            <p>{f.a}</p>
+          </details>
         ))}
       </div>
     </div>
