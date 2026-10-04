@@ -123,7 +123,7 @@ const rowTool: Record<string, Tool> = {
       <div class="id-wrap reveal" id="idBadge">
         <div class="id-hang">
         <span class="id-lanyard" aria-hidden="true"></span>
-        <div class="id-card" id="clockCard" role="group" data-tz={WORK_HOURS.timeZone} data-start={WORK_HOURS.start} data-end={WORK_HOURS.end} data-days={WORK_HOURS.days.join(',')} aria-label="Gabriel Alisasis: ID card with live availability">
+        <div class="id-card" id="clockCard" role="group" tabindex="0" data-tz={WORK_HOURS.timeZone} data-start={WORK_HOURS.start} data-end={WORK_HOURS.end} data-days={WORK_HOURS.days.join(',')} aria-label="Gabriel Alisasis ID card with live availability. Click to flip.">
           <span class="id-edge" aria-hidden="true"></span><span class="id-edge" aria-hidden="true"></span><span class="id-edge" aria-hidden="true"></span>
 
           <div class="id-face id-front">
@@ -136,7 +136,6 @@ const rowTool: Record<string, Tool> = {
             <div class="id-body">
               <div class="id-photo">
                 <img src="/images/about/gab-id.webp" srcset="/images/about/gab-id-240.webp 240w, /images/about/gab-id.webp 480w" sizes="132px" width="480" height="480" alt="Gabriel Alisasis" fetchpriority="high" decoding="async" draggable="false" />
-                <span class="id-seal" aria-hidden="true">TO</span>
               </div>
               <div class="id-who">
                 <strong class="id-name">Gabriel Alisasis</strong>
@@ -183,7 +182,6 @@ const rowTool: Record<string, Tool> = {
           </div>
         </div>
         </div>
-        <button class="id-hint" type="button" aria-controls="clockCard"><span aria-hidden="true">↻</span> <span class="id-hint-text">Flip card</span></button>
       </div>
     </div>
   </section>

@@ -361,26 +361,31 @@ gsap.registerPlugin(ScrollTrigger);
   /* ---------- about: ID badge (lanyard physics, drag, 3D twist, flip) ---------- */
   (function () {
     var wrap = $('#idBadge'); if (!wrap) return;
-    var hang = $('.id-hang', wrap), card = $('.id-card', wrap), hint = $('.id-hint', wrap);
-    var front = $('.id-front', card), back = $('.id-back', card), hintText = $('.id-hint-text', wrap);
-    var coarse = window.matchMedia('(pointer: coarse)').matches;
+    var hang = $('.id-hang', wrap), card = $('.id-card', wrap);
+    var front = $('.id-front', card), back = $('.id-back', card);
     var flipped = false;
     function setFaces() {
       front.inert = flipped; back.inert = !flipped;
       front.setAttribute('aria-hidden', flipped ? 'true' : 'false');
       back.setAttribute('aria-hidden', flipped ? 'false' : 'true');
-      hint.setAttribute('aria-pressed', flipped ? 'true' : 'false');
     }
     setFaces();
 
-    if (reduce) { // no physics: flip is an instant face swap
-      card.addEventListener('dblclick', function () { flipped = !flipped; card.classList.toggle('is-flipped', flipped); setFaces(); });
-      hint.addEventListener('click', function () { flipped = !flipped; card.classList.toggle('is-flipped', flipped); setFaces(); });
+    function onKey(fn) {
+      card.addEventListener('keydown', function (e) {
+        if (e.target !== card || (e.key !== 'Enter' && e.key !== ' ')) return;
+        e.preventDefault(); fn();
+      });
+    }
+
+    if (reduce) { // no physics: a click is an instant face swap
+      var swap = function () { flipped = !flipped; card.classList.toggle('is-flipped', flipped); setFaces(); };
+      card.addEventListener('click', function (e) { if (!e.target.closest('a, button')) swap(); });
+      onKey(swap);
       return;
     }
 
     wrap.classList.add('is-live');
-    hintText.textContent = coarse ? 'Drag it · tap to flip' : 'Drag it · double-click to flip';
 
     // woven strap printed with the brand, plus the metal crimp, swivel and ring
     var label = new Array(14).join('TECHYOPS  ·  ');
@@ -411,8 +416,8 @@ gsap.registerPlugin(ScrollTrigger);
     // state: rope angle/length, card swing relative to the rope, 3D twist
     var G = 2600, KR = 260, CR = 16, KP = 90, CP = 7, KS = 55, CS = 6.5;
     var ax, ay, p0x, p0y, L;
-    var phi = 0.22, om = 0, r = 0, vr = 0, psi = 0, vpsi = 0, spin = 0, vspin = 0, F = 0, phiAcc = 0;
-    var drag = null, raf = null, last = 0;
+    var phi = 0, om = 0, r = 0, vr = 0, psi = 0, vpsi = 0, spin = 0, vspin = 0, F = 0, phiAcc = 0;
+    var drag = null, raf = null, last = 0, flipT = 0; // flipT: time left in a flip, which uses a softer spring
 
     function layout() {
       var strapPx = parseFloat(getComputedStyle(hang).getPropertyValue('--strap')) || 170;
@@ -455,7 +460,10 @@ gsap.registerPlugin(ScrollTrigger);
       }
       vpsi += (-KP * psi - CP * vpsi - phiAcc * 0.5) * dt; psi = Math.max(-0.6, Math.min(0.6, psi + vpsi * dt));
       var target = F + (drag ? Math.max(-70, Math.min(70, drag.vx * 0.05)) : 0);
-      vspin += (-KS * (spin - target) - CS * vspin) * dt; spin += vspin * dt;
+      // a flip turns slower with one small overshoot, like a badge turned by hand; drag twisting stays lively
+      var ks = flipT > 0 ? 38 : KS, cs = flipT > 0 ? 10 : CS;
+      flipT = Math.max(0, flipT - dt);
+      vspin += (-ks * (spin - target) - cs * vspin) * dt; spin += vspin * dt;
     }
 
     function atRest() {
@@ -472,7 +480,11 @@ gsap.registerPlugin(ScrollTrigger);
     function kick() { if (!raf) { last = performance.now(); raf = requestAnimationFrame(frame); } }
 
     function local(e) { var b = wrap.getBoundingClientRect(); return { x: e.clientX - b.left, y: e.clientY - b.top }; }
-    function flip() { F = F === 0 ? 180 : 0; flipped = !flipped; setFaces(); kick(); }
+    function flip() {
+      F = F === 0 ? 180 : 0; flipped = !flipped; setFaces();
+      flipT = 1.6; om += (Math.random() < 0.5 ? -1 : 1) * 0.25; vr -= 120; // it bobs and sways as it turns
+      kick();
+    }
 
     card.addEventListener('pointerdown', function (e) {
       if (e.button !== 0 || e.target.closest('a, button')) return;
@@ -498,16 +510,34 @@ gsap.registerPlugin(ScrollTrigger);
       vspin += Math.max(-600, Math.min(600, drag.vx * 0.08));
       om = Math.max(-3.2, Math.min(3.2, om)); vr = Math.max(-400, Math.min(400, vr)); // a throw swings, it doesn't launch
       drag = null; wrap.classList.remove('is-dragging');
-      if (e.type === 'pointerup' && e.pointerType !== 'mouse' && moved < 6 && quick) flip();
+      if (e.type === 'pointerup' && moved < 6 && quick) flip(); // a click, not a drag
       kick();
     }
     card.addEventListener('pointerup', release);
     card.addEventListener('pointercancel', release);
-    card.addEventListener('dblclick', function (e) { if (!e.target.closest('a, button')) flip(); });
-    hint.addEventListener('click', flip);
+    onKey(flip);
 
-    layout(); render(); kick();
+    layout(); render();
     if ('ResizeObserver' in window) new ResizeObserver(function () { layout(); render(); }).observe(wrap);
+
+    // swing in the first time it scrolls into view, then drift now and then like a badge in a breeze
+    var visible = false, swungIn = false, breeze = null;
+    function scheduleBreeze() {
+      clearTimeout(breeze);
+      breeze = setTimeout(function () {
+        if (visible && !drag && !document.hidden) { om += (Math.random() < 0.5 ? -1 : 1) * (0.18 + Math.random() * 0.14); kick(); }
+        scheduleBreeze();
+      }, 3500 + Math.random() * 3500);
+    }
+    new IntersectionObserver(function (entries) {
+      visible = entries[0].intersectionRatio >= 0.35;
+      if (visible && !swungIn) {
+        swungIn = true; phi = 0.26; om = 0; kick();
+        // one small half-turn tease, so it's clear the card turns over
+        setTimeout(function () { if (!drag && F === 0) { vspin += 160; kick(); } }, 2600);
+      }
+      if (visible) scheduleBreeze(); else clearTimeout(breeze);
+    }, { threshold: [0, 0.35] }).observe(card);
   })();
 
   /* ---------- focus trap helper ---------- */
