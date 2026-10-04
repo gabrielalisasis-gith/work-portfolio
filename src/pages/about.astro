@@ -1,6 +1,12 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import RowLogo from '../components/RowLogo.astro';
+import { brandColor as brand, type Tool } from '../data/brand';
 import { WORK_HOURS } from '../config';
+import {
+  siReact, siTypescript, siNextdotjs, siTailwindcss, siShopify, siSupabase, siPostgresql, siPython, siGit,
+  siZapier, siHubspot, siWordpress, siClickup, siTrello, siGooglesheets, siClaude, siHtml5,
+} from 'simple-icons';
 
 // 24px line icons (lucide-style)
 const I = {
@@ -69,11 +75,30 @@ const faq = [
   { q: 'After launch?', a: 'You own everything. Most clients keep me on for improvements.' },
 ];
 
-const toolbox = [
-  ['Development', ['React', 'TypeScript', 'Next.js', 'Tailwind', 'Shopify Liquid', 'Supabase', 'Postgres', 'Python', 'Git']],
-  ['CRM & marketing', ['GoHighLevel', 'Klaviyo', 'Zapier', 'HubSpot', 'Salesforce', 'Kommo', 'Shopify', 'WordPress']],
-  ['Operations', ['ClickUp', 'Monday.com', 'Trello', 'Google Sheets', 'ChatGPT', 'Claude']],
+// brand logos from Simple Icons (CC0); tools without a published mark get a monogram tile in their brand colour
+const toolbox: [string, Tool[]][] = [
+  ['Development', [
+    { name: 'React', icon: siReact }, { name: 'TypeScript', icon: siTypescript }, { name: 'Next.js', icon: siNextdotjs },
+    { name: 'Tailwind', icon: siTailwindcss }, { name: 'Shopify Liquid', icon: siShopify }, { name: 'Supabase', icon: siSupabase },
+    { name: 'Postgres', icon: siPostgresql }, { name: 'Python', icon: siPython }, { name: 'Git', icon: siGit },
+  ]],
+  ['CRM & marketing', [
+    { name: 'GoHighLevel', mono: 'GHL', hex: '188BF6' }, { name: 'Klaviyo', mono: 'K', hex: '232426' },
+    { name: 'Zapier', icon: siZapier }, { name: 'HubSpot', icon: siHubspot }, { name: 'Salesforce', mono: 'SF', hex: '00A1E0' },
+    { name: 'Kommo', mono: 'Ko', hex: '4C8BF5' }, { name: 'Shopify', icon: siShopify }, { name: 'WordPress', icon: siWordpress },
+  ]],
+  ['Operations', [
+    { name: 'ClickUp', icon: siClickup }, { name: 'monday.com', mono: 'm', hex: 'FF3D57' }, { name: 'Trello', icon: siTrello },
+    { name: 'Google Sheets', icon: siGooglesheets }, { name: 'ChatGPT', mono: 'GPT', hex: '10A37F' }, { name: 'Claude', icon: siClaude },
+  ]],
 ];
+const byName = Object.fromEntries(toolbox.flatMap(([, l]) => l).map((t) => [t.name, t]));
+// logos for the usage matrix rows
+const rowTool: Record<string, Tool> = {
+  'GoHighLevel': byName['GoHighLevel'], 'Klaviyo': byName['Klaviyo'], 'Shopify Liquid': byName['Shopify Liquid'],
+  'React / TypeScript': byName['React'], 'Supabase / Postgres': byName['Supabase'],
+  'HTML / CSS / JS': { name: 'HTML', icon: siHtml5 }, 'Zapier': byName['Zapier'], 'Git': byName['Git'],
+};
 ---
 <BaseLayout
   title="About – Gabriel Alisasis"
@@ -221,30 +246,42 @@ const toolbox = [
                     </tr>
                   </thead>
                   <tbody>
-                    <tr><th scope="row">GoHighLevel</th>
+                    <tr><th scope="row"><span class="row-tool"><RowLogo t={rowTool['GoHighLevel']} />GoHighLevel</span></th>
                       <td class="cell-no"><span class="m-dot" aria-hidden="true"></span><span class="sr-only">Not used</span></td><td class="cell-no"><span class="m-dot" aria-hidden="true"></span><span class="sr-only">Not used</span></td><td class="cell-no"><span class="m-dot" aria-hidden="true"></span><span class="sr-only">Not used</span></td><td class="cell-yes"><span class="m-dot" aria-hidden="true"></span><span class="sr-only">Used</span></td><td class="cell-yes"><span class="m-dot" aria-hidden="true"></span><span class="sr-only">Used</span></td></tr>
-                    <tr><th scope="row">Klaviyo</th>
+                    <tr><th scope="row"><span class="row-tool"><RowLogo t={rowTool['Klaviyo']} />Klaviyo</span></th>
                       <td class="cell-no"><span class="m-dot" aria-hidden="true"></span><span class="sr-only">Not used</span></td><td class="cell-yes"><span class="m-dot" aria-hidden="true"></span><span class="sr-only">Used</span></td><td class="cell-no"><span class="m-dot" aria-hidden="true"></span><span class="sr-only">Not used</span></td><td class="cell-no"><span class="m-dot" aria-hidden="true"></span><span class="sr-only">Not used</span></td><td class="cell-no"><span class="m-dot" aria-hidden="true"></span><span class="sr-only">Not used</span></td></tr>
-                    <tr><th scope="row">Shopify Liquid</th>
+                    <tr><th scope="row"><span class="row-tool"><RowLogo t={rowTool['Shopify Liquid']} />Shopify Liquid</span></th>
                       <td class="cell-no"><span class="m-dot" aria-hidden="true"></span><span class="sr-only">Not used</span></td><td class="cell-yes"><span class="m-dot" aria-hidden="true"></span><span class="sr-only">Used</span></td><td class="cell-yes"><span class="m-dot" aria-hidden="true"></span><span class="sr-only">Used</span></td><td class="cell-no"><span class="m-dot" aria-hidden="true"></span><span class="sr-only">Not used</span></td><td class="cell-no"><span class="m-dot" aria-hidden="true"></span><span class="sr-only">Not used</span></td></tr>
-                    <tr><th scope="row">React / TypeScript</th>
+                    <tr><th scope="row"><span class="row-tool"><RowLogo t={rowTool['React / TypeScript']} />React / TypeScript</span></th>
                       <td class="cell-yes"><span class="m-dot" aria-hidden="true"></span><span class="sr-only">Used</span></td><td class="cell-no"><span class="m-dot" aria-hidden="true"></span><span class="sr-only">Not used</span></td><td class="cell-no"><span class="m-dot" aria-hidden="true"></span><span class="sr-only">Not used</span></td><td class="cell-no"><span class="m-dot" aria-hidden="true"></span><span class="sr-only">Not used</span></td><td class="cell-no"><span class="m-dot" aria-hidden="true"></span><span class="sr-only">Not used</span></td></tr>
-                    <tr><th scope="row">Supabase / Postgres</th>
+                    <tr><th scope="row"><span class="row-tool"><RowLogo t={rowTool['Supabase / Postgres']} />Supabase / Postgres</span></th>
                       <td class="cell-yes"><span class="m-dot" aria-hidden="true"></span><span class="sr-only">Used</span></td><td class="cell-no"><span class="m-dot" aria-hidden="true"></span><span class="sr-only">Not used</span></td><td class="cell-no"><span class="m-dot" aria-hidden="true"></span><span class="sr-only">Not used</span></td><td class="cell-no"><span class="m-dot" aria-hidden="true"></span><span class="sr-only">Not used</span></td><td class="cell-no"><span class="m-dot" aria-hidden="true"></span><span class="sr-only">Not used</span></td></tr>
-                    <tr><th scope="row">HTML / CSS / JS</th>
+                    <tr><th scope="row"><span class="row-tool"><RowLogo t={rowTool['HTML / CSS / JS']} />HTML / CSS / JS</span></th>
                       <td class="cell-yes"><span class="m-dot" aria-hidden="true"></span><span class="sr-only">Used</span></td><td class="cell-yes"><span class="m-dot" aria-hidden="true"></span><span class="sr-only">Used</span></td><td class="cell-yes"><span class="m-dot" aria-hidden="true"></span><span class="sr-only">Used</span></td><td class="cell-yes"><span class="m-dot" aria-hidden="true"></span><span class="sr-only">Used</span></td><td class="cell-no"><span class="m-dot" aria-hidden="true"></span><span class="sr-only">Not used</span></td></tr>
-                    <tr><th scope="row">DNS / DKIM / DMARC</th>
+                    <tr><th scope="row"><span class="row-tool"><span class="row-logo is-blank" aria-hidden="true"></span>DNS / DKIM / DMARC</span></th>
                       <td class="cell-no"><span class="m-dot" aria-hidden="true"></span><span class="sr-only">Not used</span></td><td class="cell-yes"><span class="m-dot" aria-hidden="true"></span><span class="sr-only">Used</span></td><td class="cell-no"><span class="m-dot" aria-hidden="true"></span><span class="sr-only">Not used</span></td><td class="cell-yes"><span class="m-dot" aria-hidden="true"></span><span class="sr-only">Used</span></td><td class="cell-no"><span class="m-dot" aria-hidden="true"></span><span class="sr-only">Not used</span></td></tr>
-                    <tr><th scope="row">Zapier</th>
+                    <tr><th scope="row"><span class="row-tool"><RowLogo t={rowTool['Zapier']} />Zapier</span></th>
                       <td class="cell-no"><span class="m-dot" aria-hidden="true"></span><span class="sr-only">Not used</span></td><td class="cell-no"><span class="m-dot" aria-hidden="true"></span><span class="sr-only">Not used</span></td><td class="cell-no"><span class="m-dot" aria-hidden="true"></span><span class="sr-only">Not used</span></td><td class="cell-no"><span class="m-dot" aria-hidden="true"></span><span class="sr-only">Not used</span></td><td class="cell-yes"><span class="m-dot" aria-hidden="true"></span><span class="sr-only">Used</span></td></tr>
-                    <tr><th scope="row">Git</th>
+                    <tr><th scope="row"><span class="row-tool"><RowLogo t={rowTool['Git']} />Git</span></th>
                       <td class="cell-yes"><span class="m-dot" aria-hidden="true"></span><span class="sr-only">Used</span></td><td class="cell-yes"><span class="m-dot" aria-hidden="true"></span><span class="sr-only">Used</span></td><td class="cell-yes"><span class="m-dot" aria-hidden="true"></span><span class="sr-only">Used</span></td><td class="cell-no"><span class="m-dot" aria-hidden="true"></span><span class="sr-only">Not used</span></td><td class="cell-no"><span class="m-dot" aria-hidden="true"></span><span class="sr-only">Not used</span></td></tr>
                   </tbody>
                 </table>
       </div>
       <div class="toolbox reveal">
         {toolbox.map(([group, list]) => (
-          <div><h4>{group}</h4><ul class="tool-chips">{(list as string[]).map((t) => <li>{t}</li>)}</ul></div>
+          <div class="tool-group">
+            <h4>{group}</h4>
+            <ul class="tool-logos">
+              {list.map((t) => (
+                <li class="tool" style={`--brand:${brand(t)}`}>
+                  <span class="tool-logo" aria-hidden="true">
+                    {t.icon ? <svg viewBox="0 0 24 24"><path d={t.icon.path} /></svg> : <span class="tool-mono">{t.mono}</span>}
+                  </span>
+                  <span class="tool-name">{t.name}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
         ))}
       </div>
     </div>
