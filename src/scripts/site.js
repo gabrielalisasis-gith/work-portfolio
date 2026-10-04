@@ -358,6 +358,158 @@ gsap.registerPlugin(ScrollTrigger);
     setInterval(tick, 30000);
   })();
 
+  /* ---------- about: ID badge (lanyard physics, drag, 3D twist, flip) ---------- */
+  (function () {
+    var wrap = $('#idBadge'); if (!wrap) return;
+    var hang = $('.id-hang', wrap), card = $('.id-card', wrap), hint = $('.id-hint', wrap);
+    var front = $('.id-front', card), back = $('.id-back', card), hintText = $('.id-hint-text', wrap);
+    var coarse = window.matchMedia('(pointer: coarse)').matches;
+    var flipped = false;
+    function setFaces() {
+      front.inert = flipped; back.inert = !flipped;
+      front.setAttribute('aria-hidden', flipped ? 'true' : 'false');
+      back.setAttribute('aria-hidden', flipped ? 'false' : 'true');
+      hint.setAttribute('aria-pressed', flipped ? 'true' : 'false');
+    }
+    setFaces();
+
+    if (reduce) { // no physics: flip is an instant face swap
+      card.addEventListener('dblclick', function () { flipped = !flipped; card.classList.toggle('is-flipped', flipped); setFaces(); });
+      hint.addEventListener('click', function () { flipped = !flipped; card.classList.toggle('is-flipped', flipped); setFaces(); });
+      return;
+    }
+
+    wrap.classList.add('is-live');
+    hintText.textContent = coarse ? 'Drag it · tap to flip' : 'Drag it · double-click to flip';
+
+    // woven strap printed with the brand, plus the metal crimp, swivel and ring
+    var label = new Array(14).join('TECHYOPS  ·  ');
+    wrap.insertAdjacentHTML('afterbegin',
+      '<svg class="id-strap" aria-hidden="true"><defs>' +
+        '<pattern id="idWeave" width="5" height="5" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">' +
+          '<rect width="5" height="5" style="fill:var(--accent)"/><rect width="2" height="5" fill="rgba(0,0,0,.14)"/></pattern>' +
+        '<linearGradient id="idFadeG" gradientUnits="userSpaceOnUse" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#000"/><stop offset="1" stop-color="#fff"/></linearGradient>' +
+        '<mask id="idFade" maskUnits="userSpaceOnUse" x="-3000" y="-3000" width="6000" height="6000"><rect x="-3000" y="-3000" width="6000" height="6000" fill="url(#idFadeG)"/></mask>' +
+      '</defs><g mask="url(#idFade)">' +
+        '<path class="s-edge" fill="none" stroke="rgba(0,0,0,.32)" stroke-width="25"/>' +
+        '<path id="idStrapPath" fill="none" stroke="url(#idWeave)" stroke-width="22"/>' +
+        '<text font-family="JetBrains Mono, monospace" font-size="8.5" font-weight="700" letter-spacing="2" fill="rgba(255,255,255,.88)" dominant-baseline="central">' +
+          '<textPath href="#idStrapPath" startOffset="4">' + label + '</textPath></text>' +
+      '</g></svg>');
+    wrap.insertAdjacentHTML('beforeend',
+      '<svg class="id-clip" aria-hidden="true"><defs>' +
+        '<linearGradient id="idMetal" x1="0" x2="1" y1="0" y2="1"><stop offset="0" stop-color="#f4f6fb"/><stop offset=".45" stop-color="#a7b0c2"/><stop offset=".7" stop-color="#e6eaf2"/><stop offset="1" stop-color="#7c869a"/></linearGradient>' +
+      '</defs>' +
+        '<line class="c-stem" stroke="url(#idMetal)" stroke-width="3" stroke-linecap="round"/>' +
+        '<circle class="c-ring" r="8" fill="none" stroke="url(#idMetal)" stroke-width="3"/>' +
+        '<g class="c-crimp"><rect x="-13" y="-8" width="26" height="16" rx="3.5" fill="url(#idMetal)" stroke="rgba(0,0,0,.28)"/>' +
+          '<rect x="-9" y="-2" width="18" height="4" rx="2" fill="rgba(0,0,0,.18)"/></g>' +
+      '</svg>');
+    var strap = $('.id-strap', wrap), path = $('#idStrapPath'), edge = $('.s-edge', strap), fadeG = $('#idFadeG');
+    var clip = $('.id-clip', wrap), stem = $('.c-stem', clip), ring = $('.c-ring', clip), crimp = $('.c-crimp', clip);
+
+    // state: rope angle/length, card swing relative to the rope, 3D twist
+    var G = 2600, KR = 260, CR = 16, KP = 90, CP = 7, KS = 55, CS = 6.5;
+    var ax, ay, p0x, p0y, L;
+    var phi = 0.22, om = 0, r = 0, vr = 0, psi = 0, vpsi = 0, spin = 0, vspin = 0, F = 0, phiAcc = 0;
+    var drag = null, raf = null, last = 0;
+
+    function layout() {
+      var strapPx = parseFloat(getComputedStyle(hang).getPropertyValue('--strap')) || 170;
+      p0x = wrap.clientWidth / 2; p0y = hang.offsetTop + strapPx;
+      L = strapPx * 1.5 + 20; ax = p0x; ay = p0y - L; // anchor sits above the visible strap
+      if (!r) r = L;
+      fadeG.setAttribute('y1', ay); fadeG.setAttribute('y2', ay + L * 0.5);
+    }
+
+    function render() {
+      var px = ax + Math.sin(phi) * r, py = ay + Math.cos(phi) * r;
+      var theta = -(phi + psi);
+      card.style.transform = 'translate3d(' + (px - p0x).toFixed(2) + 'px,' + (py - p0y).toFixed(2) + 'px,0) rotate(' + theta.toFixed(4) + 'rad) rotateY(' + spin.toFixed(2) + 'deg)';
+      card.style.setProperty('--tilt', (theta * 57.3 + (spin % 180) * 0.15).toFixed(2));
+      // strap: sags into a curve when the card is pushed closer than its length
+      var dx = px - ax, dy = py - ay, d = Math.hypot(dx, dy) || 1, sag = r < L ? Math.sqrt(L * L - r * r) * 0.55 : 0;
+      var side = om >= 0 ? -1 : 1, cx = ax + dx / 2 + (-dy / d) * sag * side, cy = ay + dy / 2 + (dx / d) * sag * side;
+      var ux = px - cx, uy = py - cy, ul = Math.hypot(ux, uy) || 1; ux /= ul; uy /= ul;
+      var ex = px - ux * 22, ey = py - uy * 22;
+      var dPath = 'M' + ax.toFixed(1) + ' ' + ay.toFixed(1) + ' Q' + cx.toFixed(1) + ' ' + cy.toFixed(1) + ' ' + ex.toFixed(1) + ' ' + ey.toFixed(1);
+      path.setAttribute('d', dPath); edge.setAttribute('d', dPath);
+      crimp.setAttribute('transform', 'translate(' + ex.toFixed(1) + ' ' + ey.toFixed(1) + ') rotate(' + (Math.atan2(uy, ux) * 57.3 - 90).toFixed(1) + ')');
+      var rx = px - Math.sin(theta) * 6, ry = py + Math.cos(theta) * 6;
+      ring.setAttribute('cx', rx.toFixed(1)); ring.setAttribute('cy', ry.toFixed(1));
+      stem.setAttribute('x1', (ex + ux * 8).toFixed(1)); stem.setAttribute('y1', (ey + uy * 8).toFixed(1));
+      stem.setAttribute('x2', (rx - ux * 8).toFixed(1)); stem.setAttribute('y2', (ry - uy * 8).toFixed(1));
+    }
+
+    function step(dt) {
+      if (!drag) {
+        phiAcc = -(G / r) * Math.sin(phi) - 1.5 * om;
+        om += phiAcc * dt; phi += om * dt;
+        vr += (-KR * (r - L) - CR * vr + r * om * om * 0.3) * dt; r += vr * dt;
+      } else {
+        var tx = drag.x - drag.ox - ax, ty = drag.y - drag.oy - ay;
+        var nphi = Math.atan2(tx, ty), d = Math.hypot(tx, ty), lim = L * 1.18;
+        var nr = Math.max(L * 0.45, d > lim ? lim + (d - lim) * 0.18 : d);
+        var nom = (nphi - phi) / dt;
+        phiAcc = (nom - om) / dt; om += (nom - om) * 0.5; vr = (nr - r) / dt; phi = nphi; r = nr;
+      }
+      vpsi += (-KP * psi - CP * vpsi - phiAcc * 0.5) * dt; psi = Math.max(-0.6, Math.min(0.6, psi + vpsi * dt));
+      var target = F + (drag ? Math.max(-70, Math.min(70, drag.vx * 0.05)) : 0);
+      vspin += (-KS * (spin - target) - CS * vspin) * dt; spin += vspin * dt;
+    }
+
+    function atRest() {
+      return !drag && Math.abs(om) < 0.002 && Math.abs(phi) < 0.001 && Math.abs(r - L) < 0.05 && Math.abs(vr) < 0.05 &&
+        Math.abs(psi) < 0.001 && Math.abs(vpsi) < 0.002 && Math.abs(spin - F) < 0.05 && Math.abs(vspin) < 0.05;
+    }
+
+    function frame(now) {
+      var dt = Math.min(0.033, (now - last) / 1000 || 0.016); last = now;
+      step(dt / 2); step(dt / 2);
+      if (atRest()) { phi = om = psi = vpsi = vr = vspin = 0; r = L; spin = F; render(); raf = null; return; }
+      render(); raf = requestAnimationFrame(frame);
+    }
+    function kick() { if (!raf) { last = performance.now(); raf = requestAnimationFrame(frame); } }
+
+    function local(e) { var b = wrap.getBoundingClientRect(); return { x: e.clientX - b.left, y: e.clientY - b.top }; }
+    function flip() { F = F === 0 ? 180 : 0; flipped = !flipped; setFaces(); kick(); }
+
+    card.addEventListener('pointerdown', function (e) {
+      if (e.button !== 0 || e.target.closest('a, button')) return;
+      var p = local(e), px = ax + Math.sin(phi) * r, py = ay + Math.cos(phi) * r;
+      drag = { x: p.x, y: p.y, ox: p.x - px, oy: p.y - py, vx: 0, t: performance.now(), sx: p.x, sy: p.y, lt: performance.now() };
+      card.setPointerCapture(e.pointerId); wrap.classList.add('is-dragging');
+      if (e.pointerType === 'mouse') e.preventDefault();
+      kick();
+    });
+    card.addEventListener('pointermove', function (e) {
+      var p = local(e), now = performance.now();
+      if (drag) {
+        var dt = Math.max(0.008, (now - drag.lt) / 1000);
+        drag.vx = drag.vx * 0.6 + ((p.x - drag.x) / dt) * 0.4;
+        drag.x = p.x; drag.y = p.y; drag.lt = now;
+      } else if (e.pointerType === 'mouse' && e.movementX) { // a passing cursor nudges it
+        om += Math.max(-0.4, Math.min(0.4, e.movementX * 0.004)); kick();
+      }
+    });
+    function release(e) {
+      if (!drag) return;
+      var moved = Math.hypot(drag.x - drag.sx, drag.y - drag.sy), quick = performance.now() - drag.t < 300;
+      vspin += Math.max(-600, Math.min(600, drag.vx * 0.08));
+      om = Math.max(-3.2, Math.min(3.2, om)); vr = Math.max(-400, Math.min(400, vr)); // a throw swings, it doesn't launch
+      drag = null; wrap.classList.remove('is-dragging');
+      if (e.type === 'pointerup' && e.pointerType !== 'mouse' && moved < 6 && quick) flip();
+      kick();
+    }
+    card.addEventListener('pointerup', release);
+    card.addEventListener('pointercancel', release);
+    card.addEventListener('dblclick', function (e) { if (!e.target.closest('a, button')) flip(); });
+    hint.addEventListener('click', flip);
+
+    layout(); render(); kick();
+    if ('ResizeObserver' in window) new ResizeObserver(function () { layout(); render(); }).observe(wrap);
+  })();
+
   /* ---------- focus trap helper ---------- */
   var FOCUSABLE = 'a[href],button:not([disabled]),input,select,textarea,[tabindex]:not([tabindex="-1"])';
   function trap(container, e) {

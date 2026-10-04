@@ -120,41 +120,70 @@ const rowTool: Record<string, Tool> = {
         </dl>
       </div>
 
-      <div class="id-wrap reveal">
+      <div class="id-wrap reveal" id="idBadge">
         <div class="id-hang">
         <span class="id-lanyard" aria-hidden="true"></span>
-        <aside class="id-card" id="clockCard" data-tz={WORK_HOURS.timeZone} data-start={WORK_HOURS.start} data-end={WORK_HOURS.end} data-days={WORK_HOURS.days.join(',')} aria-label="Gabriel Alisasis: operator card with live availability">
-          <div class="id-top">
-            <span class="id-slot" aria-hidden="true"></span>
-            <span class="id-org">TechyOps</span>
-            <span class="id-type">Operator</span>
-          </div>
-          <div class="id-body">
-            <div class="id-photo">
-              <img src="/images/about/gab-id.webp" srcset="/images/about/gab-id-240.webp 240w, /images/about/gab-id.webp 480w" sizes="132px" width="480" height="480" alt="Gabriel Alisasis" fetchpriority="high" decoding="async" />
+        <div class="id-card" id="clockCard" role="group" data-tz={WORK_HOURS.timeZone} data-start={WORK_HOURS.start} data-end={WORK_HOURS.end} data-days={WORK_HOURS.days.join(',')} aria-label="Gabriel Alisasis: ID card with live availability">
+          <span class="id-edge" aria-hidden="true"></span><span class="id-edge" aria-hidden="true"></span><span class="id-edge" aria-hidden="true"></span>
+
+          <div class="id-face id-front">
+            <div class="id-top">
+              <span class="id-slot" aria-hidden="true"></span>
+              <span class="id-org"><b aria-hidden="true">◎</b> TechyOps</span>
+              <span class="id-type">Operator</span>
             </div>
-            <div class="id-who">
-              <strong class="id-name">Gabriel Alisasis</strong>
-              <span class="id-role">Systems &amp; Automation</span>
-              <div class="clock-status" id="clockStatus"><b></b><span>Checking availability…</span></div>
+            <span class="id-holo" aria-hidden="true"></span>
+            <div class="id-body">
+              <div class="id-photo">
+                <img src="/images/about/gab-id.webp" srcset="/images/about/gab-id-240.webp 240w, /images/about/gab-id.webp 480w" sizes="132px" width="480" height="480" alt="Gabriel Alisasis" fetchpriority="high" decoding="async" draggable="false" />
+                <span class="id-seal" aria-hidden="true">TO</span>
+              </div>
+              <div class="id-who">
+                <strong class="id-name">Gabriel Alisasis</strong>
+                <span class="id-role">Systems &amp; Automation</span>
+                <div class="clock-status" id="clockStatus"><b></b><span>Checking availability…</span></div>
+              </div>
+            </div>
+            <dl class="id-meta">
+              <div><dt>Based</dt><dd>Batangas, PH</dd></div>
+              <div><dt>Hours</dt><dd>{WORK_HOURS.start} AM–{WORK_HOURS.end - 12} PM ET · Mon–Fri</dd></div>
+              <div><dt>Builds</dt><dd>CRM · Automation · Web</dd></div>
+            </dl>
+            <dl class="id-clocks">
+              <div class="is-home"><dt>Batangas</dt><dd data-clock="Asia/Manila">--:--</dd></div>
+              <div><dt>New York</dt><dd data-clock="America/New_York">--:--</dd></div>
+              <div><dt>Los Angeles</dt><dd data-clock="America/Los_Angeles">--:--</dd></div>
+            </dl>
+            <div class="id-foot" aria-hidden="true">
+              <span class="id-code"></span>
+              <span class="id-no">GA · 2021 → NOW</span>
             </div>
           </div>
-          <dl class="id-meta">
-            <div><dt>Based</dt><dd>Batangas, PH</dd></div>
-            <div><dt>Hours</dt><dd>{WORK_HOURS.start} AM–{WORK_HOURS.end - 12} PM ET · Mon–Fri</dd></div>
-            <div><dt>Builds</dt><dd>CRM · Automation · Web</dd></div>
-          </dl>
-          <dl class="id-clocks">
-            <div class="is-home"><dt>Batangas</dt><dd data-clock="Asia/Manila">--:--</dd></div>
-            <div><dt>New York</dt><dd data-clock="America/New_York">--:--</dd></div>
-            <div><dt>Los Angeles</dt><dd data-clock="America/Los_Angeles">--:--</dd></div>
-          </dl>
-          <div class="id-foot" aria-hidden="true">
-            <span class="id-code"></span>
-            <span class="id-no">GA · 2021 → NOW</span>
+
+          <div class="id-face id-back" inert>
+            <div class="id-top">
+              <span class="id-slot" aria-hidden="true"></span>
+              <span class="id-org"><b aria-hidden="true">◎</b> TechyOps</span>
+              <span class="id-type">Contact</span>
+            </div>
+            <div class="id-back-body">
+              <p class="id-back-title">Let’s talk.</p>
+              <p class="id-back-sub">Reply within 24 hours on weekdays.</p>
+              <ul class="id-links">
+                <li><a href="mailto:gabb.alisasis@gmail.com"><span>Email</span>gabb.alisasis@gmail.com</a></li>
+                <li><a href="https://wa.me/639661989672" target="_blank" rel="noopener"><span>WhatsApp</span>+63 966 198 9672</a></li>
+                <li><a href="https://linkedin.com/in/gab-alisasis" target="_blank" rel="noopener"><span>LinkedIn</span>/in/gab-alisasis</a></li>
+              </ul>
+              <a class="btn btn-primary id-book" href="#contact">Book a free 15-min call →</a>
+            </div>
+            <div class="id-foot">
+              <span class="id-found">If found, hire the owner.</span>
+              <span class="id-code" aria-hidden="true"></span>
+            </div>
           </div>
-        </aside>
         </div>
+        </div>
+        <button class="id-hint" type="button" aria-controls="clockCard"><span aria-hidden="true">↻</span> <span class="id-hint-text">Flip card</span></button>
       </div>
     </div>
   </section>
