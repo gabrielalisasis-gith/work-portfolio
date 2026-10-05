@@ -33,7 +33,6 @@ const workflows = [
     <div class="wrap">
       <span class="sec-kicker reveal">Selected work</span>
       <h1 class="reveal">Systems that are live, <span class="accent">and doing the work.</span></h1>
-      <p class="work-lede reveal">Client builds and long-term engagements. Open any case for the full story.</p>
       <div class="proof-stats work-stats reveal">
         <div class="proof-stat"><strong>4</strong><span>client systems live in production</span></div>
         <div class="proof-stat"><strong>8</strong><span>Klaviyo flows built and delivering</span></div>
@@ -60,15 +59,14 @@ const workflows = [
               </div>
             </div>
             <div class="case-body">
-              <div class="case-meta"><span class="case-client">{c.client}</span><span>{c.sector}</span>{c.ongoing && <span class="ongoing-badge"><b></b>Ongoing</span>}</div>
+              <div class="case-meta"><span class="case-client">{c.client}</span>{c.ongoing && <span class="ongoing-badge"><b></b>Ongoing</span>}</div>
               <h2 class="case-title"><a class="case-link" href={`/work/${c.slug}`}>{c.headline}</a></h2>
               <ul class="case-metrics">
-                {c.metrics.map(([v, l]) => <li><strong>{v}</strong><span>{l}</span></li>)}
+                {c.metrics.slice(0, 2).map(([v, l]) => <li><strong>{v}</strong><span>{l}</span></li>)}
               </ul>
               <div class="case-foot">
-                <div class="bento-tags">{c.stack.map((t) => <span class="bento-pill">{t}</span>)}</div>
                 <div class="case-actions-row">
-                  <span class="case-cta">Read case study →</span>
+                  <span class="case-cta">Case study →</span>
                   <a class="case-visit" href={`https://${c.url}`} target="_blank" rel="noopener">Visit site ↗</a>
                 </div>
               </div>
@@ -85,13 +83,12 @@ const workflows = [
             </div>
             <div class="case-body">
               <div class="case-meta"><span class="case-client">{r.client}</span><span>{r.dates}</span></div>
-              <p class="case-role">{r.role} · {r.sector}</p>
+              <p class="case-role">{r.role}</p>
               <h2 class="case-title"><a class="case-link" href={`https://${r.url}`} target="_blank" rel="noopener">{r.headline}</a></h2>
               <ul class="case-metrics">
-                {r.metrics.map(([v, l]) => <li><strong>{v}</strong><span>{l}</span></li>)}
+                {r.metrics.slice(0, 2).map(([v, l]) => <li><strong>{v}</strong><span>{l}</span></li>)}
               </ul>
               <div class="case-foot">
-                <div class="bento-tags">{r.stack.map((t) => <span class="bento-pill">{t}</span>)}</div>
                 <span class="case-cta">Visit site ↗</span>
               </div>
             </div>

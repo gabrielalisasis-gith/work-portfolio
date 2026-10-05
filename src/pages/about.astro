@@ -1,11 +1,10 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
-import RowLogo from '../components/RowLogo.astro';
 import { brandColor as brand, type Tool } from '../data/brand';
 import { WORK_HOURS } from '../config';
 import {
   siReact, siTypescript, siNextdotjs, siTailwindcss, siShopify, siSupabase, siPostgresql, siPython, siGit,
-  siZapier, siHubspot, siWordpress, siClickup, siTrello, siGooglesheets, siClaude, siHtml5,
+  siZapier, siHubspot, siWordpress, siClickup, siTrello, siGooglesheets, siClaude,
 } from 'simple-icons';
 
 // 24px line icons (lucide-style)
@@ -71,8 +70,6 @@ const faq = [
   { q: 'How do we communicate?', a: 'Email, video calls, and your team’s workspace (Slack, ClickUp, Monday).' },
   { q: 'How fast do you reply?', a: 'Within 24 hours on weekdays.' },
   { q: 'What do you need to start?', a: 'A 15-minute call, then access to the tools involved.' },
-  { q: 'Is this an agency?', a: 'No. You work directly with me.' },
-  { q: 'After launch?', a: 'You own everything. Most clients keep me on for improvements.' },
 ];
 
 // brand logos from Simple Icons (CC0); tools without a published mark get a monogram tile in their brand colour
@@ -92,13 +89,6 @@ const toolbox: [string, Tool[]][] = [
     { name: 'Google Sheets', icon: siGooglesheets }, { name: 'ChatGPT', mono: 'GPT', hex: '10A37F' }, { name: 'Claude', icon: siClaude },
   ]],
 ];
-const byName = Object.fromEntries(toolbox.flatMap(([, l]) => l).map((t) => [t.name, t]));
-// logos for the usage matrix rows
-const rowTool: Record<string, Tool> = {
-  'GoHighLevel': byName['GoHighLevel'], 'Klaviyo': byName['Klaviyo'], 'Shopify Liquid': byName['Shopify Liquid'],
-  'React / TypeScript': byName['React'], 'Supabase / Postgres': byName['Supabase'],
-  'HTML / CSS / JS': { name: 'HTML', icon: siHtml5 }, 'Zapier': byName['Zapier'], 'Git': byName['Git'],
-};
 ---
 <BaseLayout
   title="About – Gabriel Alisasis"
@@ -108,7 +98,6 @@ const rowTool: Record<string, Tool> = {
     <div class="wrap about-hero-grid">
       <div class="about-intro">
         <span class="sec-kicker reveal">About</span>
-        <p class="about-hi reveal">Hi, I’m Gab.</p>
         <h1 class="about-title reveal">You run the business. <span class="accent">I run the systems behind it.</span></h1>
         <p class="about-lead reveal">CRMs, automations and web systems that run without you babysitting them.</p>
         <div class="hero-ctas reveal">
@@ -257,42 +246,7 @@ const rowTool: Record<string, Tool> = {
     <div class="wrap">
       <div class="principles-head reveal">
         <span class="sec-kicker">Stack</span>
-        <h2>The tools, and where they were used.</h2>
-      </div>
-      <div class="matrix-wrap matrix-card reveal">
-        <table class="matrix">
-                  <caption class="sr-only">Which tools were used on which client engagement</caption>
-                  <thead>
-                    <tr>
-                      <th scope="col">Tool</th>
-                      <th scope="col">Cordelia ARC</th>
-                      <th scope="col">Kemp Beauty</th>
-                      <th scope="col">Sell Ready AI</th>
-                      <th scope="col">Orange Ashes</th>
-                      <th scope="col">LiveHowYouWant</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr><th scope="row"><span class="row-tool"><RowLogo t={rowTool['GoHighLevel']} />GoHighLevel</span></th>
-                      <td class="cell-no"><span class="m-dot" aria-hidden="true"></span><span class="sr-only">Not used</span></td><td class="cell-no"><span class="m-dot" aria-hidden="true"></span><span class="sr-only">Not used</span></td><td class="cell-no"><span class="m-dot" aria-hidden="true"></span><span class="sr-only">Not used</span></td><td class="cell-yes"><span class="m-dot" aria-hidden="true"></span><span class="sr-only">Used</span></td><td class="cell-yes"><span class="m-dot" aria-hidden="true"></span><span class="sr-only">Used</span></td></tr>
-                    <tr><th scope="row"><span class="row-tool"><RowLogo t={rowTool['Klaviyo']} />Klaviyo</span></th>
-                      <td class="cell-no"><span class="m-dot" aria-hidden="true"></span><span class="sr-only">Not used</span></td><td class="cell-yes"><span class="m-dot" aria-hidden="true"></span><span class="sr-only">Used</span></td><td class="cell-no"><span class="m-dot" aria-hidden="true"></span><span class="sr-only">Not used</span></td><td class="cell-no"><span class="m-dot" aria-hidden="true"></span><span class="sr-only">Not used</span></td><td class="cell-no"><span class="m-dot" aria-hidden="true"></span><span class="sr-only">Not used</span></td></tr>
-                    <tr><th scope="row"><span class="row-tool"><RowLogo t={rowTool['Shopify Liquid']} />Shopify Liquid</span></th>
-                      <td class="cell-no"><span class="m-dot" aria-hidden="true"></span><span class="sr-only">Not used</span></td><td class="cell-yes"><span class="m-dot" aria-hidden="true"></span><span class="sr-only">Used</span></td><td class="cell-yes"><span class="m-dot" aria-hidden="true"></span><span class="sr-only">Used</span></td><td class="cell-no"><span class="m-dot" aria-hidden="true"></span><span class="sr-only">Not used</span></td><td class="cell-no"><span class="m-dot" aria-hidden="true"></span><span class="sr-only">Not used</span></td></tr>
-                    <tr><th scope="row"><span class="row-tool"><RowLogo t={rowTool['React / TypeScript']} />React / TypeScript</span></th>
-                      <td class="cell-yes"><span class="m-dot" aria-hidden="true"></span><span class="sr-only">Used</span></td><td class="cell-no"><span class="m-dot" aria-hidden="true"></span><span class="sr-only">Not used</span></td><td class="cell-no"><span class="m-dot" aria-hidden="true"></span><span class="sr-only">Not used</span></td><td class="cell-no"><span class="m-dot" aria-hidden="true"></span><span class="sr-only">Not used</span></td><td class="cell-no"><span class="m-dot" aria-hidden="true"></span><span class="sr-only">Not used</span></td></tr>
-                    <tr><th scope="row"><span class="row-tool"><RowLogo t={rowTool['Supabase / Postgres']} />Supabase / Postgres</span></th>
-                      <td class="cell-yes"><span class="m-dot" aria-hidden="true"></span><span class="sr-only">Used</span></td><td class="cell-no"><span class="m-dot" aria-hidden="true"></span><span class="sr-only">Not used</span></td><td class="cell-no"><span class="m-dot" aria-hidden="true"></span><span class="sr-only">Not used</span></td><td class="cell-no"><span class="m-dot" aria-hidden="true"></span><span class="sr-only">Not used</span></td><td class="cell-no"><span class="m-dot" aria-hidden="true"></span><span class="sr-only">Not used</span></td></tr>
-                    <tr><th scope="row"><span class="row-tool"><RowLogo t={rowTool['HTML / CSS / JS']} />HTML / CSS / JS</span></th>
-                      <td class="cell-yes"><span class="m-dot" aria-hidden="true"></span><span class="sr-only">Used</span></td><td class="cell-yes"><span class="m-dot" aria-hidden="true"></span><span class="sr-only">Used</span></td><td class="cell-yes"><span class="m-dot" aria-hidden="true"></span><span class="sr-only">Used</span></td><td class="cell-yes"><span class="m-dot" aria-hidden="true"></span><span class="sr-only">Used</span></td><td class="cell-no"><span class="m-dot" aria-hidden="true"></span><span class="sr-only">Not used</span></td></tr>
-                    <tr><th scope="row"><span class="row-tool"><span class="row-logo is-blank" aria-hidden="true"></span>DNS / DKIM / DMARC</span></th>
-                      <td class="cell-no"><span class="m-dot" aria-hidden="true"></span><span class="sr-only">Not used</span></td><td class="cell-yes"><span class="m-dot" aria-hidden="true"></span><span class="sr-only">Used</span></td><td class="cell-no"><span class="m-dot" aria-hidden="true"></span><span class="sr-only">Not used</span></td><td class="cell-yes"><span class="m-dot" aria-hidden="true"></span><span class="sr-only">Used</span></td><td class="cell-no"><span class="m-dot" aria-hidden="true"></span><span class="sr-only">Not used</span></td></tr>
-                    <tr><th scope="row"><span class="row-tool"><RowLogo t={rowTool['Zapier']} />Zapier</span></th>
-                      <td class="cell-no"><span class="m-dot" aria-hidden="true"></span><span class="sr-only">Not used</span></td><td class="cell-no"><span class="m-dot" aria-hidden="true"></span><span class="sr-only">Not used</span></td><td class="cell-no"><span class="m-dot" aria-hidden="true"></span><span class="sr-only">Not used</span></td><td class="cell-no"><span class="m-dot" aria-hidden="true"></span><span class="sr-only">Not used</span></td><td class="cell-yes"><span class="m-dot" aria-hidden="true"></span><span class="sr-only">Used</span></td></tr>
-                    <tr><th scope="row"><span class="row-tool"><RowLogo t={rowTool['Git']} />Git</span></th>
-                      <td class="cell-yes"><span class="m-dot" aria-hidden="true"></span><span class="sr-only">Used</span></td><td class="cell-yes"><span class="m-dot" aria-hidden="true"></span><span class="sr-only">Used</span></td><td class="cell-yes"><span class="m-dot" aria-hidden="true"></span><span class="sr-only">Used</span></td><td class="cell-no"><span class="m-dot" aria-hidden="true"></span><span class="sr-only">Not used</span></td><td class="cell-no"><span class="m-dot" aria-hidden="true"></span><span class="sr-only">Not used</span></td></tr>
-                  </tbody>
-                </table>
+        <h2>The tools I build with.</h2>
       </div>
       <div class="toolbox reveal">
         {toolbox.map(([group, list]) => (

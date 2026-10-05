@@ -15,6 +15,12 @@ gsap.registerPlugin(ScrollTrigger);
   var yearEl = $('#year'); if (yearEl) yearEl.textContent = new Date().getFullYear();
 
   /* ---------- mobile nav ---------- */
+  // top bar gets a hairline border once the page scrolls
+  var topbar = $('header');
+  if (topbar) {
+    var onScroll = function () { topbar.classList.toggle('is-scrolled', window.scrollY > 8); };
+    onScroll(); window.addEventListener('scroll', onScroll, { passive: true });
+  }
   var navToggle = $('#navToggle'), navLinks = $('#navLinks');
   (function () {
     var headerEl = $('header');

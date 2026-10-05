@@ -1,9 +1,0 @@
----
-// small brand mark for a row in the About page tool matrix
-import { brandColor, type Tool } from '../data/brand';
-interface Props { t: Tool }
-const { t } = Astro.props;
----
-<span class="row-logo" style={`--brand:${brandColor(t)}`} aria-hidden="true">
-  {t.icon ? <svg viewBox="0 0 24 24"><path d={t.icon.path} /></svg> : <span class="tool-mono">{t.mono}</span>}
-</span>

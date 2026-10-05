@@ -1,5 +1,5 @@
 ---
-import '@fontsource-variable/inter-tight';
+import '@fontsource-variable/plus-jakarta-sans';
 import '@fontsource-variable/inter';
 import '@fontsource-variable/jetbrains-mono';
 import '../styles/global.css';
@@ -23,7 +23,7 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
 <meta name="description" content={description}>
 <meta name="author" content="Gabriel Alisasis">
 <link rel="canonical" href={canonical}>
-<meta name="theme-color" content="#16120F">
+<meta name="theme-color" content="#FFFFFF">
 
 <meta property="og:type" content="website">
 <meta property="og:title" content={title}>
@@ -71,11 +71,6 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
         <span class="sec-kicker">Get in touch</span>
         <h2>Let's automate your operations.</h2>
         <p>Tell me what’s slowing your business down. I reply personally.</p>
-        <ol class="contact-steps">
-          <li><b>1</b><span><strong>Send the form</strong></span></li>
-          <li><b>2</b><span><strong>Free 15-minute call</strong></span></li>
-          <li><b>3</b><span><strong>A clear plan and quote</strong></span></li>
-        </ol>
         <div class="contact-direct">
           <span>Prefer to message directly?</span>
           <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>
@@ -115,7 +110,7 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
 <footer>
   <div class="wrap">
     <p>© <span id="year">2026</span> Gabriel Alisasis</p>
-    <p>Operations Support &amp; Marketing Automation</p>
+    <p class="foot-links"><a href="mailto:gabb.alisasis@gmail.com">Email</a><a href="https://linkedin.com/in/gab-alisasis" target="_blank" rel="noopener">LinkedIn</a><a href="https://wa.me/639661989672" target="_blank" rel="noopener">WhatsApp</a></p>
   </div>
 </footer>
 </div>
