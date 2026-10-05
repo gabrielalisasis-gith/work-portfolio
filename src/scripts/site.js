@@ -14,32 +14,6 @@ gsap.registerPlugin(ScrollTrigger);
   /* ---------- year ---------- */
   var yearEl = $('#year'); if (yearEl) yearEl.textContent = new Date().getFullYear();
 
-  /* ---------- theme ---------- */
-  var root = document.documentElement, themeBtn = $('#themeToggle'), themeIcon = $('#themeIcon');
-  var SUN = '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>';
-  var MOON = '<path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/>';
-  function currentTheme() {
-    var set = root.getAttribute('data-theme');
-    if (set) return set;
-    return window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
-  }
-  function paintThemeIcon() {
-    if (themeIcon) themeIcon.innerHTML = currentTheme() === 'light' ? MOON : SUN;
-    if (themeBtn) themeBtn.setAttribute('aria-label',
-      currentTheme() === 'light' ? 'Switch to dark theme' : 'Switch to light theme');
-  }
-  try {
-    var saved = localStorage.getItem('ga-theme');
-    if (saved === 'light' || saved === 'dark') root.setAttribute('data-theme', saved);
-  } catch (e) { }
-  paintThemeIcon();
-  if (themeBtn) themeBtn.addEventListener('click', function () {
-    var next = currentTheme() === 'light' ? 'dark' : 'light';
-    root.setAttribute('data-theme', next);
-    try { localStorage.setItem('ga-theme', next); } catch (e) { }
-    paintThemeIcon();
-  });
-
   /* ---------- mobile nav ---------- */
   var navToggle = $('#navToggle'), navLinks = $('#navLinks');
   (function () {
@@ -398,7 +372,7 @@ gsap.registerPlugin(ScrollTrigger);
       '</defs><g mask="url(#idFade)">' +
         '<path class="s-edge" fill="none" stroke="rgba(0,0,0,.32)" stroke-width="25"/>' +
         '<path id="idStrapPath" fill="none" stroke="url(#idWeave)" stroke-width="22"/>' +
-        '<text font-family="JetBrains Mono, monospace" font-size="8.5" font-weight="700" letter-spacing="2" fill="rgba(255,255,255,.88)" dominant-baseline="central">' +
+        '<text font-family="JetBrains Mono Variable, monospace" font-size="8.5" font-weight="700" letter-spacing="2" fill="rgba(255,255,255,.88)" dominant-baseline="central">' +
           '<textPath href="#idStrapPath" startOffset="4">' + label + '</textPath></text>' +
       '</g></svg>');
     wrap.insertAdjacentHTML('beforeend',
@@ -674,8 +648,7 @@ gsap.registerPlugin(ScrollTrigger);
     { k: 'Link', t: 'Open cordeliaarc.com', href: 'https://cordeliaarc.com', ext: true },
     { k: 'Link', t: 'Open kempbeauty.com', href: 'https://kempbeauty.com', ext: true },
     { k: 'Link', t: 'Open sellready.ai', href: 'https://sellready.ai', ext: true },
-    { k: 'Link', t: 'Open shop.orangeashes.com', href: 'https://shop.orangeashes.com', ext: true },
-    { k: 'Theme', t: 'Toggle light / dark theme', action: 'theme' }
+    { k: 'Link', t: 'Open shop.orangeashes.com', href: 'https://shop.orangeashes.com', ext: true }
   ];
   function fuzzy(q, s) {
     q = q.toLowerCase(); s = s.toLowerCase();
@@ -719,7 +692,6 @@ gsap.registerPlugin(ScrollTrigger);
   }
   function runItem(it) {
     if (!it) return;
-    if (it.action === 'theme') { closeCmdk(); if (themeBtn) themeBtn.click(); return; }
     closeCmdk();
     if (it.ext) { window.open(it.href, it.href.indexOf('http') === 0 ? '_blank' : '_self', 'noopener'); return; }
     if (it.href.charAt(0) === '#') {

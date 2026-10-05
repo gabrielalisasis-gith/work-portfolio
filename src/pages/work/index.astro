@@ -16,17 +16,13 @@ const countFor = (f: string) => f === 'all' ? all.length : all.filter((c) => c.t
 
 const workflows = [
   { img: 'workflow-edc-ghl', w: 1200, h: 633, tag: 'GoHighLevel', cls: 'tag-trigger',
-    title: 'EDC time-slot form → shuttle & hotel routing → Google Sheets',
-    body: 'Guests submit a form with their arrival time slot. The workflow tags the contact, reads the notes field to work out which shuttle and hotel package applies, and writes the result into the ops Google Sheet so the ground team has it without asking.' },
+    title: 'EDC time-slot form → shuttle & hotel routing → Google Sheets' },
   { img: 'workflow-multi-venue', w: 1200, h: 674, tag: 'Zapier', cls: 'tag-action',
-    title: 'Multi-venue event booking → GoHighLevel contact sync',
-    body: 'A new booking arrives from the events calendar and splits into six paths – one per venue across the Vegas and Miami locations. Each path creates or updates the right contact in GoHighLevel with venue-specific tags, so reporting stays clean per property.' },
+    title: 'Multi-venue event booking → GoHighLevel contact sync' },
   { img: 'workflow-woocommerce', w: 1200, h: 677, tag: 'Zapier', cls: 'tag-action',
-    title: 'WooCommerce order → shuttle or hotel opportunity',
-    body: 'Fires the moment a customer buys a shuttle or hotel package. The order splits on what was purchased, and each path opens the matching opportunity in the CRM pipeline – so sales sees the deal without anyone re-entering it.' },
+    title: 'WooCommerce order → shuttle or hotel opportunity' },
   { img: 'workflow-inbox-ai', w: 1200, h: 677, tag: 'Zapier + AI', cls: 'tag-trigger',
-    title: 'Inbox monitoring → AI affiliate detection → CRM update',
-    body: 'Watches a Gmail inbox and splits mail on whether the subject mentions an affiliate. Affiliate email goes to an AI step that extracts the details, which then update the contact record in the CRM automatically.' },
+    title: 'Inbox monitoring → AI affiliate detection → CRM update' },
 ];
 ---
 <BaseLayout
@@ -37,7 +33,7 @@ const workflows = [
     <div class="wrap">
       <span class="sec-kicker reveal">Selected work</span>
       <h1 class="reveal">Systems that are live, <span class="accent">and doing the work.</span></h1>
-      <p class="work-lede reveal">Client builds and long-term engagements across GoHighLevel, Klaviyo, Shopify and custom software. The case studies open into the full record — what was broken, how I diagnosed it, what shipped, and the work that has continued since.</p>
+      <p class="work-lede reveal">Client builds and long-term engagements. Open any case for the full story.</p>
       <div class="proof-stats work-stats reveal">
         <div class="proof-stat"><strong>4</strong><span>client systems live in production</span></div>
         <div class="proof-stat"><strong>8</strong><span>Klaviyo flows built and delivering</span></div>
@@ -66,7 +62,6 @@ const workflows = [
             <div class="case-body">
               <div class="case-meta"><span class="case-client">{c.client}</span><span>{c.sector}</span>{c.ongoing && <span class="ongoing-badge"><b></b>Ongoing</span>}</div>
               <h2 class="case-title"><a class="case-link" href={`/work/${c.slug}`}>{c.headline}</a></h2>
-              <p class="case-summary">{c.summary}</p>
               <ul class="case-metrics">
                 {c.metrics.map(([v, l]) => <li><strong>{v}</strong><span>{l}</span></li>)}
               </ul>
@@ -92,7 +87,6 @@ const workflows = [
               <div class="case-meta"><span class="case-client">{r.client}</span><span>{r.dates}</span></div>
               <p class="case-role">{r.role} · {r.sector}</p>
               <h2 class="case-title"><a class="case-link" href={`https://${r.url}`} target="_blank" rel="noopener">{r.headline}</a></h2>
-              <p class="case-summary">{r.summary}</p>
               <ul class="case-metrics">
                 {r.metrics.map(([v, l]) => <li><strong>{v}</strong><span>{l}</span></li>)}
               </ul>
@@ -115,7 +109,7 @@ const workflows = [
         <div>
           <span class="sec-kicker">Automation library</span>
           <h2>Inside the automations</h2>
-          <p>Real builds pulled straight from GoHighLevel and Zapier – the trigger, the branching logic, and where the data ends up. Click any screenshot to enlarge.</p>
+          <p>Real GoHighLevel and Zapier builds. Click to enlarge.</p>
         </div>
       </div>
       <div class="wf-grid">
@@ -127,7 +121,6 @@ const workflows = [
             <div class="wf-tile-body">
               <div class="wf-meta"><span class="n">{String(n + 1).padStart(2, '0')} / 04</span><span class={`tag ${f.cls}`}>{f.tag}</span></div>
               <h3>{f.title}</h3>
-              <p>{f.body}</p>
             </div>
           </article>
         ))}
@@ -142,7 +135,6 @@ const workflows = [
         <div>
           <span class="sec-kicker">Selected projects</span>
           <h2>Things I've built</h2>
-          <p>Filter by discipline – the mix runs from CRM automation through to machine learning.</p>
         </div>
       </div>
 
@@ -161,10 +153,6 @@ const workflows = [
           <div>
             <h3>Experience Vegas</h3>
             <span class="loc">Destination ticketing platform · USA</span>
-            <ul>
-              <li>Developed workflow automations that streamlined customer journeys.</li>
-              <li>Managed weekly event listings and promotional content for Las Vegas events.</li>
-            </ul>
           </div>
           <div class="project-tags"><span class="tag">GoHighLevel</span><span class="tag">Zapier</span><span class="tag">Ops</span></div>
         </div>
@@ -174,10 +162,6 @@ const workflows = [
           <div>
             <h3>Vision Drive</h3>
             <span class="loc">AI intelligent transport system · Philippines</span>
-            <ul>
-              <li>Built real-time analytics dashboards using HTML, CSS, JavaScript, Firebase, and Chart.js.</li>
-              <li>Developed live vehicle classification and traffic monitoring visualizations.</li>
-            </ul>
           </div>
           <div class="project-tags"><span class="tag">JavaScript</span><span class="tag">Firebase</span><span class="tag">Chart.js</span></div>
         </div>
@@ -187,10 +171,6 @@ const workflows = [
           <div>
             <h3>Hybrid Fraud Detection System</h3>
             <span class="loc">Capstone project · Philippines</span>
-            <ul>
-              <li>Developed a fraud detection framework using Python, statistical anomaly detection, and machine learning.</li>
-              <li>Applied Z-score analysis and Benford's Law to flag suspicious patterns in insurance claim data.</li>
-            </ul>
           </div>
           <div class="project-tags"><span class="tag">Python</span><span class="tag">ML</span><span class="tag">Statistics</span></div>
         </div>
@@ -200,10 +180,6 @@ const workflows = [
           <div>
             <h3>University Public Dashboard</h3>
             <span class="loc">Research portal · Philippines</span>
-            <ul>
-              <li>Built a centralized research portal using Next.js, React.js, Node.js, and Tailwind CSS.</li>
-              <li>Integrated APIs and advanced search for improved research accessibility.</li>
-            </ul>
           </div>
           <div class="project-tags"><span class="tag">Next.js</span><span class="tag">React</span><span class="tag">Node.js</span><span class="tag">Tailwind</span></div>
         </div>

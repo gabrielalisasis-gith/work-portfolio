@@ -1,4 +1,7 @@
 ---
+import '@fontsource-variable/inter-tight';
+import '@fontsource-variable/inter';
+import '@fontsource-variable/jetbrains-mono';
 import '../styles/global.css';
 import Header from '../components/Header.astro';
 import CommandPalette from '../components/CommandPalette.astro';
@@ -20,7 +23,7 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
 <meta name="description" content={description}>
 <meta name="author" content="Gabriel Alisasis">
 <link rel="canonical" href={canonical}>
-<meta name="theme-color" content="#0E1430">
+<meta name="theme-color" content="#16120F">
 
 <meta property="og:type" content="website">
 <meta property="og:title" content={title}>
@@ -36,9 +39,6 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
 
 <script is:inline>document.documentElement.classList.add('js');</script>
 
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,400..800;1,400..800&family=JetBrains+Mono:wght@500;600;700&family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 
 <script type="application/ld+json">
 {
@@ -70,11 +70,11 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
       <div class="contact-intro">
         <span class="sec-kicker">Get in touch</span>
         <h2>Let's automate your operations.</h2>
-        <p>GoHighLevel build, CRM cleanup, deliverability rescue, or full operations management — tell me what's slowing your business down and I'll reply personally with next steps.</p>
+        <p>Tell me what’s slowing your business down. I reply personally.</p>
         <ol class="contact-steps">
-          <li><b>1</b><span><strong>Send the form</strong>Two minutes, no prep needed.</span></li>
-          <li><b>2</b><span><strong>Free 15-minute audit call</strong>We map what's still manual today.</span></li>
-          <li><b>3</b><span><strong>A clear plan and quote</strong>What I'd build, and what it will change.</span></li>
+          <li><b>1</b><span><strong>Send the form</strong></span></li>
+          <li><b>2</b><span><strong>Free 15-minute call</strong></span></li>
+          <li><b>3</b><span><strong>A clear plan and quote</strong></span></li>
         </ol>
         <div class="contact-direct">
           <span>Prefer to message directly?</span>
