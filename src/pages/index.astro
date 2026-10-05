@@ -1,37 +1,29 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 
-const steps = [
-  {
-    title: 'New lead: <em data-name>Sarah M.</em>',
-    sub: 'Website form · Facebook ad',
-    time: '0.0s',
-    icon: '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M19 8v6M22 11h-6"/>',
-  },
-  {
-    title: 'Tagged &amp; scored',
-    sub: '<span class="demo-chip">hot-lead</span><span class="demo-chip">quote-request</span>',
-    time: '0.4s',
-    icon: '<path d="M20.6 13.4l-7.2 7.2a2 2 0 0 1-2.8 0L3 13V3h10l7.6 7.6a2 2 0 0 1 0 2.8z"/><circle cx="7.5" cy="7.5" r="1.5"/>',
-  },
-  {
-    title: 'SMS sent',
-    sub: '“Hi <span data-first>Sarah</span>, thanks! Pick a time for your free quote…”',
-    time: '1.1s',
-    icon: '<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>',
-  },
-  {
-    title: 'Call booked',
-    sub: 'Tue 10:30 AM · calendar synced',
-    time: '4m 12s',
-    icon: '<rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>',
-  },
-  {
-    title: 'Pipeline updated',
-    sub: 'Moved to <strong>Booked</strong> · owner notified',
-    time: '4m 13s',
-    icon: '<rect x="3" y="3" width="5" height="18" rx="1"/><rect x="10" y="3" width="5" height="12" rx="1"/><rect x="17" y="3" width="4" height="8" rx="1"/>',
-  },
+// GoHighLevel "speed-to-lead" pattern: instant SMS + email + team alert, wait, then branch on reply
+const I = {
+  bolt: '<path d="M13 2 3 14h9l-1 8 10-12h-9z"/>',
+  stack: '<path d="m12 2 9 5-9 5-9-5 9-5z"/><path d="m3 12 9 5 9-5M3 17l9 5 9-5"/>',
+  clock: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+  split: '<path d="M6 3v6a6 6 0 0 0 6 6h0a6 6 0 0 1 6 6v0M6 9a6 6 0 0 1 6 6"/><circle cx="6" cy="3" r="1"/><circle cx="18" cy="21" r="1"/>',
+  spark: '<path d="M12 3l1.8 4.7L18.5 9.5l-4.7 1.8L12 16l-1.8-4.7L5.5 9.5l4.7-1.8z"/><path d="M19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8z"/>',
+  cal: '<rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>',
+  funnel: '<path d="M3 4h18l-7 8v6l-4 2v-8z"/>',
+  msg: '<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>',
+  task: '<path d="M9 11l3 3 8-8"/><path d="M20 12v7a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h9"/>',
+};
+const nodes = [
+  { id: 'trigger', t: 'trigger', icon: 'bolt', kind: 'Trigger', label: 'Lead form submitted', sub: '<span data-src>FB Lead Ad</span> · <b data-name>Sarah M.</b>' },
+  { id: 'actions', t: 'action', icon: 'stack', kind: 'Actions · 4', label: 'Tag, SMS, email, alert team', sub: '<span class="wf-mini">hot-lead</span><span class="wf-mini">+ 3 more</span>' },
+  { id: 'wait', t: 'wait', icon: 'clock', kind: 'Wait', label: '5 minutes', sub: 'or until reply' },
+  { id: 'cond', t: 'cond', icon: 'split', kind: 'If / Else', label: 'Replied to SMS?', sub: 'Yes → AI · No → nurture' },
+  { id: 'ai', t: 'ai', lane: 'yes', icon: 'spark', kind: 'Conversation AI', label: 'Qualify the lead', sub: 'budget · timeline · service' },
+  { id: 'nsms', t: 'action', lane: 'no', icon: 'msg', kind: 'Action', label: 'Send booking link', sub: 'SMS + email' },
+  { id: 'book', t: 'book', lane: 'yes', icon: 'cal', kind: 'Calendar', label: 'Book appointment', sub: 'auto-assign owner' },
+  { id: 'nwait', t: 'wait', lane: 'no', icon: 'clock', kind: 'Wait', label: '1 hour', sub: 'no reply yet' },
+  { id: 'booked', t: 'book', lane: 'yes', icon: 'funnel', kind: 'Pipeline', label: 'Move to Booked', sub: 'owner notified' },
+  { id: 'task', t: 'task', lane: 'no', icon: 'task', kind: 'Task', label: 'Call the lead', sub: 'assigned · due today' },
 ];
 ---
 <BaseLayout
@@ -51,38 +43,44 @@ const steps = [
       </div>
 
       <div class="hero-demo">
-        <div class="demo" id="demo" role="img" aria-label="Example automation: a new lead is tagged, sent an SMS, booked into the calendar and moved in the sales pipeline, with no manual steps.">
+        <div class="demo" id="demo" role="img" aria-label="Example GoHighLevel speed-to-lead workflow: a new lead gets an instant SMS, email and team alert; after five minutes it branches on whether they replied. Replies are qualified by Conversation AI and booked into the calendar; silent leads get a booking link and then a call task.">
           <div class="demo-window" aria-hidden="true">
             <div class="demo-bar">
               <span class="demo-dots"><i></i><i></i><i></i></span>
-              <span class="demo-title">Lead → booking workflow</span>
-              <span class="demo-live"><b></b>Running</span>
+              <span class="demo-title">Speed-to-lead · FB &amp; website leads</span>
+              <span class="demo-live"><b></b>Published</span>
             </div>
             <div class="demo-kpis">
-              <div><span>Leads handled</span><strong id="demoCount">1,284</strong></div>
-              <div><span>First reply</span><strong>&lt; 60s</strong></div>
-              <div><span>Manual steps</span><strong>0</strong></div>
+              <div><span>Leads today</span><strong id="demoCount">1,284</strong></div>
+              <div><span>First reply</span><strong>38s</strong></div>
+              <div><span>Booked rate</span><strong id="demoRate">64%</strong></div>
             </div>
-            <ol class="demo-steps" id="demoSteps">
-              {steps.map((s) => (
-                <li class="demo-step">
-                  <span class="demo-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" set:html={s.icon} /></span>
-                  <span class="demo-txt"><strong set:html={s.title} /><small set:html={s.sub} /></span>
-                  <span class="demo-time">{s.time}</span>
-                </li>
+            <div class="wf" id="wf">
+              <svg class="wf-lines" xmlns="http://www.w3.org/2000/svg">
+                {['s0','s1','s2','y0','y1','y2','n0','n1','n2'].map((k) => <path class={`wf-track ${k[0] === 'y' ? 'is-yes' : k[0] === 'n' ? 'is-no' : ''}`} data-seg={k} />)}
+                {['s0','s1','s2','y0','y1','y2','n0','n1','n2'].map((k) => <path class={`wf-fill ${k[0] === 'n' ? 'is-no' : k[0] === 'y' ? 'is-yes' : ''}`} data-fill={k} />)}
+                <circle class="wf-halo" r="10" cx="-20" cy="-20" />
+                <circle class="wf-token" r="4.5" cx="-20" cy="-20" />
+              </svg>
+              {nodes.map((n) => (
+                <div class={`wf-node t-${n.t}${n.lane ? ' lane-' + n.lane : ' is-main'}`} data-node={n.id}>
+                  <span class="wf-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" set:html={I[n.icon]} /></span>
+                  <span class="wf-txt"><small>{n.kind}</small><strong>{n.label}</strong><em set:html={n.sub} /></span>
+                  <i class="wf-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg></i>
+                </div>
               ))}
-            </ol>
-          </div>
-          <div class="demo-toast demo-toast--booking" aria-hidden="true">
-            <span class="demo-toast-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>
-            <span><strong>New booking</strong><small><span data-name>Sarah M.</span> · Tue 10:30 AM</small></span>
-          </div>
-          <div class="demo-toast demo-toast--sms" aria-hidden="true">
-            <span class="demo-toast-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span>
-            <span><strong>SMS delivered</strong><small>Replied in 38 seconds</small></span>
+              <span class="wf-tag is-yes" data-tag="yes">Yes</span>
+              <span class="wf-tag is-no" data-tag="no">No</span>
+              <div class="wf-bubble b-out" data-bubble="actions">Hi <span data-first>Sarah</span>, thanks for reaching out! Is now a good time for a quick call?</div>
+              <div class="wf-bubble b-in" data-bubble="ai"><b>Lead</b>Yes! Need a quote for Tuesday morning.</div>
+              <div class="wf-bubble b-chip" data-bubble="book"><span class="dot is-pos"></span>Tue 10:30 AM · Booked</div>
+              <div class="wf-bubble b-chip" data-bubble="booked"><span class="dot is-pos"></span>Pipeline → Booked · owner notified</div>
+              <div class="wf-bubble b-out" data-bubble="nsms">Here’s my calendar, pick any slot: techyops.link/book</div>
+              <div class="wf-bubble b-chip" data-bubble="task"><span class="dot is-amber"></span>Call <span data-first>Sarah</span> · due today</div>
+            </div>
           </div>
         </div>
-        <p class="demo-cap">A simplified example of the lead-to-booking workflows I build in GoHighLevel. Simulated data.</p>
+        <p class="demo-cap">A real speed-to-lead workflow pattern I build in GoHighLevel. Simulated data.</p>
       </div>
     </div>
   </section>

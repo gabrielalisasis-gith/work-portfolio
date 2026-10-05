@@ -173,48 +173,126 @@ gsap.registerPlugin(ScrollTrigger);
     stats.forEach(function (el) { sio.observe(el); });
   }
 
-  /* ---------- hero: live automation demo ---------- */
+  /* ---------- hero: live speed-to-lead workflow (loops forever) ---------- */
   (function () {
-    var demo = $('#demo'); if (!demo) return;
-    var steps = $$('.demo-step', demo);
-    var toastSms = $('.demo-toast--sms', demo), toastBook = $('.demo-toast--booking', demo);
-    var countEl = $('#demoCount');
-    var leads = [['Sarah M.', 'Sarah'], ['James T.', 'James'], ['Priya K.', 'Priya'], ['Marco D.', 'Marco']];
-    var lead = 0, count = 1284, active = -1, timer = null, running = false;
+    var demo = $('#demo'), wf = $('#wf'); if (!demo || !wf) return;
+    var svg = $('.wf-lines', wf), token = $('.wf-token', wf), halo = $('.wf-halo', wf);
+    var node = function (id) { return $('[data-node="' + id + '"]', wf); };
+    var countEl = $('#demoCount'), rateEl = $('#demoRate');
+    // segment -> [from node, to node]
+    var SEG = { s0: ['trigger', 'actions'], s1: ['actions', 'wait'], s2: ['wait', 'cond'], y0: ['cond', 'ai'], y1: ['ai', 'book'], y2: ['book', 'booked'],
+      n0: ['cond', 'nsms'], n1: ['nsms', 'nwait'], n2: ['nwait', 'task'] };
+    var leads = [['Sarah M.', 'Sarah', 'FB Lead Ad', true], ['Mike R.', 'Mike', 'Website form', false], ['Priya K.', 'Priya', 'Google Ads', true],
+      ['Daniel T.', 'Daniel', 'FB Lead Ad', true], ['Ana L.', 'Ana', 'Website form', false]];
+    var count = 1284, booked = 822, li = 0, running = false;
 
-    function paint(n) {
-      steps.forEach(function (s, i) {
-        s.classList.toggle('is-done', i < n);
-        s.classList.toggle('is-active', i === n);
+    // connectors are measured from the laid-out nodes, so they follow any screen size
+    function layout() {
+      var W = wf.clientWidth, H = wf.clientHeight;
+      svg.setAttribute('viewBox', '0 0 ' + W + ' ' + H);
+      Object.keys(SEG).forEach(function (k) {
+        var A = node(SEG[k][0]), B = node(SEG[k][1]);
+        var x1 = A.offsetLeft + A.offsetWidth / 2, y1 = A.offsetTop + A.offsetHeight;
+        var x2 = B.offsetLeft + B.offsetWidth / 2, y2 = B.offsetTop, d;
+        if (Math.abs(x1 - x2) < 1) d = 'M' + x1 + ' ' + y1 + ' V' + y2;
+        else {
+          var ym = (y1 + y2) / 2, r = 10, dir = x2 > x1 ? 1 : -1;
+          d = 'M' + x1 + ' ' + y1 + ' V' + (ym - r) + ' Q' + x1 + ' ' + ym + ' ' + (x1 + dir * r) + ' ' + ym +
+            ' H' + (x2 - dir * r) + ' Q' + x2 + ' ' + ym + ' ' + x2 + ' ' + (ym + r) + ' V' + y2;
+        }
+        $('[data-seg="' + k + '"]', svg).setAttribute('d', d);
+        var f = $('[data-fill="' + k + '"]', svg); f.setAttribute('d', d);
+        var len = f.getTotalLength(); f.style.strokeDasharray = len; if (!f.dataset.on) f.style.strokeDashoffset = len;
       });
-      demo.style.setProperty('--progress', Math.max(0, Math.min(1, n / (steps.length - 1))));
-      toastSms.classList.toggle('show', n > 2);
-      toastBook.classList.toggle('show', n > 3);
+      ['yes', 'no'].forEach(function (k) {
+        var p = $('[data-seg="' + (k === 'yes' ? 'y0' : 'n0') + '"]', svg), pt = p.getPointAtLength(p.getTotalLength() * 0.5);
+        var t = $('[data-tag="' + k + '"]', wf); t.style.left = pt.x + 'px'; t.style.top = pt.y + 'px';
+      });
     }
-    if (reduce) { paint(steps.length); return; }
 
-    function tick() {
-      active++;
-      if (active > steps.length + 2) {
-        active = -1; lead = (lead + 1) % leads.length; count++;
-        demo.classList.add('is-resetting');
-        timer = setTimeout(function () {
-          $$('[data-name]', demo).forEach(function (el) { el.textContent = leads[lead][0]; });
-          $$('[data-first]', demo).forEach(function (el) { el.textContent = leads[lead][1]; });
-          if (countEl) countEl.textContent = count.toLocaleString('en-US');
-          paint(-1);
-          demo.classList.remove('is-resetting');
-          timer = setTimeout(tick, 500);
-        }, 450);
-        return;
-      }
-      paint(active);
-      timer = setTimeout(tick, 1100);
+    // time only advances while running, so pausing offscreen freezes the scene mid-step
+    function wait(ms) {
+      return new Promise(function (res) {
+        var last = performance.now();
+        (function loop(now) { if (running) ms -= now - last; last = now; ms <= 0 ? res() : requestAnimationFrame(loop); })(last);
+      });
     }
-    function start() { if (!running) { running = true; timer = setTimeout(tick, 700); } }
-    function stop() { running = false; clearTimeout(timer); }
-    paint(-1);
-    new IntersectionObserver(function (en) { en[0].isIntersecting ? start() : stop(); }).observe(demo);
+    function travel(k, ms) {
+      var f = $('[data-fill="' + k + '"]', svg), len = f.getTotalLength(), t = 0;
+      return new Promise(function (res) {
+        var last = performance.now();
+        (function loop(now) {
+          if (running) t += (now - last) / ms; last = now;
+          var e = Math.min(1, t), q = e < .5 ? 2 * e * e : 1 - Math.pow(-2 * e + 2, 2) / 2, pt = f.getPointAtLength(len * q);
+          token.setAttribute('cx', pt.x); token.setAttribute('cy', pt.y); halo.setAttribute('cx', pt.x); halo.setAttribute('cy', pt.y);
+          f.style.strokeDashoffset = len * (1 - q); f.dataset.on = '1';
+          e >= 1 ? res() : requestAnimationFrame(loop);
+        })(last);
+      });
+    }
+    function bubble(id, on) {
+      var b = $('[data-bubble="' + id + '"]', wf); if (!b) return;
+      if (on) {
+        var n = node(id), right = !n.classList.contains('lane-no');
+        b.style.top = (n.offsetTop - b.offsetHeight + 6) + 'px';
+        b.style.left = right ? Math.min(wf.clientWidth - b.offsetWidth - 6, n.offsetLeft + n.offsetWidth * 0.55) + 'px'
+          : Math.max(6, n.offsetLeft + n.offsetWidth * 0.45 - b.offsetWidth) + 'px';
+      }
+      b.classList.toggle('show', on);
+    }
+    async function step(id, ms) {
+      var n = node(id); n.classList.add('is-active'); bubble(id, true);
+      await wait(ms);
+      n.classList.remove('is-active'); n.classList.add('is-done');
+      setTimeout(function () { bubble(id, false); }, 900);
+    }
+    function reset() {
+      $$('.wf-node', wf).forEach(function (n) { n.classList.remove('is-active', 'is-done'); });
+      $$('.wf-fill', svg).forEach(function (f) { delete f.dataset.on; f.style.strokeDashoffset = f.getTotalLength(); });
+      $$('.wf-bubble', wf).forEach(function (b) { b.classList.remove('show'); });
+      wf.classList.remove('go-yes', 'go-no');
+      token.setAttribute('cx', -20); halo.setAttribute('cx', -20);
+    }
+    function setLead(L) {
+      $$('[data-name]', wf).forEach(function (el) { el.textContent = L[0]; });
+      $$('[data-first]', wf).forEach(function (el) { el.textContent = L[1]; });
+      $$('[data-src]', wf).forEach(function (el) { el.textContent = L[2]; });
+    }
+    async function run() {
+      for (;;) {
+        var L = leads[li]; setLead(L);
+        await step('trigger', 700);
+        if (countEl) countEl.textContent = (++count).toLocaleString('en-US');
+        await travel('s0', 520); await step('actions', 1300);
+        await travel('s1', 480); await step('wait', 800);
+        await travel('s2', 480); await step('cond', 650);
+        var y = L[3], P = y ? ['y', 'ai', 'book', 'booked'] : ['n', 'nsms', 'nwait', 'task'];
+        wf.classList.add(y ? 'go-yes' : 'go-no');
+        await travel(P[0] + '0', 700); await step(P[1], 1300);
+        await travel(P[0] + '1', 480); await step(P[2], y ? 1100 : 800);
+        await travel(P[0] + '2', 480); await step(P[3], 1200);
+        if (y) booked++;
+        if (rateEl) rateEl.textContent = Math.round((booked / count) * 100) + '%';
+        await wait(1100);
+        wf.classList.add('is-resetting'); await wait(380);
+        reset(); wf.classList.remove('is-resetting');
+        li = (li + 1) % leads.length;
+        await wait(350);
+      }
+    }
+
+    layout();
+    if ('ResizeObserver' in window) new ResizeObserver(layout).observe(wf);
+    if (reduce) { // static, completed "yes" path
+      ['trigger', 'actions', 'wait', 'cond', 'ai', 'book', 'booked'].forEach(function (id) { node(id).classList.add('is-done'); });
+      ['s0', 's1', 's2', 'y0', 'y1', 'y2'].forEach(function (k) { var f = $('[data-fill="' + k + '"]', svg); f.dataset.on = '1'; f.style.strokeDashoffset = 0; });
+      wf.classList.add('go-yes');
+      return;
+    }
+    var started = false;
+    function start() { running = true; if (!started) { started = true; run(); } }
+    function stop() { running = false; }
+    new IntersectionObserver(function (en) { en[0].isIntersecting && !document.hidden ? start() : stop(); }).observe(demo);
     document.addEventListener('visibilitychange', function () {
       if (document.hidden) stop(); else if (demo.getBoundingClientRect().top < window.innerHeight) start();
     });
