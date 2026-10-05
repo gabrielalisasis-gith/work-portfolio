@@ -1,9 +1,9 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="TechyOps">
   <defs>
     <linearGradient id="to-mark" x1="8" y1="6" x2="56" y2="58" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#60A5FA"/>
-      <stop offset="0.5" stop-color="#2563EB"/>
-      <stop offset="1" stop-color="#1E40AF"/>
+      <stop offset="0" stop-color="#93B4FF"/>
+      <stop offset="0.5" stop-color="#3B6CF6"/>
+      <stop offset="1" stop-color="#1E3A8A"/>
     </linearGradient>
   </defs>
   <g fill="none" stroke="url(#to-mark)" stroke-linecap="round">
