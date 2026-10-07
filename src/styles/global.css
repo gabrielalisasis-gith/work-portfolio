@@ -1343,34 +1343,31 @@
   .mascot-btn:focus-visible{ outline:2px solid var(--accent); outline-offset:4px; }
   .mascot-hand{ position:absolute; z-index:2; width:var(--hs,30px); height:auto; overflow:visible; cursor:pointer; pointer-events:auto; transform-origin:50% 100%; filter:drop-shadow(0 2px 3px rgba(0,0,0,.35)); transition:opacity .25s ease .5s, transform .35s cubic-bezier(.3,1.6,.5,1) .5s; }
   .js .mascot:not(.is-in) .mascot-hand{ opacity:0; transform:translateY(10px); }
-  .mascot-svg{ display:block; width:100%; height:100%; overflow:visible; transform-origin:50% 88%; clip-path:inset(-60% -40% 12.5% -40%); filter:drop-shadow(0 0 1.2px rgba(255,255,255,.5)) drop-shadow(0 0 10px rgba(52,211,153,.16)); }
-  .mascot .m-ol{ stroke:#2B1B14; stroke-width:3.6; stroke-linejoin:round; }
-  .mascot .m-ol-thin{ stroke:#2B1B14; stroke-width:2; stroke-linejoin:round; }
-  .mascot .m-line{ fill:none; stroke:#2B1B14; stroke-width:3.2; stroke-linecap:round; stroke-linejoin:round; }
-  .mascot .m-thin{ stroke-width:2.2; }
+  .mascot-fig{ position:absolute; inset:0; display:block; transform-origin:50% 88%; clip-path:inset(-60% -40% 12.5% -40%); filter:drop-shadow(0 0 1.2px rgba(255,255,255,.55)) drop-shadow(0 0 10px rgba(52,211,153,.16)); }
+  .mascot .m-bob, .mascot .m-look, .mascot-sprite{ position:absolute; inset:0; display:block; }
+  .mascot .m-look{ transform-origin:50% 90%; will-change:transform; }
+  .mascot-sprite{ background:url(/images/mascot/gab-faces.webp) 0 0 / 300% 300% no-repeat; }
+  .mascot-fx{ position:absolute; inset:0; width:100%; height:100%; overflow:visible; }
   .mascot [data-show]{ display:none; }
-  .mascot .m-eye{ transform-box:fill-box; transform-origin:50% 55%; transition:transform .09s ease; }
-  .mascot.is-blinking .m-eye{ transform:scaleY(.1); }
-  .mascot[data-face="surprised"] .m-eye{ transform:scale(1.14); }
   .mascot .m-pop{ transform-box:fill-box; transform-origin:50% 100%; animation:m-pop .45s cubic-bezier(.3,1.6,.5,1) both; }
   .mascot .m-zzz{ animation:m-float 2.4s ease-in-out infinite; }
   .mascot .m-twinkle path{ transform-box:fill-box; transform-origin:center; animation:m-twinkle 2.6s ease-in-out infinite; }
   .mascot .m-twinkle path:nth-child(2){ animation-delay:1.3s; }
-  .mascot .m-bob{ animation:m-breathe 3.2s ease-in-out infinite; transform-origin:80px 160px; }
+  .mascot .m-bob{ animation:m-breathe 3.2s ease-in-out infinite; transform-origin:50% 100%; }
 
   .js .mascot:not(.is-in) .m-bob{ transform:translateY(62%); animation:none; }
   .mascot.is-in .m-bob{ animation:m-peek .7s cubic-bezier(.3,1.5,.5,1) both, m-breathe 3.2s ease-in-out .7s infinite; }
   .mascot.is-waving .m-hand-r{ animation:m-wave .9s ease-in-out; }
 
-  .mascot.is-squash .mascot-svg{ animation:m-squash .42s ease-out; }
-  .mascot.is-cheer .mascot-svg{ animation:m-jump .7s cubic-bezier(.3,.7,.4,1); }
-  .mascot.is-hop .mascot-svg{ animation:m-hop .56s cubic-bezier(.3,.7,.4,1); }
+  .mascot.is-squash .mascot-fig{ animation:m-squash .42s ease-out; }
+  .mascot.is-cheer .mascot-fig{ animation:m-jump .7s cubic-bezier(.3,.7,.4,1); }
+  .mascot.is-hop .mascot-fig{ animation:m-hop .56s cubic-bezier(.3,.7,.4,1); }
   .mascot.is-cheer .mascot-hand{ animation:m-hands-up .7s ease-out; }
 
   .mascot-bubble{
     position:absolute; z-index:3; left:var(--qx,0); top:var(--qy,0); width:max-content; max-width:170px;
     padding:5px 9px; border-radius:11px 11px 3px 11px;
-    background:#fff; color:#111827; border:1.5px solid #2B1B14; box-shadow:0 2px 0 #2B1B14;
+    background:#fff; color:#111827; border:1.5px solid #2A1710; box-shadow:0 2px 0 #2A1710;
     font:600 .68rem/1.3 var(--font-display); letter-spacing:-.005em;
     opacity:0; transform:translate(-100%, 6px) scale(.9); transform-origin:100% 100%;
     transition:opacity .18s ease, transform .25s cubic-bezier(.3,1.5,.5,1); pointer-events:none;
@@ -1395,6 +1392,6 @@
   @media (prefers-reduced-motion: reduce){
     .mascot .m-twinkle{ display:none; }
     .mascot .m-bob, .mascot.is-in .m-bob, .mascot .m-zzz, .mascot .m-pop{ animation:none !important; transform:none !important; }
-    .mascot.is-cheer .mascot-svg, .mascot.is-hop .mascot-svg, .mascot.is-cheer .mascot-hand, .mascot.is-waving .m-hand-r{ animation:none; }
+    .mascot.is-cheer .mascot-fig, .mascot.is-hop .mascot-fig, .mascot.is-cheer .mascot-hand, .mascot.is-waving .m-hand-r{ animation:none; }
   }
   .m-word{ white-space:nowrap; }
