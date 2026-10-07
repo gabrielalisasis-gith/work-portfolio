@@ -367,7 +367,7 @@ gsap.registerPlugin(ScrollTrigger);
       m.style.setProperty('--bx', bx.toFixed(1) + 'px');
       m.style.setProperty('--by', by.toFixed(1) + 'px');
       m.style.setProperty('--qx', (bx + size * 0.14).toFixed(1) + 'px');
-      m.style.setProperty('--qy', (by - size * 0.2).toFixed(1) + 'px');
+      m.style.setProperty('--qy', (by - size * 0.08).toFixed(1) + 'px');
       var hs = Math.max(22, fs * 0.46);
       m.style.setProperty('--hs', hs.toFixed(1) + 'px');
       handEls.forEach(function (h, i) {
