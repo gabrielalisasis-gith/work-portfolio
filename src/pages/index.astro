@@ -1,5 +1,6 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import Mascot from '../components/Mascot.astro';
 
 // GoHighLevel "speed-to-lead" pattern: instant SMS + email + team alert, wait, then branch on reply
 const I = {
@@ -34,7 +35,10 @@ const nodes = [
     <div class="wrap hero-grid">
       <div class="hero-copy">
         <div class="bento-status">Available for new projects</div>
-        <h1>Automation that <span class="accent">actually runs.</span></h1>
+        <div class="h1-wrap">
+          <Mascot />
+          <h1>Automation that <span class="accent">actually runs.</span></h1>
+        </div>
         <p class="lede"><strong>CRMs, automations and backend systems</strong> that run without you babysitting them.</p>
         <div class="hero-ctas">
           <a href="#contact" class="btn btn-primary">Let's talk →</a>

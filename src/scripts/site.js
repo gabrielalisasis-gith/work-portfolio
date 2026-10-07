@@ -271,7 +271,7 @@ gsap.registerPlugin(ScrollTrigger);
         await travel(P[0] + '0', 700); await step(P[1], 1300);
         await travel(P[0] + '1', 480); await step(P[2], y ? 1100 : 800);
         await travel(P[0] + '2', 480); await step(P[3], 1200);
-        if (y) booked++;
+        if (y) { booked++; document.dispatchEvent(new CustomEvent('wf:booked', { detail: { name: L[1] } })); }
         if (rateEl) rateEl.textContent = Math.round((booked / count) * 100) + '%';
         await wait(1100);
         wf.classList.add('is-resetting'); await wait(380);
@@ -309,6 +309,130 @@ gsap.registerPlugin(ScrollTrigger);
       });
       hero.addEventListener('pointerleave', function () { demo.style.setProperty('--px', 0); demo.style.setProperty('--py', 0); });
     }
+  })();
+
+  /* ---------- hero: mini Gab mascot (follows the cursor, reacts to pokes and bookings) ---------- */
+  (function () {
+    var m = $('#mascot'); if (!m) return;
+    var btn = $('.mascot-btn', m), bubbleEl = $('#mascotBubble'), hero = $('.hero');
+    var head = $('.m-head', m), feat = $('.m-feat', m), hairF = $('.m-hairfront', m),
+        hairB = $('.m-hairback', m), ears = $('.m-ears', m), body = $('.m-body', m);
+    var parts = $$('[data-show]', m);
+    var face = 'idle', hold = 0, timers = [], visible = true;
+    var tx = 0, ty = 0, lx = 0, ly = 0, raf = 0, lastInput = Date.now(), lastBook = 0;
+    var tips = ['Hi! I’m mini Gab 👋', 'Psst… poke me', 'New leads get a reply in 38s ↓', 'Need a CRM untangled?', 'Your workflows, minus the babysitting', 'Say hi → Let’s talk'];
+    var tipI = 0, bubbleT = 0;
+
+    function later(fn, ms) { var t = setTimeout(fn, ms); timers.push(t); return t; }
+    function setFace(f) {
+      face = f; m.dataset.face = f;
+      parts.forEach(function (p) { p.style.display = p.dataset.show.split(' ').indexOf(f) > -1 ? 'inline' : ''; });
+    }
+    // show a reaction for ms, then settle back to idle
+    function react(f, ms) {
+      setFace(f); clearTimeout(hold);
+      hold = setTimeout(function () { setFace('idle'); }, ms);
+    }
+    function say(text, ms) {
+      if (!bubbleEl) return;
+      bubbleEl.textContent = text; bubbleEl.classList.add('is-on');
+      clearTimeout(bubbleT); bubbleT = setTimeout(function () { bubbleEl.classList.remove('is-on'); }, ms || 3200);
+    }
+    function replay(cls, ms) {
+      m.classList.remove(cls); void m.offsetWidth; m.classList.add(cls);
+      later(function () { m.classList.remove(cls); }, ms);
+    }
+
+    // head turn: features slide toward the target, hair and ears lag, head tilts
+    function draw() {
+      head.setAttribute('transform', 'translate(' + (lx * 3).toFixed(2) + ' ' + (ly * 2.5).toFixed(2) + ') rotate(' + (lx * 5).toFixed(2) + ' 80 108)');
+      feat.setAttribute('transform', 'translate(' + (lx * 7).toFixed(2) + ' ' + (ly * 5.5).toFixed(2) + ')');
+      hairF.setAttribute('transform', 'translate(' + (lx * 3.5).toFixed(2) + ' ' + (ly * 2.5).toFixed(2) + ')');
+      hairB.setAttribute('transform', 'translate(' + (-lx * 2).toFixed(2) + ' ' + (-ly * 1.2).toFixed(2) + ')');
+      ears.setAttribute('transform', 'translate(' + (-lx * 2.5).toFixed(2) + ' ' + (ly * 1.5).toFixed(2) + ')');
+      body.setAttribute('transform', 'translate(' + (lx * 1.2).toFixed(2) + ' 0)');
+    }
+    function tick() {
+      lx += (tx - lx) * 0.14; ly += (ty - ly) * 0.14;
+      draw();
+      raf = Math.abs(tx - lx) + Math.abs(ty - ly) > 0.002 ? requestAnimationFrame(tick) : 0;
+    }
+    function lookAt(x, y) {
+      var r = btn.getBoundingClientRect();
+      var dx = x - (r.left + r.width / 2), dy = y - (r.top + r.height * 0.45);
+      var d = Math.hypot(dx, dy), k = Math.min(1, d / 320) / (d || 1);
+      tx = dx * k; ty = dy * k;
+      if (reduce) { lx = tx; ly = ty; draw(); return; }
+      if (!raf && visible) raf = requestAnimationFrame(tick);
+    }
+    function wake() {
+      lastInput = Date.now();
+      if (face === 'sleepy') setFace('idle');
+    }
+
+    if (fine) {
+      window.addEventListener('pointermove', function (e) { wake(); lookAt(e.clientX, e.clientY); }, { passive: true });
+    }
+    window.addEventListener('pointerdown', function (e) { wake(); lookAt(e.clientX, e.clientY); }, { passive: true });
+
+    // pokes: squash + a happy reaction; four quick pokes make him dizzy
+    var pokes = 0, pokeAt = 0, payoffs = ['heart', 'sparkle', 'delighted', 'wink', 'bashful'];
+    btn.addEventListener('click', function () {
+      wake();
+      var now = Date.now();
+      pokes = now - pokeAt < 1600 ? pokes + 1 : 1; pokeAt = now;
+      if (!reduce) replay('is-squash', 440);
+      if (pokes >= 4) { pokes = 0; react('dizzy', 1400); say('Whoa… okay, okay, I’m dizzy 😵‍💫', 2400); return; }
+      setFace('surprised'); clearTimeout(hold);
+      hold = setTimeout(function () { react(payoffs[Math.floor(Math.random() * payoffs.length)], 700); }, 140);
+      if (pokes === 1 && Math.random() < 0.5) say(['Hehe, that tickles', 'Hi there!', 'Boop!', 'I automate things. Ask me how →'][Math.floor(Math.random() * 4)], 2200);
+    });
+
+    // cheer when the hero workflow books a lead
+    document.addEventListener('wf:booked', function (e) {
+      var now = Date.now(); if (!visible || now - lastBook < 3000) return; lastBook = now;
+      tx = -0.9; ty = 0.5; if (!raf) raf = requestAnimationFrame(tick); // glance at the workflow
+      react('stars', 1600);
+      if (!reduce) replay('is-cheer', 720);
+      var who = e.detail && e.detail.name;
+      say(who ? who + ' just booked! 🎉' : 'Lead booked! 🎉', 2600);
+    });
+
+    // idle life: blinking, glancing around, falling asleep, tips
+    function blink() {
+      if (visible && face === 'idle') { m.classList.add('is-blinking'); setTimeout(function () { m.classList.remove('is-blinking'); }, 120); }
+      later(blink, 2600 + Math.random() * 3200);
+    }
+    function idle() {
+      if (visible) {
+        var quiet = Date.now() - lastInput;
+        if (quiet > 30000 && face === 'idle') setFace('sleepy');
+        else if (quiet > 4000 && face === 'idle') { // look around on his own
+          tx = Math.random() * 1.6 - 0.8; ty = Math.random() * 1.0 - 0.4;
+          if (!raf) raf = requestAnimationFrame(tick);
+        }
+      }
+      later(idle, 2200 + Math.random() * 1800);
+    }
+    function tip() {
+      if (visible && face !== 'sleepy' && !bubbleEl.classList.contains('is-on')) { say(tips[tipI], 3400); tipI = (tipI + 1) % tips.length; }
+      later(tip, 13000 + Math.random() * 6000);
+    }
+
+    setFace('idle');
+    if (hero) new IntersectionObserver(function (en) { visible = en[0].isIntersecting && !document.hidden; }).observe(hero);
+    document.addEventListener('visibilitychange', function () {
+      var r = hero && hero.getBoundingClientRect();
+      visible = !document.hidden && !!r && r.bottom > 0 && r.top < window.innerHeight;
+    });
+
+    if (reduce) { m.classList.add('is-in'); return; }
+    later(function () {
+      m.classList.add('is-in');
+      later(function () { m.classList.add('is-waving'); say(tips[0], 3000); tipI = 1; }, 750);
+      later(function () { m.classList.remove('is-waving'); }, 1700);
+      later(blink, 2000); later(idle, 3000); later(tip, 12000);
+    }, 900);
   })();
 
   /* ---------- case study diagrams: animate when scrolled into view ---------- */
