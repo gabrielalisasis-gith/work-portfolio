@@ -2,134 +2,139 @@
 // Mini Gab: a chibi mascot that peeks over the hero headline, follows the cursor
 // and reacts to pokes. Driven by the mascot block in src/scripts/site.js.
 // Variant parts carry data-show="<faces>"; everything else is always drawn.
+const OL = '#2B1B14';
+const eye = (cx: number) => `
+  <ellipse cx="${cx}" cy="90" rx="10.5" ry="12" fill="#fff" stroke="${OL}" stroke-width="2.2"/>
+  <g class="m-iris">
+    <circle cx="${cx}" cy="91.5" r="8" fill="#6B3F2A"/>
+    <circle cx="${cx}" cy="94" r="5" fill="#A0603E" opacity=".7"/>
+    <circle cx="${cx}" cy="91" r="4.4" fill="${OL}"/>
+    <circle cx="${cx - 3}" cy="87.2" r="3.3" fill="#fff"/>
+    <circle cx="${cx + 3}" cy="94.5" r="1.5" fill="#fff"/>
+  </g>
+  <path d="M${cx - 10.5} 85 Q${cx} 75 ${cx + 10.5} 85" fill="none" stroke="${OL}" stroke-width="3.4" stroke-linecap="round"/>`;
+const happy = (cx: number) => `M${cx - 10} 94 Q${cx} 82 ${cx + 10} 94`;
+const star = (cx: number, cy: number, s: number) =>
+  `<path transform="translate(${cx} ${cy}) scale(${s})" d="M0 -12 L3.5 -4 L12 -3.5 L5.5 2.5 L7.5 11 L0 6.5 L-7.5 11 L-5.5 2.5 L-12 -3.5 L-3.5 -4 Z" fill="#FFC83D" stroke="${OL}" stroke-width="${(2.2 / s).toFixed(2)}" stroke-linejoin="round"/>`;
+const spiral = (cx: number) => `M${cx} 90 m-1.5 0 a1.5 1.5 0 1 1 3 0 a3.5 3.5 0 1 1 -7 0 a5.5 5.5 0 1 1 11 0 a7.5 7.5 0 1 1 -15 0`;
+const open = (w: number, d: number) => `<path d="M${80 - w} 108 Q80 ${110 + w * 0.1} ${80 + w} 108 Q${80 + w - 1.5} ${108 + d} 80 ${108 + d} Q${80 - w + 1.5} ${108 + d} ${80 - w} 108 Z" fill="#8B3238" stroke="${OL}" stroke-width="2.6" stroke-linejoin="round"/>
+  <path d="M${80 - w + 1.5} 109 Q80 111 ${80 + w - 1.5} 109 L${80 + w - 2} 110.8 Q80 112.6 ${80 - w + 2} 110.8 Z" fill="#fff"/>
+  <path d="M${80 - w * 0.55} ${108 + d - 1.2} Q80 ${108 + d - 5} ${80 + w * 0.55} ${108 + d - 1.2} Q80 ${108 + d + 0.6} ${80 - w * 0.55} ${108 + d - 1.2} Z" fill="#F07C7C"/>`;
+const sparkle = (x: number, y: number, s: number, c: string) =>
+  `<path transform="translate(${x} ${y}) scale(${s})" d="M0 -10 Q1.2 -1.2 10 0 Q1.2 1.2 0 10 Q-1.2 1.2 -10 0 Q-1.2 -1.2 0 -10 Z" fill="${c}" stroke="${OL}" stroke-width="${(1.6 / s).toFixed(2)}" stroke-linejoin="round"/>`;
 ---
 <div class="mascot" id="mascot" data-face="idle">
   <div class="mascot-bubble" id="mascotBubble" role="status" aria-live="polite"></div>
   <button class="mascot-btn" type="button" aria-label="Poke mini Gab">
     <svg class="mascot-svg" viewBox="0 0 160 160" aria-hidden="true">
       <g class="m-bob">
-        <!-- body: leather jacket over a black tee -->
-        <g class="m-body">
-          <path class="m-ol" d="M14 162 C16 140 26 126 48 120 L64 113 L96 113 L112 120 C134 126 144 140 146 162 Z" fill="#2C303A"/>
-          <path d="M66 115 L94 115 L90 162 L70 162 Z" fill="#0D0E11"/>
-          <path class="m-ol-thin" d="M64 113 L54 124 L66 146 L72 120 Z M96 113 L106 124 L94 146 L88 120 Z" fill="#3B404C"/>
-          <path d="M30 136 C34 130 40 127 46 125" stroke="#5B6271" stroke-width="2.4" fill="none" stroke-linecap="round"/>
-          <path d="M126 136 C122 131 117 128 112 126" stroke="#5B6271" stroke-width="2.4" fill="none" stroke-linecap="round"/>
-          <circle cx="58" cy="140" r="1.8" fill="#8A909C"/>
-          <rect x="68" y="98" width="24" height="20" rx="6" fill="#D49A70"/>
-          <path d="M68 108 C74 113 86 113 92 108" stroke="#B97E57" stroke-width="2" fill="none"/>
+        <g transform="translate(8 6) scale(.9)">
+          <!-- body: black varsity jacket over a black tee -->
+          <g class="m-body">
+            <path class="m-ol" d="M20 166 C20 142 40 127 80 127 C120 127 140 142 140 166 Z" fill="#262930"/>
+            <path d="M64 129 Q80 141 96 129 L93 166 L67 166 Z" fill="#121318"/>
+            <path d="M56 129 C62 140 72 144 80 144 C88 144 98 140 104 129" fill="none" stroke="#3A3E48" stroke-width="5" stroke-linecap="round"/>
+            <path d="M58 131 C64 140 72 142 80 142 C88 142 96 140 102 131" fill="none" stroke="#9CA3AF" stroke-width="1.4" stroke-linecap="round"/>
+            <path d="M31 147 C36 142 40 140 45 139 M28 153 C33 148 38 146 43 145" stroke="#E5E7EB" stroke-width="2.6" stroke-linecap="round" fill="none"/>
+            <path d="M129 147 C124 142 120 140 115 139 M132 153 C127 148 122 146 117 145" stroke="#E5E7EB" stroke-width="2.6" stroke-linecap="round" fill="none"/>
+            <text x="105" y="158" font-family="Georgia, serif" font-style="italic" font-weight="700" font-size="14" fill="#10B981">G</text>
+            <circle cx="98" cy="137" r="1.6" fill="#9CA3AF"/>
+          </g>
+
+          <g class="m-head">
+            <path class="m-hairback m-ol" d="M26 102 C16 68 26 38 48 25 L45 12 L60 19 C70 12 82 9 94 11 L101 1 L106 15 C122 21 136 35 140 55 L149 59 L140 68 C142 82 140 94 135 104 Z" fill="#3A2925"/>
+            <g class="m-ears">
+              <ellipse class="m-ol" cx="33" cy="95" rx="9" ry="10.5" fill="#FBD5BA"/>
+              <ellipse class="m-ol" cx="127" cy="95" rx="9" ry="10.5" fill="#FBD5BA"/>
+              <path d="M34 90 C30 93 30 98 34 101" stroke="#E79A88" stroke-width="2.4" fill="none" stroke-linecap="round"/>
+              <path d="M126 90 C130 93 130 98 126 101" stroke="#E79A88" stroke-width="2.4" fill="none" stroke-linecap="round"/>
+            </g>
+            <ellipse class="m-ol" cx="80" cy="88" rx="47" ry="43" fill="#FBD9C0"/>
+            <path d="M42 98 C48 118 64 128 80 129 C68 124 54 114 48 98 Z" fill="#F2C2A6" opacity=".7"/>
+
+            <g class="m-feat">
+              <g class="m-blush">
+                <ellipse cx="47" cy="106" rx="8" ry="5" fill="#FF8F8F" opacity=".5"/>
+                <ellipse cx="113" cy="106" rx="8" ry="5" fill="#FF8F8F" opacity=".5"/>
+                <path d="M44 106 l2 -3 M48 107 l2 -3 M110 106 l2 -3 M114 107 l2 -3" stroke="#E26D6D" stroke-width="1.4" stroke-linecap="round"/>
+              </g>
+              <g data-show="bashful">
+                <ellipse cx="47" cy="106" rx="11" ry="6.5" fill="#FF6B6B" opacity=".5"/>
+                <ellipse cx="113" cy="106" rx="11" ry="6.5" fill="#FF6B6B" opacity=".5"/>
+              </g>
+
+              <!-- eyes -->
+              <g class="m-eye" data-show="idle surprised wink" set:html={eye(61)} />
+              <g class="m-eye" data-show="idle surprised" set:html={eye(99)} />
+              <path data-show="blink heart sparkle delighted bashful" class="m-line" d={happy(61)} />
+              <path data-show="blink heart sparkle delighted bashful wink" class="m-line" d={happy(99)} />
+              <path data-show="sleepy" class="m-line" d="M51 90 Q61 97 71 90 M89 90 Q99 97 109 90" />
+              <g data-show="stars" set:html={star(61, 90, 1) + star(99, 90, 1)} />
+              <path data-show="dizzy" class="m-line m-thin" d={spiral(61) + ' ' + spiral(99)} />
+
+              <!-- thick black glasses -->
+              <g class="m-glasses" fill="rgba(255,255,255,.16)" stroke="#231A18" stroke-width="3.4">
+                <rect x="44" y="76" width="34" height="28" rx="10" />
+                <rect x="82" y="76" width="34" height="28" rx="10" />
+                <path d="M78 86 Q80 83.5 82 86" fill="none" />
+                <path d="M44 85 L37 87 M116 85 L123 87" stroke-linecap="round" />
+                <path d="M49 82 L54 79" stroke="#fff" stroke-width="2" stroke-linecap="round" opacity=".8" />
+                <path d="M87 82 L92 79" stroke="#fff" stroke-width="2" stroke-linecap="round" opacity=".8" />
+              </g>
+
+              <!-- nose -->
+              <path d="M78.5 101.5 Q80 103 81.5 101.5" stroke="#D99377" stroke-width="2" fill="none" stroke-linecap="round" />
+
+              <!-- mouths -->
+              <g data-show="idle wink heart sparkle" set:html={open(7, 8)} />
+              <g data-show="stars delighted" set:html={open(10, 12)} />
+              <ellipse data-show="surprised" cx="80" cy="113" rx="4.5" ry="5.5" fill="#8B3238" stroke={OL} stroke-width="2.6" />
+              <path data-show="dizzy" class="m-line m-thin" d="M71 112 q2.25 -3 4.5 0 t4.5 0 t4.5 0 t4.5 0" />
+              <path data-show="sleepy bashful" class="m-line" d="M76 111 Q80 113.5 84 111" />
+            </g>
+
+            <!-- hair: messy spiky bangs with shine spots, springy tuft on top -->
+            <g class="m-hairfront">
+              <path class="m-ol" d="M28 88 C24 56 44 30 76 26 C104 22 128 36 134 62 C136 70 135 79 132 88 L125 73 L122 83 L113 63 L108 70 L98 58 L92 65 L82 57 L74 64 L67 55 L58 65 L53 60 L43 77 L39 70 Z" fill="#3A2925" />
+              <ellipse cx="60" cy="38" rx="5" ry="3" fill="#7A5A4E" transform="rotate(-25 60 38)" />
+              <circle cx="69" cy="34" r="2.2" fill="#7A5A4E" />
+              <ellipse cx="102" cy="34" rx="4" ry="2.4" fill="#7A5A4E" transform="rotate(20 102 34)" />
+              <circle cx="110" cy="40" r="1.8" fill="#7A5A4E" />
+              <path d="M84 40 L88 52 M70 46 L66 56" stroke="#2A1D1A" stroke-width="2" stroke-linecap="round" />
+              <path class="m-ahoge m-ol" d="M78 28 C70 14 76 4 88 1 C82 8 82 16 86 26 Z" fill="#3A2925" />
+            </g>
+
+            <!-- brows sit on top of the bangs, like the reference -->
+            <g class="m-brows">
+              <path d="M50 73.5 Q60 67.5 70 71" stroke="#3A2925" stroke-width="4.6" fill="none" stroke-linecap="round" />
+              <path d="M90 71 Q100 67.5 110 73.5" stroke="#3A2925" stroke-width="4.6" fill="none" stroke-linecap="round" />
+            </g>
+          </g>
+
+          <!-- hands gripping the headline, with striped cuffs -->
+          <g class="m-hands">
+            <g class="m-hand m-hand-l">
+              <path class="m-ol" d="M26 152 L52 152 L52 160 L26 160 Z" fill="#262930" />
+              <path d="M27 155 H51" stroke="#E5E7EB" stroke-width="2" />
+              <ellipse class="m-ol" cx="39" cy="161" rx="12" ry="8" fill="#FBD9C0" />
+              <path d="M33 158 v5 M39 157 v6 M45 158 v5" stroke="#E0A987" stroke-width="2" stroke-linecap="round" />
+            </g>
+            <g class="m-hand m-hand-r">
+              <path class="m-ol" d="M108 152 L134 152 L134 160 L108 160 Z" fill="#262930" />
+              <path d="M109 155 H133" stroke="#E5E7EB" stroke-width="2" />
+              <ellipse class="m-ol" cx="121" cy="161" rx="12" ry="8" fill="#FBD9C0" />
+              <path d="M115 158 v5 M121 157 v6 M127 158 v5" stroke="#E0A987" stroke-width="2" stroke-linecap="round" />
+            </g>
+          </g>
         </g>
 
-        <g class="m-head">
-          <!-- hair, back mass -->
-          <path class="m-hairback m-ol" d="M34 74 C26 46 40 20 72 15 C104 11 132 26 130 60 C130 70 128 78 125 82 L36 82 Z" fill="#1F1A1E"/>
-          <!-- ears -->
-          <g class="m-ears">
-            <circle class="m-ol" cx="40" cy="80" r="8.5" fill="#F0BE94"/>
-            <circle class="m-ol" cx="120" cy="80" r="8.5" fill="#F0BE94"/>
-            <path d="M39 77 C42 79 42 83 39 85" stroke="#C98D63" stroke-width="2" fill="none" stroke-linecap="round"/>
-            <path d="M121 77 C118 79 118 83 121 85" stroke="#C98D63" stroke-width="2" fill="none" stroke-linecap="round"/>
-          </g>
-          <!-- face -->
-          <path class="m-ol" d="M40 68 C40 42 120 42 120 68 C120 94 104 111 80 111 C56 111 40 94 40 68 Z" fill="#F4C59C"/>
-          <path d="M46 84 C50 98 62 107 80 108 C70 104 58 98 52 86 Z" fill="#E8B086" opacity=".55"/>
-
-          <g class="m-feat">
-            <!-- blush -->
-            <g class="m-blush">
-              <ellipse cx="53" cy="92" rx="7.5" ry="4.6" fill="#F49A86" opacity=".6"/>
-              <ellipse cx="107" cy="92" rx="7.5" ry="4.6" fill="#F49A86" opacity=".6"/>
-            </g>
-            <g data-show="bashful">
-              <ellipse cx="53" cy="92" rx="10" ry="6" fill="#F26D6D" opacity=".55"/>
-              <ellipse cx="107" cy="92" rx="10" ry="6" fill="#F26D6D" opacity=".55"/>
-              <path d="M47 90 l3 -3 M52 91 l3 -3 M57 92 l3 -3 M101 90 l3 -3 M106 91 l3 -3 M111 92 l3 -3" stroke="#D9534F" stroke-width="1.6" stroke-linecap="round"/>
-            </g>
-
-            <!-- eyes: open -->
-            <g class="m-eye m-eye-l" data-show="idle surprised wink">
-              <ellipse cx="64" cy="79" rx="8.6" ry="10.2" fill="#2B1B14"/>
-              <ellipse cx="64" cy="83" rx="6" ry="5.6" fill="#5A3826"/>
-              <circle cx="61" cy="75" r="3.3" fill="#fff"/>
-              <circle cx="67.2" cy="83.6" r="1.6" fill="#fff"/>
-            </g>
-            <g class="m-eye m-eye-r" data-show="idle surprised">
-              <ellipse cx="96" cy="79" rx="8.6" ry="10.2" fill="#2B1B14"/>
-              <ellipse cx="96" cy="83" rx="6" ry="5.6" fill="#5A3826"/>
-              <circle cx="93" cy="75" r="3.3" fill="#fff"/>
-              <circle cx="99.2" cy="83.6" r="1.6" fill="#fff"/>
-            </g>
-            <!-- eyes: happy arcs ^ ^ -->
-            <path data-show="blink heart sparkle delighted bashful" class="m-line" d="M56 82 Q64 72 72 82"/>
-            <path data-show="blink heart sparkle delighted bashful wink" class="m-line" d="M88 82 Q96 72 104 82"/>
-            <!-- eyes: sleepy -->
-            <path data-show="sleepy" class="m-line" d="M56 79 Q64 86 72 79 M88 79 Q96 86 104 79"/>
-            <!-- eyes: stars -->
-            <g data-show="stars" class="m-stars">
-              <path d="M64 69 L66.9 75.6 L74 76.2 L68.6 80.8 L70.3 87.8 L64 84 L57.7 87.8 L59.4 80.8 L54 76.2 L61.1 75.6 Z" fill="#FFC83D" stroke="#2B1B14" stroke-width="2" stroke-linejoin="round"/>
-              <path d="M96 69 L98.9 75.6 L106 76.2 L100.6 80.8 L102.3 87.8 L96 84 L89.7 87.8 L91.4 80.8 L86 76.2 L93.1 75.6 Z" fill="#FFC83D" stroke="#2B1B14" stroke-width="2" stroke-linejoin="round"/>
-            </g>
-            <!-- eyes: dizzy spirals -->
-            <path data-show="dizzy" class="m-line m-thin" d="M64 79 m-1.5 0 a1.5 1.5 0 1 1 3 0 a3.5 3.5 0 1 1 -7 0 a5.5 5.5 0 1 1 11 0 a7.5 7.5 0 1 1 -15 0 M96 79 m-1.5 0 a1.5 1.5 0 1 1 3 0 a3.5 3.5 0 1 1 -7 0 a5.5 5.5 0 1 1 11 0 a7.5 7.5 0 1 1 -15 0"/>
-
-            <!-- glasses: thin gold metal frames -->
-            <g class="m-glasses">
-              <rect x="50" y="68" width="28" height="22" rx="9" fill="rgba(255,255,255,.14)" stroke="#B98A47" stroke-width="2.3"/>
-              <rect x="82" y="68" width="28" height="22" rx="9" fill="rgba(255,255,255,.14)" stroke="#B98A47" stroke-width="2.3"/>
-              <path d="M78 75 Q80 72.5 82 75" stroke="#B98A47" stroke-width="2.3" fill="none"/>
-              <path d="M50 74 L42 72 M110 74 L118 72" stroke="#B98A47" stroke-width="2.3" stroke-linecap="round"/>
-              <path d="M54 72 L59 70" stroke="#fff" stroke-width="1.6" stroke-linecap="round" opacity=".8"/>
-              <path d="M86 72 L91 70" stroke="#fff" stroke-width="1.6" stroke-linecap="round" opacity=".8"/>
-            </g>
-
-            <!-- brows -->
-            <path class="m-brows m-line m-thin" d="M56 63 Q63 60 70 62 M90 62 Q97 60 104 63"/>
-
-            <!-- nose -->
-            <path d="M79 88 Q81 90 83 88" stroke="#C98D63" stroke-width="2" fill="none" stroke-linecap="round"/>
-
-            <!-- mouths -->
-            <path data-show="idle wink heart sparkle" class="m-line" d="M74 95.5 Q77 99 80 96 Q83 99 86 95.5"/>
-            <ellipse data-show="surprised" cx="80" cy="98" rx="4" ry="5" fill="#7A2E2A" stroke="#2B1B14" stroke-width="2.6"/>
-            <g data-show="stars delighted">
-              <path d="M71 94 Q80 95 89 94 Q88 106 80 106 Q72 106 71 94 Z" fill="#7A2E2A" stroke="#2B1B14" stroke-width="2.6" stroke-linejoin="round"/>
-              <path d="M75 102.5 Q80 99.5 85 102.5 Q83 105 80 105 Q77 105 75 102.5 Z" fill="#F07C7C"/>
-            </g>
-            <path data-show="dizzy" class="m-line m-thin" d="M72 98 q2 -3 4 0 t4 0 t4 0 t4 0"/>
-            <path data-show="sleepy bashful" class="m-line" d="M76 97 Q80 99.5 84 97"/>
-          </g>
-
-          <!-- hair, front fringe sweeping to the right -->
-          <g class="m-hairfront">
-            <path class="m-ol" d="M37 70 C33 44 52 24 82 22 C106 21 126 34 125 62 C122 56 119 52 116 50 C117 56 116 60 113 63 C110 55 104 49 98 46 C99 53 96 58 92 61 C90 52 84 46 76 44 C76 50 72 55 66 58 C66 51 62 47 57 46 C56 54 51 60 45 62 C44 57 43 55 42 54 C40 59 38 64 37 70 Z" fill="#1F1A1E"/>
-            <path d="M50 38 C60 30 74 27 88 28" stroke="#4E4752" stroke-width="3" fill="none" stroke-linecap="round"/>
-            <path d="M96 30 C104 32 110 36 114 41" stroke="#4E4752" stroke-width="2.4" fill="none" stroke-linecap="round"/>
-            <path class="m-ol" d="M86 22 C90 13 98 10 104 12 C99 14 96 18 95 23 Z" fill="#1F1A1E"/>
-          </g>
-        </g>
-
-        <!-- reaction extras -->
-        <path data-show="heart" class="m-pop" d="M90 8 C90 2 82 0 80 6 C78 0 70 2 70 8 C70 14 80 18 80 22 C80 18 90 14 90 8 Z" fill="#F2545B" stroke="#2B1B14" stroke-width="2.2" stroke-linejoin="round"/>
-        <g data-show="sparkle stars" class="m-pop">
-          <path d="M28 22 L30.5 28.5 L37 31 L30.5 33.5 L28 40 L25.5 33.5 L19 31 L25.5 28.5 Z" fill="#FFC83D" stroke="#2B1B14" stroke-width="1.8" stroke-linejoin="round"/>
-          <path d="M134 14 L136 19 L141 21 L136 23 L134 28 L132 23 L127 21 L132 19 Z" fill="#FFC83D" stroke="#2B1B14" stroke-width="1.8" stroke-linejoin="round"/>
-          <path d="M140 46 L141.4 49.6 L145 51 L141.4 52.4 L140 56 L138.6 52.4 L135 51 L138.6 49.6 Z" fill="#34D399" stroke="#2B1B14" stroke-width="1.6" stroke-linejoin="round"/>
-        </g>
-        <g data-show="sleepy" class="m-pop m-zzz" fill="#60A5FA" stroke="#2B1B14" stroke-width="1.4" stroke-linejoin="round">
-          <path d="M118 22 h9 l-9 9 h9 v2.4 h-13 l9 -9 h-5 Z"/>
-          <path d="M132 8 h7 l-7 7 h7 v2 h-10 l7 -7 h-4 Z"/>
-        </g>
-
-        <!-- hands gripping the headline -->
-        <g class="m-hands">
-          <g class="m-hand m-hand-l">
-            <path class="m-ol" d="M30 150 C30 142 36 138 44 138 C52 138 56 142 56 150 C56 156 50 159 43 159 C36 159 30 156 30 150 Z" fill="#F4C59C"/>
-            <path d="M38 147 v8 M44 146 v9 M50 147 v8" stroke="#C98D63" stroke-width="2" stroke-linecap="round"/>
-          </g>
-          <g class="m-hand m-hand-r">
-            <path class="m-ol" d="M104 150 C104 142 108 138 116 138 C124 138 130 142 130 150 C130 156 124 159 117 159 C110 159 104 156 104 150 Z" fill="#F4C59C"/>
-            <path d="M110 147 v8 M116 146 v9 M122 147 v8" stroke="#C98D63" stroke-width="2" stroke-linecap="round"/>
-          </g>
+        <!-- ambient sparkles + reaction extras -->
+        <g class="m-twinkle" set:html={sparkle(14, 44, .55, '#fff') + sparkle(150, 84, .45, '#fff')} />
+        <path data-show="heart" class="m-pop" d="M100 10 C100 3 91 1 89 8 C87 1 78 3 78 10 C78 17 89 21 89 26 C89 21 100 17 100 10 Z" fill="#F2545B" stroke={OL} stroke-width="2.4" stroke-linejoin="round" />
+        <g data-show="sparkle stars" class="m-pop" set:html={star(20, 22, .85) + sparkle(142, 18, .7, '#FFE58A') + sparkle(148, 52, .5, '#34D399')} />
+        <g data-show="sleepy" class="m-pop m-zzz" fill="#60A5FA" stroke={OL} stroke-width="1.4" stroke-linejoin="round">
+          <path d="M120 20 h9 l-9 9 h9 v2.4 h-13 l9 -9 h-5 Z" />
+          <path d="M134 6 h7 l-7 7 h7 v2 h-10 l7 -7 h-4 Z" />
         </g>
       </g>
     </svg>

@@ -316,7 +316,8 @@ gsap.registerPlugin(ScrollTrigger);
     var m = $('#mascot'); if (!m) return;
     var btn = $('.mascot-btn', m), bubbleEl = $('#mascotBubble'), hero = $('.hero');
     var head = $('.m-head', m), feat = $('.m-feat', m), hairF = $('.m-hairfront', m),
-        hairB = $('.m-hairback', m), ears = $('.m-ears', m), body = $('.m-body', m);
+        hairB = $('.m-hairback', m), ears = $('.m-ears', m), body = $('.m-body', m),
+        brows = $('.m-brows', m), irises = $$('.m-iris', m);
     var parts = $$('[data-show]', m);
     var face = 'idle', hold = 0, timers = [], visible = true;
     var tx = 0, ty = 0, lx = 0, ly = 0, raf = 0, lastInput = Date.now(), lastBook = 0;
@@ -343,26 +344,38 @@ gsap.registerPlugin(ScrollTrigger);
       later(function () { m.classList.remove(cls); }, ms);
     }
 
-    // head turn: features slide toward the target, hair and ears lag, head tilts
-    function draw() {
-      head.setAttribute('transform', 'translate(' + (lx * 3).toFixed(2) + ' ' + (ly * 2.5).toFixed(2) + ') rotate(' + (lx * 5).toFixed(2) + ' 80 108)');
-      feat.setAttribute('transform', 'translate(' + (lx * 7).toFixed(2) + ' ' + (ly * 5.5).toFixed(2) + ')');
-      hairF.setAttribute('transform', 'translate(' + (lx * 3.5).toFixed(2) + ' ' + (ly * 2.5).toFixed(2) + ')');
-      hairB.setAttribute('transform', 'translate(' + (-lx * 2).toFixed(2) + ' ' + (-ly * 1.2).toFixed(2) + ')');
-      ears.setAttribute('transform', 'translate(' + (-lx * 2.5).toFixed(2) + ' ' + (ly * 1.5).toFixed(2) + ')');
-      body.setAttribute('transform', 'translate(' + (lx * 1.2).toFixed(2) + ' 0)');
+    // head turn: features lead, hair lags behind, the tuft springs (all eased per frame)
+    var ahoge = $('.m-ahoge', m), hx = 0, hy = 0, aA = 0, aV = 0, kick = 0, t0 = performance.now();
+    function f2(n) { return n.toFixed(2); }
+    function draw(now) {
+      head.setAttribute('transform', 'translate(' + f2(lx * 3) + ' ' + f2(ly * 2.5) + ') rotate(' + f2(lx * 6) + ' 80 124)');
+      feat.setAttribute('transform', 'translate(' + f2(lx * 8) + ' ' + f2(ly * 6) + ')');
+      hairF.setAttribute('transform', 'translate(' + f2(hx * 4) + ' ' + f2(hy * 2.5) + ')');
+      hairB.setAttribute('transform', 'translate(' + f2(-hx * 2.5) + ' ' + f2(-hy * 1.2) + ')');
+      body.setAttribute('transform', 'translate(' + f2(lx * 1.5) + ' 0)');
+      ears.setAttribute('transform', 'translate(' + f2(-lx * 2.5) + ' ' + f2(ly * 1.5) + ')');
+      brows.setAttribute('transform', 'translate(' + f2(lx * 8) + ' ' + f2(ly * 5 - (face === 'surprised' ? 3 : 0)) + ')');
+      var ix = 'translate(' + f2(lx * 2.4) + ' ' + f2(ly * 2) + ')';
+      irises.forEach(function (g) { g.setAttribute('transform', ix); });
+      var sway = reduce ? 0 : Math.sin((now - t0) / 700) * 4;
+      ahoge.setAttribute('transform', 'rotate(' + f2(aA + sway) + ' 82 26)');
     }
-    function tick() {
-      lx += (tx - lx) * 0.14; ly += (ty - ly) * 0.14;
-      draw();
-      raf = Math.abs(tx - lx) + Math.abs(ty - ly) > 0.002 ? requestAnimationFrame(tick) : 0;
+    function tick(now) {
+      var px = lx;
+      lx += (tx - lx) * 0.16; ly += (ty - ly) * 0.16;
+      hx += (lx - hx) * 0.08; hy += (ly - hy) * 0.08;
+      // spring: pulled back to rest, pushed by head motion and kicks
+      aV += (-0.09 * aA) - 0.12 * aV - (lx - px) * 90 + kick; kick = 0; aA += aV;
+      draw(now);
+      raf = visible ? requestAnimationFrame(tick) : 0;
     }
+    function boing(n) { kick += n; }
     function lookAt(x, y) {
       var r = btn.getBoundingClientRect();
       var dx = x - (r.left + r.width / 2), dy = y - (r.top + r.height * 0.45);
       var d = Math.hypot(dx, dy), k = Math.min(1, d / 320) / (d || 1);
       tx = dx * k; ty = dy * k;
-      if (reduce) { lx = tx; ly = ty; draw(); return; }
+      if (reduce) { lx = hx = tx; ly = hy = ty; draw(0); return; }
       if (!raf && visible) raf = requestAnimationFrame(tick);
     }
     function wake() {
@@ -381,7 +394,7 @@ gsap.registerPlugin(ScrollTrigger);
       wake();
       var now = Date.now();
       pokes = now - pokeAt < 1600 ? pokes + 1 : 1; pokeAt = now;
-      if (!reduce) replay('is-squash', 440);
+      if (!reduce) { replay('is-squash', 440); boing(Math.random() < .5 ? 9 : -9); }
       if (pokes >= 4) { pokes = 0; react('dizzy', 1400); say('Whoa… okay, okay, I’m dizzy 😵‍💫', 2400); return; }
       setFace('surprised'); clearTimeout(hold);
       hold = setTimeout(function () { react(payoffs[Math.floor(Math.random() * payoffs.length)], 700); }, 140);
@@ -391,16 +404,19 @@ gsap.registerPlugin(ScrollTrigger);
     // cheer when the hero workflow books a lead
     document.addEventListener('wf:booked', function (e) {
       var now = Date.now(); if (!visible || now - lastBook < 3000) return; lastBook = now;
-      tx = -0.9; ty = 0.5; if (!raf) raf = requestAnimationFrame(tick); // glance at the workflow
+      tx = 0.9; ty = 0.5; // glance toward the workflow
       react('stars', 1600);
-      if (!reduce) replay('is-cheer', 720);
+      if (!reduce) { replay('is-cheer', 720); later(function () { boing(12); }, 300); }
       var who = e.detail && e.detail.name;
       say(who ? who + ' just booked! 🎉' : 'Lead booked! 🎉', 2600);
     });
 
     // idle life: blinking, glancing around, falling asleep, tips
     function blink() {
-      if (visible && face === 'idle') { m.classList.add('is-blinking'); setTimeout(function () { m.classList.remove('is-blinking'); }, 120); }
+      if (visible && face === 'idle') {
+        m.classList.add('is-blinking'); setTimeout(function () { m.classList.remove('is-blinking'); }, 120);
+        if (Math.random() < 0.25) setTimeout(function () { m.classList.add('is-blinking'); setTimeout(function () { m.classList.remove('is-blinking'); }, 110); }, 260);
+      }
       later(blink, 2600 + Math.random() * 3200);
     }
     function idle() {
@@ -409,8 +425,8 @@ gsap.registerPlugin(ScrollTrigger);
         if (quiet > 30000 && face === 'idle') setFace('sleepy');
         else if (quiet > 4000 && face === 'idle') { // look around on his own
           tx = Math.random() * 1.6 - 0.8; ty = Math.random() * 1.0 - 0.4;
-          if (!raf) raf = requestAnimationFrame(tick);
         }
+        if (face === 'idle' && quiet > 2500 && !reduce && Math.random() < 0.3) { replay('is-hop', 560); later(function () { boing(8); }, 260); }
       }
       later(idle, 2200 + Math.random() * 1800);
     }
@@ -420,10 +436,12 @@ gsap.registerPlugin(ScrollTrigger);
     }
 
     setFace('idle');
-    if (hero) new IntersectionObserver(function (en) { visible = en[0].isIntersecting && !document.hidden; }).observe(hero);
+    function resume() { if (visible && !raf && !reduce) raf = requestAnimationFrame(tick); }
+    if (hero) new IntersectionObserver(function (en) { visible = en[0].isIntersecting && !document.hidden; resume(); }).observe(hero);
     document.addEventListener('visibilitychange', function () {
       var r = hero && hero.getBoundingClientRect();
       visible = !document.hidden && !!r && r.bottom > 0 && r.top < window.innerHeight;
+      resume();
     });
 
     if (reduce) { m.classList.add('is-in'); return; }
