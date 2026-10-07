@@ -111,21 +111,6 @@ const sparkle = (x: number, y: number, s: number, c: string) =>
             </g>
           </g>
 
-          <!-- hands gripping the headline, with striped cuffs -->
-          <g class="m-hands">
-            <g class="m-hand m-hand-l">
-              <path class="m-ol" d="M26 152 L52 152 L52 160 L26 160 Z" fill="#262930" />
-              <path d="M27 155 H51" stroke="#E5E7EB" stroke-width="2" />
-              <ellipse class="m-ol" cx="39" cy="161" rx="12" ry="8" fill="#FBD9C0" />
-              <path d="M33 158 v5 M39 157 v6 M45 158 v5" stroke="#E0A987" stroke-width="2" stroke-linecap="round" />
-            </g>
-            <g class="m-hand m-hand-r">
-              <path class="m-ol" d="M108 152 L134 152 L134 160 L108 160 Z" fill="#262930" />
-              <path d="M109 155 H133" stroke="#E5E7EB" stroke-width="2" />
-              <ellipse class="m-ol" cx="121" cy="161" rx="12" ry="8" fill="#FBD9C0" />
-              <path d="M115 158 v5 M121 157 v6 M127 158 v5" stroke="#E0A987" stroke-width="2" stroke-linecap="round" />
-            </g>
-          </g>
         </g>
 
         <!-- ambient sparkles + reaction extras -->
@@ -139,4 +124,15 @@ const sparkle = (x: number, y: number, s: number, c: string) =>
       </g>
     </svg>
   </button>
+  <!-- hands sit in front of the headline, gripping each "t" of "that" -->
+  <svg class="mascot-hand m-hand-l" viewBox="0 0 40 28" aria-hidden="true">
+    <path class="m-ol" d="M6 14 C6 6 12 2 20 2 C28 2 34 6 34 14 C34 21 28 25 20 25 C12 25 6 21 6 14 Z" fill="#FBD9C0" />
+    <path d="M13 16 v6 M20 16.5 v7 M27 16 v6" stroke="#E0A987" stroke-width="2.2" stroke-linecap="round" />
+    <ellipse cx="15" cy="8" rx="4" ry="2.2" fill="#fff" opacity=".55" />
+  </svg>
+  <svg class="mascot-hand m-hand-r" viewBox="0 0 40 28" aria-hidden="true">
+    <path class="m-ol" d="M6 14 C6 6 12 2 20 2 C28 2 34 6 34 14 C34 21 28 25 20 25 C12 25 6 21 6 14 Z" fill="#FBD9C0" />
+    <path d="M13 16 v6 M20 16.5 v7 M27 16 v6" stroke="#E0A987" stroke-width="2.2" stroke-linecap="round" />
+    <ellipse cx="15" cy="8" rx="4" ry="2.2" fill="#fff" opacity=".55" />
+  </svg>
 </div>

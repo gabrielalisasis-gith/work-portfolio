@@ -344,6 +344,44 @@ gsap.registerPlugin(ScrollTrigger);
       later(function () { m.classList.remove(cls); }, ms);
     }
 
+    // sit him behind "that": body clipped at the x-height line, a hand on each "t"
+    var wrapEl = m.parentNode, h1El = $('h1', wrapEl), wordEl = $('.m-word', wrapEl), handEls = $$('.mascot-hand', m);
+    var metricsCtx = document.createElement('canvas').getContext('2d');
+    function place() {
+      if (!wordEl || !h1El) return;
+      var cs = getComputedStyle(h1El), fs = parseFloat(cs.fontSize);
+      metricsCtx.font = cs.fontWeight + ' ' + fs + 'px ' + cs.fontFamily;
+      var mt = metricsCtx.measureText('tx'), A = mt.fontBoundingBoxAscent || fs * 0.95, D = mt.fontBoundingBoxDescent || fs * 0.25;
+      var tAsc = metricsCtx.measureText('t').actualBoundingBoxAscent || fs * 0.66;
+      var xAsc = metricsCtx.measureText('x').actualBoundingBoxAscent || fs * 0.52;
+      var lh = parseFloat(cs.lineHeight) || fs * 1.02;
+      var W = wrapEl.getBoundingClientRect(), wr = wordEl.getBoundingClientRect();
+      var ts = $$('.m-t', wordEl).map(function (t) { return t.getBoundingClientRect(); });
+      var lineTop = ts[0].top - W.top;
+      var base = lineTop + (lh - (A + D)) / 2 + A;
+      var xTop = base - xAsc, tTop = base - tAsc;
+      var size = Math.max(84, Math.min(180, wr.width * 1.18));
+      var cx = (wr.left + wr.right) / 2 - W.left;
+      var bx = cx - size / 2, by = xTop + fs * 0.06 - size * 0.875;
+      m.style.setProperty('--bs', size.toFixed(1) + 'px');
+      m.style.setProperty('--bx', bx.toFixed(1) + 'px');
+      m.style.setProperty('--by', by.toFixed(1) + 'px');
+      m.style.setProperty('--qx', (bx + size * 0.14).toFixed(1) + 'px');
+      m.style.setProperty('--qy', (by - size * 0.2).toFixed(1) + 'px');
+      var hs = Math.max(22, fs * 0.46);
+      m.style.setProperty('--hs', hs.toFixed(1) + 'px');
+      handEls.forEach(function (h, i) {
+        var r = ts[i] || ts[0];
+        h.style.left = ((r.left + r.right) / 2 - W.left - hs / 2).toFixed(1) + 'px';
+        h.style.top = (tTop - hs * 0.32).toFixed(1) + 'px';
+      });
+      m.classList.add('is-placed');
+    }
+    place();
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(place);
+    window.addEventListener('resize', place);
+    handEls.forEach(function (h) { h.addEventListener('click', function () { btn.click(); }); });
+
     // head turn: features lead, hair lags behind, the tuft springs (all eased per frame)
     var ahoge = $('.m-ahoge', m), hx = 0, hy = 0, aA = 0, aV = 0, kick = 0, t0 = performance.now();
     function f2(n) { return n.toFixed(2); }
