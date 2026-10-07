@@ -4,7 +4,7 @@ import { brandColor as brand, type Tool } from '../data/brand';
 import { WORK_HOURS } from '../config';
 import {
   siReact, siTypescript, siNextdotjs, siTailwindcss, siShopify, siSupabase, siPostgresql, siPython, siGit,
-  siZapier, siHubspot, siWordpress, siClickup, siTrello, siGooglesheets, siClaude,
+  siZapier, siHubspot, siWordpress, siClickup, siTrello, siGooglesheets, siClaude, siMailgun,
 } from 'simple-icons';
 
 // 24px line icons (lucide-style)
@@ -22,6 +22,10 @@ const I = {
   talk: '<path d="M7.9 20A9 9 0 1 0 4 16.1L2 22z"/><path d="M12 8v4M12 16h.01"/>',
   bolt: '<path d="M13 2 3 14h9l-1 8 10-12h-9z"/>',
   code: '<path d="m16 18 6-6-6-6M8 6l-6 6 6 6"/>',
+  cart: '<circle cx="9" cy="20" r="1.5"/><circle cx="18" cy="20" r="1.5"/><path d="M2 3h3l2.7 12.4a2 2 0 0 0 2 1.6h8.4a2 2 0 0 0 2-1.6L22 7H6"/>',
+  users: '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.9M16 3.1a4 4 0 0 1 0 7.8"/>',
+  inbox: '<path d="M22 12h-6l-2 3h-4l-2-3H2"/><path d="M5.5 5.1 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.5-6.9A2 2 0 0 0 16.8 4H7.2a2 2 0 0 0-1.7 1.1z"/>',
+  layers: '<path d="m12 2 9 5-9 5-9-5 9-5z"/><path d="m3 12 9 5 9-5M3 17l9 5 9-5"/>',
 };
 
 const hours = `${WORK_HOURS.start} AM–${WORK_HOURS.end - 12} PM ${WORK_HOURS.label}`;
@@ -33,14 +37,35 @@ const facts = [
   ['BS CS', 'Batangas State University'],
 ];
 
-// founder problems, in their words, and what each became, tied to a real engagement
-// founder problems -> what each became, tied to a real engagement
-const handoffs = [
-  { icon: 'chat', before: 'Leads wait hours', after: 'Answered instantly', where: 'Supreme Club Tours' },
-  { icon: 'copy', before: 'Orders copied by hand', after: 'Delivers itself', where: 'Orange Ashes' },
-  { icon: 'mail', before: 'Flows “live”, mail bouncing', after: 'Built, verified, in the inbox', where: 'Kemp Beauty' },
-  { icon: 'merge', before: '4 tools, no sync', after: '1 platform', where: 'Cordelia ARC' },
-  { icon: 'pages', before: 'Pages stuck in the queue', after: '23+ pages shipped', where: 'Sell Ready AI' },
+// "What founders hand me": founders tap the messes they have; each answer is a real engagement
+const GHL: Tool = { name: 'GoHighLevel', mono: 'GHL', hex: '188BF6' };
+type Node = { label: string; tool?: Tool; icon?: keyof typeof I };
+type Mess = { mess: string; icon: keyof typeof I; client: string; href?: string; built: string; flow: Node[]; metric: string; count?: number; suffix?: string; unit: string };
+const messes: Mess[] = [
+  { mess: 'Leads go cold before anyone replies', icon: 'chat', client: 'Supreme Club Tours',
+    built: 'Automated lead capture and nurturing',
+    flow: [{ label: 'New lead', icon: 'bolt' }, { label: 'GoHighLevel', tool: GHL }, { label: 'Nurture', icon: 'mail' }, { label: 'Customer', icon: 'check' }],
+    metric: '3,000+', count: 3000, suffix: '+', unit: 'customers in 5 months' },
+  { mess: 'I’m copying orders by hand', icon: 'copy', client: 'Orange Ashes', href: '/work/orange-ashes',
+    built: 'Checkout, instant delivery and branded email inside the CRM',
+    flow: [{ label: 'Checkout', icon: 'cart' }, { label: 'GoHighLevel', tool: GHL }, { label: 'Mailgun', tool: { name: 'Mailgun', icon: siMailgun } }, { label: 'Delivered', icon: 'check' }],
+    metric: '0', count: 0, unit: 'manual fulfilment steps' },
+  { mess: 'Our emails land in spam', icon: 'mail', client: 'Kemp Beauty', href: '/work/kemp-beauty',
+    built: 'Klaviyo flows built, sending authenticated',
+    flow: [{ label: 'Shopify', tool: { name: 'Shopify', icon: siShopify } }, { label: 'Klaviyo', tool: { name: 'Klaviyo', mono: 'K', hex: '232426' } }, { label: 'DMARC fixed', icon: 'check' }, { label: 'Inbox', icon: 'inbox' }],
+    metric: '8', count: 8, unit: 'flows · 26 emails' },
+  { mess: 'Our tools don’t talk to each other', icon: 'merge', client: 'Cordelia ARC', href: '/work/cordelia-arc',
+    built: 'Referrals, hiring, compliance and billing in one platform',
+    flow: [{ label: '4 tools', icon: 'merge' }, { label: 'React', tool: { name: 'React', icon: siReact } }, { label: 'Supabase', tool: { name: 'Supabase', icon: siSupabase } }, { label: 'One platform', icon: 'check' }],
+    metric: '4 → 1', unit: 'systems unified' },
+  { mess: 'Pages sit in the dev queue', icon: 'pages', client: 'Sell Ready AI', href: '/work/sell-ready-ai',
+    built: 'A reusable section library on Shopify',
+    flow: [{ label: 'Section library', icon: 'layers' }, { label: 'Shopify', tool: { name: 'Shopify', icon: siShopify } }, { label: 'Git', tool: { name: 'Git', icon: siGit } }, { label: 'Live', icon: 'rocket' }],
+    metric: '23+', count: 23, suffix: '+', unit: 'landing pages shipped' },
+  { mess: 'We’re growing faster than ops can handle', icon: 'users', client: 'LiveHowYouWant',
+    built: 'CRM, workflows and automations run day to day',
+    flow: [{ label: 'Members', icon: 'users' }, { label: 'GoHighLevel', tool: GHL }, { label: 'Workflows', icon: 'bolt' }, { label: 'Scaled', icon: 'rocket' }],
+    metric: '36,000+', count: 36000, suffix: '+', unit: 'members, up from 900' },
 ];
 
 const month = [
@@ -181,17 +206,47 @@ const toolbox: [string, Tool[]][] = [
         <span class="sec-kicker">What founders hand me</span>
         <h2>Bring me the mess. <span class="accent">I’ll hand back a system.</span></h2>
       </div>
-      <ul class="handoff-grid">
-        {handoffs.map((h) => (
-          <li class="handoff-card reveal">
-            <span class="handoff-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" set:html={I[h.icon]} /></span>
-            <span class="hchip is-before"><span class="sr-only">Before: </span>{h.before}</span>
-            <span class="handoff-arrow" aria-hidden="true">↓</span>
-            <span class="hchip is-after"><span class="sr-only">After: </span>{h.after}</span>
-            <span class="handoff-where">{h.where}</span>
-          </li>
-        ))}
-      </ul>
+      <div class="mess" id="mess">
+        <div class="mess-pick reveal">
+          <p class="mess-prompt">Tap what sounds like you</p>
+          <ul class="mess-chips">
+            {messes.map((m, i) => (
+              <li><button type="button" class="mess-chip" aria-pressed={i === 0 ? 'true' : 'false'} data-i={i} style={`--tilt:${[-2.5, 1.8, -1.2, 2.4, -1.8, 1.2][i % 6]}deg`}>
+                <span class="mess-chip-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" set:html={I[m.icon]} /></span>
+                {m.mess}
+                <span class="mess-tick" aria-hidden="true">✓</span>
+              </button></li>
+            ))}
+          </ul>
+          <p class="mess-sum" aria-live="polite"><span class="mess-sum-text">1 picked. Fixed it before.</span> <a href="#contact" class="btn btn-primary mess-cta">Let’s talk →</a></p>
+        </div>
+        <ul class="mess-cards">
+          {messes.map((m, i) => (
+            <li class={`mess-card${i === 0 ? ' is-on' : ''}`} data-i={i}>
+              <div class="mess-card-top">
+                <span class="mess-client">{m.client}</span>
+                {m.href && <a class="mess-link" href={m.href}>Case study →</a>}
+              </div>
+              <ol class="mess-flow">
+                {m.flow.map((n) => (
+                  <li style={n.tool ? `--brand:#${(n.tool.icon?.hex ?? n.tool.hex ?? '888888').replace('#', '')}` : undefined}>
+                    <span class={`mess-node${n.tool ? ' is-tool' : ''}`} aria-hidden="true">
+                      {n.tool ? (n.tool.icon ? <svg viewBox="0 0 24 24"><path d={n.tool.icon.path} /></svg> : <b>{n.tool.mono}</b>)
+                        : <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" set:html={I[n.icon!]} />}
+                    </span>
+                    <span class="mess-node-l">{n.label}</span>
+                  </li>
+                ))}
+              </ol>
+              <div class="mess-result">
+                <b data-mess-count={m.count ?? ''} data-mess-suffix={m.suffix ?? ''}>{m.metric}</b>
+                <span>{m.unit}</span>
+              </div>
+              <p class="mess-built">{m.built}</p>
+            </li>
+          ))}
+        </ul>
+      </div>
     </div>
   </section>
 

@@ -767,6 +767,45 @@ gsap.registerPlugin(ScrollTrigger);
     }, { threshold: [0, 0.35] }).observe(card);
   })();
 
+  /* ---------- about: pick your mess ---------- */
+  (function () {
+    var root = $('#mess'); if (!root) return;
+    var chips = $$('.mess-chip', root), cards = $$('.mess-card', root), sum = $('.mess-sum-text', root);
+    var order = [0], words = ['', 'one', 'two', 'three', 'four', 'five', 'six'];
+    function countUp(card) {
+      var el = $('[data-mess-count]', card); if (!el || el.dataset.messCount === '') return;
+      var to = +el.dataset.messCount, suf = el.dataset.messSuffix || '';
+      if (reduce) { el.textContent = to.toLocaleString('en-US') + suf; return; }
+      var o = { v: 0 };
+      gsap.to(o, { v: to, duration: 1.1, ease: 'power2.out', onUpdate: function () { el.textContent = Math.round(o.v).toLocaleString('en-US') + suf; } });
+    }
+    function render() {
+      cards.forEach(function (c) { var at = order.indexOf(+c.dataset.i); c.style.order = at < 0 ? '' : String(-at); });
+      var n = order.length;
+      sum.innerHTML = n === 0 ? 'Tap one. Odds are I’ve fixed it before.'
+        : '<b>' + n + ' picked.</b> ' + (n === 1 ? 'Fixed it before.' : 'Fixed all ' + words[n] + ' before.');
+    }
+    chips.forEach(function (chip) {
+      chip.addEventListener('click', function () {
+        var i = +chip.dataset.i, on = chip.getAttribute('aria-pressed') !== 'true';
+        chip.setAttribute('aria-pressed', on ? 'true' : 'false');
+        var card = cards[i];
+        order = order.filter(function (x) { return x !== i; });
+        if (on) {
+          order.push(i); card.classList.remove('is-on'); void card.offsetWidth; card.classList.add('is-on'); countUp(card);
+          // phones: the answer lands below the chips, so bring it into view
+          var r = card.getBoundingClientRect();
+          if (r.top > window.innerHeight - 80) card.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'center' });
+        }
+        else card.classList.remove('is-on');
+        render();
+      });
+    });
+    render();
+    // first card counts up once the section scrolls into view
+    new IntersectionObserver(function (en, io) { if (en[0].isIntersecting) { io.disconnect(); countUp(cards[0]); } }, { threshold: 0.3 }).observe(root);
+  })();
+
   /* ---------- focus trap helper ---------- */
   var FOCUSABLE = 'a[href],button:not([disabled]),input,select,textarea,[tabindex]:not([tabindex="-1"])';
   function trap(container, e) {
