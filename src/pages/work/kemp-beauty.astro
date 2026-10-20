@@ -4,7 +4,7 @@ import CaseHero from '../../components/CaseHero.astro';
 import CaseNext from '../../components/CaseNext.astro';
 import CaseOngoing from '../../components/CaseOngoing.astro';
 ---
-<BaseLayout title="Kemp Beauty – Gabriel Alisasis" description="Eight Klaviyo flows showed live. A DMARC policy was silently bouncing almost all of it, and the fix ran deeper than the dashboard.">
+<BaseLayout title="Kemp Beauty – Gabriel Alisasis" description="Eleven Klaviyo flows showed live. A DMARC policy was silently bouncing almost all of it, and the fix ran deeper than the dashboard.">
   <div class="page-top-spacer" aria-hidden="true"></div>
   <section id="case">
     <div class="wrap">
@@ -22,14 +22,14 @@ import CaseOngoing from '../../components/CaseOngoing.astro';
                   <h4>Problem</h4>
                   <p>Every marketing email was sent from <code>info@kempbeauty.com</code> – a domain with no DKIM keys in Klaviyo and a DMARC policy of <code>p=reject</code>. Gmail refused all of it:</p>
                   <p style="margin-top:9px"><code>550 5.7.26 Unauthenticated email … not accepted due to DMARC policy</code></p>
-                  <p style="margin-top:9px">Klaviyo showed all eight flows as live the entire time. <strong>Flow status and actual delivery are two different things</strong>, and nothing in the interface surfaced the gap.</p>
+                  <p style="margin-top:9px">Klaviyo showed all eleven flows as live the entire time. <strong>Flow status and actual delivery are two different things</strong>, and nothing in the interface surfaced the gap.</p>
                 </div>
                 <div class="pao-col pao-approach">
                   <h4>Approach</h4>
                   <ul>
                     <li>Audited sending domains and found exactly one verified: <code>mail.kempbeauty.com</code>, DKIM and site-verification records confirmed.</li>
                     <li>Tested authenticating the bare root domain and established it is <strong>impossible, not merely awkward</strong> – CNAME records cannot exist at a zone apex.</li>
-                    <li>Rewrote the sender across <strong>26 messages in 8 flows</strong>, including a live A/B test's variations, keeping reply-to on the real inbox.</li>
+                    <li>Rewrote the sender across <strong>32 messages in 11 flows</strong>, including a live A/B test's variations, keeping reply-to on the real inbox.</li>
                     <li>Traced a <strong>second, separate failure</strong>: double opt-in confirmation emails carry their own sender setting that Klaviyo's API doesn't expose – invisible until you test a real signup.</li>
                   </ul>
                 </div>
@@ -50,7 +50,7 @@ import CaseOngoing from '../../components/CaseOngoing.astro';
                      aria-label="Diagram comparing two sending paths. Before: the Klaviyo flow sends from the unauthenticated root domain, fails the DMARC reject policy, and Gmail returns a 550 bounce. After: the flow sends from the DKIM-verified mail subdomain, passes DMARC, and reaches the inbox.">
                   <rect class="dg-box" x="8" y="86" width="140" height="58"/>
                   <text class="dg-label" x="22" y="110">Klaviyo flow</text>
-                  <text class="dg-sub" x="22" y="126">8 flows · 26 messages</text>
+                  <text class="dg-sub" x="22" y="126">11 flows · 32 messages</text>
 
                   <text class="dg-head" x="212" y="40">BEFORE</text>
                   <rect class="dg-box" x="212" y="50" width="168" height="52"/>

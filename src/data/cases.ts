@@ -23,14 +23,14 @@ export const cases: Case[] = [
   {
     slug: 'kemp-beauty',
     ongoing: {"summary": "The deliverability fix was the start. I've stayed on for Kemp Beauty's storefront and marketing work, shipping improvements on a continuing basis.", "items": ["UI/UX improvements across the storefront", "New landing pages, including a team affiliate page", "Product and content page refinements", "Fixes and continuous iteration on the live theme"]},
-    intro: "A DTC lash brand where I design and build storefront pages and run the email side. I built their eight Klaviyo flows, then made sure they actually deliver — tracing a DMARC policy that was bouncing mail and moving every message to an authenticated sender.",
+    intro: "A DTC lash brand where I design and build storefront pages and run the email side. I built their eleven Klaviyo flows, then made sure they actually deliver — tracing a DMARC policy that was bouncing mail and moving every message to an authenticated sender.",
     quote: "Building the flows was half the job. Making sure every one of them reached an inbox was the other half.",
-    details: [["Sector", "DTC beauty · Shopify"], ["Scope", "Deliverability · theme dev"], ["Fixed", "26 messages across 8 flows"], ["Root cause", "DMARC p=reject, unsigned domain"]],
+    details: [["Sector", "DTC beauty · Shopify"], ["Scope", "Deliverability · theme dev"], ["Fixed", "32 messages across 11 flows"], ["Root cause", "DMARC p=reject, unsigned domain"]],
     alt: "Kemp Beauty homepage hero reading Imagine waking up with perfect lashes over a close-up beauty photograph", client: 'Kemp Beauty', sector: 'DTC beauty · Shopify', url: 'kempbeauty.com',
     tags: 'email shopify', img: 'kemp-beauty-home', w: 1200, h: 750,
     headline: 'Storefront design, new pages and the email flows behind a growing beauty brand',
     summary: 'I design and build pages across their Shopify store, created the Klaviyo flows that welcome, nurture and win back customers, and set up the sending so every one of them lands in the inbox.',
-    metrics: [['8', 'Klaviyo flows built'], ['26', 'automated emails']],
+    metrics: [['11', 'Klaviyo flows built'], ['32', 'automated emails']],
     stack: ['Klaviyo', 'DNS · DMARC', 'Shopify Liquid'],
   },
   {

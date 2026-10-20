@@ -44,8 +44,8 @@ const emailCount = model.reduce((n, b) => n + b.flows.reduce((m, f) => m + (f.ca
 const first = model[0], firstFlow = first.flows[0], firstMail = firstFlow.emails[0];
 const shown = (f: (typeof model)[number]['flows'][number]) => f.emails.filter((e) => e.img);
 
-// the hero fan: one email from the start, middle and end of the customer journey
-const fanPick = [['kemp', 'welcome', 1], ['kemp', 'cart', 4], ['hh', 'checkout', 1]] as const;
+// the hero fan: the strongest-looking welcome email in the middle, a campaign and the other brand either side
+const fanPick = [['kemp', 'halloween', 1], ['kemp', 'welcome', 2], ['hh', 'checkout', 1]] as const;
 const fan = fanPick.map(([b, f, n]) => {
   const brand = model.find((x) => x.slug === b)!, mail = brand.flows.find((x) => x.slug === f)!.emails[n - 1];
   return { brand, mail };
@@ -276,7 +276,7 @@ const build = [
         <div>
           <span class="sec-kicker">Deliverability</span>
           <h2>A live flow is not a delivered email</h2>
-          <p>Kemp Beauty’s 8 flows showed “live” in Klaviyo while Gmail bounced the mail. I traced it to the sender domain and moved all 26 emails onto an authenticated one.</p>
+          <p>Kemp Beauty’s 11 flows showed “live” in Klaviyo while Gmail bounced the mail. I traced it to the sender domain and moved all 32 emails onto an authenticated one.</p>
         </div>
       </div>
       <div class="mx-lanes reveal">

@@ -90,6 +90,7 @@ gsap.registerPlugin(ScrollTrigger);
         once: true,
         onEnter: function (batch) {
           gsap.to(batch, { opacity: 1, y: 0, duration: 0.8, ease: 'power3.out', stagger: 0.08, clearProps: 'transform' });
+          batch.forEach(function (el) { el.classList.add('seen'); }); // hook for CSS that plays after the reveal
         }
       });
     } else {
@@ -1078,69 +1079,94 @@ gsap.registerPlugin(ScrollTrigger);
     });
   })();
 
-  /* ---------- command palette ---------- */
-  var cmdk = $('#cmdk'), cmdkInput = $('#cmdkInput'), cmdkList = $('#cmdkList');
-  var cmdkReturn = null, sel = 0, results = [];
+  /* ---------- site search (header field + results dropdown) ---------- */
+  var search = $('#siteSearch'), searchInput = $('#siteSearchInput'), searchPop = $('#siteSearchPop'), searchList = $('#siteSearchList');
+  var searchToggle = $('#searchToggle'), headerBar = $('header');
+  var collapsed = window.matchMedia('(max-width:960px)');
+  var sel = 0, results = [];
   var ITEMS = [
-    { k: 'Go', t: 'Home', href: '/' },
-    { k: 'Go', t: 'Work', href: '/work' },
-    { k: 'Go', t: 'About', href: '/about' },
-    { k: 'Go', t: 'Email marketing – every Klaviyo flow email', href: '/work/email-marketing' },
-    { k: 'Go', t: 'Contact', href: '#contact' },
-    { k: 'Case', t: 'Cordelia ARC – React + Supabase platform', href: '/work/cordelia-arc' },
-    { k: 'Case', t: 'Kemp Beauty – Klaviyo deliverability rescue', href: '/work/kemp-beauty' },
-    { k: 'Case', t: 'Sell Ready AI – Shopify content platform', href: '/work/sell-ready-ai' },
-    { k: 'Case', t: 'Orange Ashes – GoHighLevel store', href: '/work/orange-ashes' },
-    { k: 'Link', t: 'Email gabb.alisasis@gmail.com', href: 'mailto:gabb.alisasis@gmail.com', ext: true },
-    { k: 'Link', t: 'Call +63 966 198 9672', href: 'tel:+639661989672', ext: true },
-    { k: 'Link', t: 'Open cordeliaarc.com', href: 'https://cordeliaarc.com', ext: true },
-    { k: 'Link', t: 'Open kempbeauty.com', href: 'https://kempbeauty.com', ext: true },
-    { k: 'Link', t: 'Open sellready.ai', href: 'https://sellready.ai', ext: true },
-    { k: 'Link', t: 'Open shop.orangeashes.com', href: 'https://shop.orangeashes.com', ext: true }
+    { g: 'Pages', t: 'Home', d: 'Automation that actually runs', href: '/' },
+    { g: 'Pages', t: 'Work', d: 'Case studies, automations and projects', href: '/work' },
+    { g: 'Pages', t: 'Email marketing', d: 'Every Klaviyo flow email for Kemp Beauty and The Healthy Hand', href: '/work/email-marketing', kw: 'emails klaviyo flows campaigns newsletter inbox welcome abandoned cart' },
+    { g: 'Pages', t: 'About', d: 'How I work, the tools I use, and common questions', href: '/about', kw: 'skills stack faq process' },
+    { g: 'Case studies', t: 'Cordelia ARC', d: 'React + Supabase platform for a care agency', href: '/work/cordelia-arc', kw: 'healthcare portal hipaa' },
+    { g: 'Case studies', t: 'Kemp Beauty', d: 'Shopify pages, 11 Klaviyo flows and the DMARC fix', href: '/work/kemp-beauty', kw: 'lashes email deliverability' },
+    { g: 'Case studies', t: 'Sell Ready AI', d: 'Shopify marketing site and podcast platform', href: '/work/sell-ready-ai' },
+    { g: 'Case studies', t: 'Orange Ashes', d: 'Digital-product store inside GoHighLevel', href: '/work/orange-ashes', kw: 'ghl crm' },
+    { g: 'Contact', t: 'Send a message', d: 'The contact form at the bottom of this page', href: '#contact', kw: 'contact hire' },
+    { g: 'Contact', t: 'gabb.alisasis@gmail.com', d: 'Email me directly', href: 'mailto:gabb.alisasis@gmail.com', ext: true, kw: 'contact' },
+    { g: 'Contact', t: '+63 966 198 9672', d: 'Call or message', href: 'tel:+639661989672', ext: true, kw: 'contact phone' },
+    { g: 'Live sites', t: 'cordeliaarc.com', d: 'Cordelia ARC', href: 'https://cordeliaarc.com', ext: true },
+    { g: 'Live sites', t: 'kempbeauty.com', d: 'Kemp Beauty', href: 'https://kempbeauty.com', ext: true },
+    { g: 'Live sites', t: 'sellready.ai', d: 'Sell Ready AI', href: 'https://sellready.ai', ext: true },
+    { g: 'Live sites', t: 'shop.orangeashes.com', d: 'Orange Ashes', href: 'https://shop.orangeashes.com', ext: true }
   ];
-  function fuzzy(q, s) {
-    q = q.toLowerCase(); s = s.toLowerCase();
-    if (!q) return true;
-    var i = 0;
-    for (var j = 0; j < s.length && i < q.length; j++) { if (s[j] === q[i]) i++; }
-    return i === q.length;
+  function esc(s) { return s.replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+  // wrap each term's first hit in <mark>, escaping everything around it
+  function hl(text, terms) {
+    var lo = text.toLowerCase(), hits = [], out = '', at = 0;
+    terms.forEach(function (t) { var i = lo.indexOf(t); if (i > -1) hits.push([i, i + t.length]); });
+    hits.sort(function (a, b) { return a[0] - b[0]; }).forEach(function (h) {
+      var from = Math.max(h[0], at); if (h[1] <= from) return;
+      out += esc(text.slice(at, from)) + '<mark>' + esc(text.slice(from, h[1])) + '</mark>'; at = h[1];
+    });
+    return out + esc(text.slice(at));
   }
-  function renderCmdk() {
-    var q = cmdkInput ? cmdkInput.value.trim() : '';
-    results = ITEMS.filter(function (it) { return fuzzy(q, it.k + ' ' + it.t); });
-    if (sel >= results.length) sel = 0;
+  function setSel(i) {
+    var opts = $$('[role="option"]', searchList);
+    sel = i;
+    opts.forEach(function (o, n) { o.setAttribute('aria-selected', n === i ? 'true' : 'false'); });
+    if (opts[i]) { searchInput.setAttribute('aria-activedescendant', opts[i].id); opts[i].scrollIntoView({ block: 'nearest' }); }
+  }
+  function showPop(open) {
+    searchPop.hidden = !open;
+    searchInput.setAttribute('aria-expanded', open ? 'true' : 'false');
+    if (!open) searchInput.removeAttribute('aria-activedescendant');
+  }
+  function renderSearch() {
+    var q = searchInput.value.trim().toLowerCase();
+    if (!q) { results = []; showPop(false); return; }
+    var terms = q.split(/\s+/);
+    results = ITEMS.filter(function (it) {
+      var hay = (it.t + ' ' + it.d + ' ' + (it.kw || '')).toLowerCase();
+      return terms.every(function (t) { return hay.indexOf(t) > -1; });
+    });
     if (!results.length) {
-      cmdkList.innerHTML = '<li class="cmdk-empty" role="presentation">No matches</li>';
-      return;
+      searchList.innerHTML = '<li class="ss-empty" role="presentation">No results for “' + esc(searchInput.value.trim()) + '”</li>';
+      showPop(true); return;
     }
-    cmdkList.innerHTML = results.map(function (it, i) {
-      return '<li role="option" id="cmdk-o' + i + '" aria-selected="' + (i === sel) + '" data-i="' + i + '">' +
-        '<span class="k">' + it.k + '</span><span class="t">' + it.t + '</span></li>';
-    }).join('');
-    var act = cmdkList.children[sel];
-    if (act && act.scrollIntoView) act.scrollIntoView({ block: 'nearest' });
-    if (cmdkInput) cmdkInput.setAttribute('aria-activedescendant', 'cmdk-o' + sel);
+    var html = '', group = '';
+    results.forEach(function (it, i) {
+      if (it.g !== group) { group = it.g; html += '<li class="ss-group" role="presentation">' + group + '</li>'; }
+      html += '<li class="ss-opt" role="option" id="ss-o' + i + '" data-i="' + i + '" aria-selected="false">' +
+        '<b>' + hl(it.t, terms) + (it.ext ? '<i aria-hidden="true">↗</i>' : '') + '</b><span>' + hl(it.d, terms) + '</span></li>';
+    });
+    searchList.innerHTML = html;
+    showPop(true); setSel(0);
   }
-  function openCmdk() {
-    if (!cmdk) return;
-    cmdkReturn = document.activeElement;
-    cmdk.hidden = false; cmdk.classList.add('open');
-    requestAnimationFrame(function () { cmdk.classList.add('show'); });
-    if (cmdkInput) { cmdkInput.value = ''; }
-    sel = 0; renderCmdk();
-    if (cmdkInput) cmdkInput.focus();
+  function openBar() {
+    if (navLinks && navLinks.classList.contains('open')) navToggle.click();
+    headerBar.classList.add('search-open');
+    searchToggle.setAttribute('aria-expanded', 'true');
+    searchInput.focus();
   }
-  function closeCmdk() {
-    if (!cmdk || !cmdk.classList.contains('open')) return;
-    cmdk.classList.remove('show');
-    setTimeout(function () {
-      cmdk.classList.remove('open'); cmdk.hidden = true;
-      if (cmdkReturn && cmdkReturn.focus) { cmdkReturn.focus(); cmdkReturn = null; }
-    }, reduce ? 0 : 160);
+  function closeBar() {
+    if (!headerBar.classList.contains('search-open')) return;
+    headerBar.classList.remove('search-open');
+    searchToggle.setAttribute('aria-expanded', 'false');
+  }
+  function closeSearch(clear) {
+    showPop(false);
+    if (clear) searchInput.value = '';
+    closeBar();
+  }
+  function focusSearch() {
+    if (!search) return;
+    if (collapsed.matches) openBar(); else { searchInput.focus(); searchInput.select(); }
   }
   function runItem(it) {
     if (!it) return;
-    closeCmdk();
+    closeSearch(true); searchInput.blur();
     if (it.ext) { window.open(it.href, it.href.indexOf('http') === 0 ? '_blank' : '_self', 'noopener'); return; }
     if (it.href.charAt(0) === '#') {
       var tgt = $(it.href);
@@ -1149,44 +1175,49 @@ gsap.registerPlugin(ScrollTrigger);
     }
     window.location.assign(it.href);
   }
-  var cmdkBtn = $('#cmdkOpen');
-  if (cmdkBtn) cmdkBtn.addEventListener('click', openCmdk);
-  if (cmdkInput) {
-    cmdkInput.addEventListener('input', function () { sel = 0; renderCmdk(); });
-    cmdkInput.addEventListener('keydown', function (e) {
-      if (e.key === 'ArrowDown') { e.preventDefault(); sel = Math.min(results.length - 1, sel + 1); renderCmdk(); }
-      else if (e.key === 'ArrowUp') { e.preventDefault(); sel = Math.max(0, sel - 1); renderCmdk(); }
-      else if (e.key === 'Enter') { e.preventDefault(); runItem(results[sel]); }
+  if (search) {
+    search.addEventListener('submit', function (e) { e.preventDefault(); runItem(results[sel]); });
+    searchInput.addEventListener('input', renderSearch);
+    searchInput.addEventListener('focus', function () { if (searchInput.value.trim()) renderSearch(); });
+    searchInput.addEventListener('keydown', function (e) {
+      var n = $$('[role="option"]', searchList).length;
+      if (e.key === 'ArrowDown' && n) { e.preventDefault(); if (searchPop.hidden) renderSearch(); else setSel((sel + 1) % n); }
+      else if (e.key === 'ArrowUp' && n) { e.preventDefault(); setSel((sel - 1 + n) % n); }
+      else if (e.key === 'Escape') {
+        e.preventDefault(); e.stopPropagation();
+        if (!searchPop.hidden) showPop(false); else { closeSearch(true); searchInput.blur(); }
+      }
     });
+    searchList.addEventListener('mousedown', function (e) { e.preventDefault(); }); // keep focus in the field
+    searchList.addEventListener('click', function (e) {
+      var li = e.target.closest('[data-i]');
+      if (li) runItem(results[+li.getAttribute('data-i')]);
+    });
+    searchList.addEventListener('mousemove', function (e) {
+      var li = e.target.closest('[data-i]');
+      if (li && +li.getAttribute('data-i') !== sel) setSel(+li.getAttribute('data-i'));
+    });
+    document.addEventListener('pointerdown', function (e) {
+      if (search.contains(e.target) || (searchToggle && searchToggle.contains(e.target))) return;
+      showPop(false); closeBar();
+    });
+    if (searchToggle) searchToggle.addEventListener('click', function () {
+      if (headerBar.classList.contains('search-open')) closeSearch(false); else openBar();
+    });
+    if (navToggle) navToggle.addEventListener('click', function () { if (navLinks.classList.contains('open')) closeSearch(false); });
   }
-  if (cmdkList) {
-    cmdkList.addEventListener('click', function (e) {
-      var li = e.target.closest('li[data-i]');
-      if (li) runItem(results[parseInt(li.getAttribute('data-i'), 10)]);
-    });
-    cmdkList.addEventListener('mousemove', function (e) {
-      var li = e.target.closest('li[data-i]');
-      if (li) { var i = parseInt(li.getAttribute('data-i'), 10); if (i !== sel) { sel = i; renderCmdk(); } }
-    });
-  }
-  if (cmdk) cmdk.addEventListener('click', function (e) { if (e.target === cmdk) closeCmdk(); });
 
   /* ---------- global keys ---------- */
   document.addEventListener('keydown', function (e) {
-    if ((e.metaKey || e.ctrlKey) && (e.key === 'k' || e.key === 'K')) {
-      e.preventDefault();
-      if (cmdk && cmdk.classList.contains('open')) closeCmdk(); else openCmdk();
-      return;
+    var t = e.target, typing = t && (/^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName) || t.isContentEditable);
+    if (((e.metaKey || e.ctrlKey) && (e.key === 'k' || e.key === 'K')) || (e.key === '/' && !typing && !e.metaKey && !e.ctrlKey && !e.altKey)) {
+      e.preventDefault(); focusSearch(); return;
     }
     if (e.key === 'Escape') {
       if (lb && lb.classList.contains('open')) { closeLightbox(); return; }
-      if (cmdk && cmdk.classList.contains('open')) { closeCmdk(); return; }
       if (navLinks && navLinks.classList.contains('open')) { navToggle.click(); return; }
     }
-    if (e.key === 'Tab') {
-      if (lb && lb.classList.contains('open')) trap(lb, e);
-      else if (cmdk && cmdk.classList.contains('open')) trap(cmdk, e);
-    }
+    if (e.key === 'Tab' && lb && lb.classList.contains('open')) trap(lb, e);
   });
 
   /* ---------- contact form (FormSubmit.co — real POST, so first-time email verification works) ---------- */
