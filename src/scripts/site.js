@@ -806,6 +806,161 @@ gsap.registerPlugin(ScrollTrigger);
     new IntersectionObserver(function (en, io) { if (en[0].isIntersecting) { io.disconnect(); countUp(cards[0]); } }, { threshold: 0.3 }).observe(root);
   })();
 
+  /* ---------- email marketing: inbox explorer ---------- */
+  (function () {
+    var app = $('#mxApp'), dataEl = $('#mxData');
+    if (!app || !dataEl) return;
+    var data;
+    try { data = JSON.parse(dataEl.textContent); } catch (err) { return; }
+    var read = $('#mxRead'), stage = $('#mxStage'), screen = $('#mxScreen'), img = $('#mxImg');
+    var subj = $('#mxSubj'), step = $('#mxStep'), job = $('#mxJob'), av = $('#mxAv'), sender = $('#mxSender');
+    var prevB = $('#mxPrev'), nextB = $('#mxNext'), backB = $('#mxBack');
+    var narrow = window.matchMedia('(max-width: 900px)');
+    var st = { b: app.dataset.brand, f: app.dataset.flow, n: +app.dataset.n, dev: 'd' };
+    var sheetReturn = null;
+
+    function brandOf(s) { return data.filter(function (b) { return b.slug === s; })[0]; }
+    function flowOf(b, s) { return b && b.flows.filter(function (f) { return f.slug === s; })[0]; }
+    function shown(f) { return f.emails.filter(function (e) { return e.img; }); }
+    function cur() { return flowOf(brandOf(st.b), st.f).emails[st.n - 1]; }
+
+    function setImg() {
+      var e = cur(), dev = narrow.matches ? 'm' : st.dev, src = e.img + '-' + dev + '.webp';
+      if (img.getAttribute('src') !== src) {
+        screen.classList.add('is-loading');
+        img.onload = img.onerror = function () { screen.classList.remove('is-loading'); };
+        img.width = e[dev][0]; img.height = e[dev][1];
+        img.src = src; img.alt = 'The email “' + e.subject + '”';
+        screen.scrollTop = 0;
+      }
+      stage.dataset.dev = dev;
+      $$('.mx-device button', app).forEach(function (b) { b.setAttribute('aria-pressed', b.dataset.dev === st.dev ? 'true' : 'false'); });
+      // warm the next email so arrowing through feels instant
+      var list = shown(flowOf(brandOf(st.b), st.f)), i = list.indexOf(e);
+      if (list[i + 1]) (new Image()).src = list[i + 1].img + '-' + dev + '.webp';
+    }
+
+    function render(updateHash) {
+      var b = brandOf(st.b), f = flowOf(b, st.f), e = f.emails[st.n - 1];
+      $$('.mx-acct', app).forEach(function (el) { el.setAttribute('aria-pressed', el.dataset.brand === st.b ? 'true' : 'false'); });
+      $$('.mx-folders ul', app).forEach(function (ul) { ul.hidden = ul.dataset.brand !== st.b; });
+      $$('.mx-folders ul[data-brand="' + st.b + '"] .mx-folder', app).forEach(function (el) { el.setAttribute('aria-current', el.dataset.flow === st.f ? 'true' : 'false'); });
+      $$('.mx-flow', app).forEach(function (el) {
+        var on = el.dataset.brand === st.b && el.dataset.flow === st.f;
+        el.hidden = !on;
+        if (on) $$('.mx-row', el).forEach(function (r) { r.setAttribute('aria-current', +r.dataset.n === st.n ? 'true' : 'false'); });
+      });
+      subj.textContent = e.subject;
+      step.textContent = 'Email ' + e.n + ' of ' + f.emails.length + ' · ' + e.when;
+      av.textContent = b.initials; av.style.setProperty('--tint', b.tint); sender.textContent = b.sender;
+      job.textContent = '';
+      if (e.job) { var t = document.createElement('span'); t.className = 'mx-job'; t.textContent = e.job; job.appendChild(t); }
+      if (e.offer) { var o = document.createElement('span'); o.className = 'mx-offer'; o.textContent = e.offer + '% off'; job.appendChild(o); }
+      var list = shown(f), i = list.indexOf(e);
+      prevB.disabled = i <= 0; nextB.disabled = i >= list.length - 1;
+      setImg();
+      if (updateHash) history.replaceState(null, '', '#' + st.b + '/' + st.f + '/' + st.n);
+    }
+
+    function select(b, f, n) {
+      var brand = brandOf(b), flow = flowOf(brand, f);
+      if (!flow) return false;
+      var list = shown(flow);
+      var e = flow.emails[(n || 0) - 1];
+      if (!e || !e.img) e = list[0];
+      st.b = b; st.f = f; st.n = e.n;
+      return true;
+    }
+
+    function openSheet() {
+      if (!narrow.matches || app.classList.contains('is-reading')) return;
+      sheetReturn = document.activeElement;
+      app.classList.add('is-reading');
+      read.setAttribute('role', 'dialog'); read.setAttribute('aria-modal', 'true');
+      lockScroll();
+      backB.focus();
+    }
+    function closeSheet() {
+      if (!app.classList.contains('is-reading')) return;
+      app.classList.remove('is-reading');
+      read.removeAttribute('role'); read.removeAttribute('aria-modal');
+      unlockScroll();
+      if (sheetReturn && sheetReturn.focus) sheetReturn.focus();
+      sheetReturn = null;
+    }
+
+    function move(d) {
+      var list = shown(flowOf(brandOf(st.b), st.f)), i = list.indexOf(cur()) + d;
+      if (!list[i]) return false;
+      st.n = list[i].n; render(true);
+      return true;
+    }
+
+    app.addEventListener('click', function (ev) {
+      var acct = ev.target.closest('.mx-acct');
+      if (acct) { var b = brandOf(acct.dataset.brand); select(b.slug, b.flows[0].slug); render(true); return; }
+      var folder = ev.target.closest('.mx-folder');
+      if (folder) { select(st.b, folder.dataset.flow); render(true); return; }
+      var row = ev.target.closest('.mx-row');
+      if (row) { st.n = +row.dataset.n; render(true); openSheet(); return; }
+      var dev = ev.target.closest('.mx-device button');
+      if (dev) { st.dev = dev.dataset.dev; setImg(); }
+    });
+    prevB.addEventListener('click', function () { move(-1); });
+    nextB.addEventListener('click', function () { move(1); });
+    backB.addEventListener('click', closeSheet);
+
+    // arrow keys walk the inbox list like a mail client
+    $('.mx-list', app).addEventListener('keydown', function (ev) {
+      if (ev.key !== 'ArrowDown' && ev.key !== 'ArrowUp') return;
+      if (!ev.target.closest('.mx-row')) return;
+      ev.preventDefault();
+      if (move(ev.key === 'ArrowDown' ? 1 : -1)) {
+        var r = $('.mx-flow:not([hidden]) .mx-row[aria-current="true"]', app);
+        if (r) { r.focus(); r.scrollIntoView({ block: 'nearest' }); }
+      }
+    });
+    read.addEventListener('keydown', function (ev) {
+      if (!app.classList.contains('is-reading')) return;
+      if (ev.key === 'Escape') { ev.stopPropagation(); closeSheet(); }
+      else if (ev.key === 'Tab') trap(read, ev);
+    });
+    narrow.addEventListener('change', function () { if (!narrow.matches) closeSheet(); setImg(); });
+
+    // deep links: #hh/checkout/4
+    function fromHash(scroll) {
+      var p = decodeURIComponent(location.hash.slice(1)).split('/');
+      if (p.length < 2 || !select(p[0], p[1], +p[2])) return;
+      render(false);
+      if (scroll) setTimeout(function () { app.scrollIntoView({ block: 'start' }); }, 60);
+    }
+    fromHash(true);
+    window.addEventListener('hashchange', function () { fromHash(true); });
+    if (narrow.matches) setImg();
+  })();
+
+  /* ---------- email marketing: offer ladder tooltips ---------- */
+  $$('.mx-plot').forEach(function (plot) {
+    var tip = $('.mx-tip', plot);
+    function show(pt) {
+      var parts = pt.getAttribute('data-tip').split('|'), box = plot.getBoundingClientRect(), r = $('.mx-mark', pt).getBoundingClientRect();
+      tip.innerHTML = '';
+      var b = document.createElement('b'); b.textContent = parts[0]; tip.appendChild(b);
+      tip.appendChild(document.createTextNode(parts[1]));
+      var x = r.left + r.width / 2 - box.left, half = Math.min(120, box.width / 2);
+      tip.style.left = Math.max(half, Math.min(box.width - half, x)) + 'px';
+      tip.style.top = (r.top - box.top) + 'px';
+      tip.classList.add('is-on');
+    }
+    function hide() { tip.classList.remove('is-on'); }
+    $$('.mx-pt', plot).forEach(function (pt) {
+      pt.addEventListener('pointerenter', function () { show(pt); });
+      pt.addEventListener('pointerleave', hide);
+      pt.addEventListener('focus', function () { show(pt); });
+      pt.addEventListener('blur', hide);
+    });
+  });
+
   /* ---------- focus trap helper ---------- */
   var FOCUSABLE = 'a[href],button:not([disabled]),input,select,textarea,[tabindex]:not([tabindex="-1"])';
   function trap(container, e) {
@@ -930,6 +1085,7 @@ gsap.registerPlugin(ScrollTrigger);
     { k: 'Go', t: 'Home', href: '/' },
     { k: 'Go', t: 'Work', href: '/work' },
     { k: 'Go', t: 'About', href: '/about' },
+    { k: 'Go', t: 'Email marketing – every Klaviyo flow email', href: '/work/email-marketing' },
     { k: 'Go', t: 'Contact', href: '#contact' },
     { k: 'Case', t: 'Cordelia ARC – React + Supabase platform', href: '/work/cordelia-arc' },
     { k: 'Case', t: 'Kemp Beauty – Klaviyo deliverability rescue', href: '/work/kemp-beauty' },

@@ -1,6 +1,11 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { cases, roles } from '../../data/cases';
+import { brands } from '../../data/emails';
+
+const emailFlows = brands.reduce((n, b) => n + b.flows.length, 0);
+const emailTotal = brands.reduce((n, b) => n + b.flows.reduce((m, f) => m + f.emails.length, 0), 0);
+const emailThumbs = ['hh/welcome-1', 'hh/checkout-1', 'hh/winback-9'];
 
 const alts: Record<string, string> = {
     "workflow-edc-ghl": "GoHighLevel workflow builder showing the EDC time-slot form submission trigger branching into contact-tag actions",
@@ -96,6 +101,17 @@ const workflows = [
         ))}
       </div>
       <p class="case-empty" id="caseEmpty" hidden>No case studies in this category yet.</p>
+      <a class="mx-band reveal" href="/work/email-marketing">
+        <span class="mx-band-stack" aria-hidden="true">
+          {emailThumbs.map((t) => <img src={`/images/email/${t}-m.webp`} width="780" height="1560" alt="" loading="lazy" decoding="async" />)}
+        </span>
+        <span class="mx-band-copy">
+          <span class="sec-kicker">Email marketing · Klaviyo</span>
+          <strong>Open the inbox: every flow email, as customers see it</strong>
+          <span class="mx-band-meta">{emailFlows} flows · {emailTotal} emails · welcome, cart, browse, win-back</span>
+        </span>
+        <span class="mx-band-go" aria-hidden="true">→</span>
+      </a>
     </div>
   </section>
 
