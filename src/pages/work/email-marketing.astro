@@ -9,6 +9,7 @@ const ICON: Record<Flow['icon'], string> = {
   cart: '<circle cx="9" cy="20" r="1.4"/><circle cx="18" cy="20" r="1.4"/><path d="M2 3h3l2.6 12.4a1 1 0 0 0 1 .8h9.7a1 1 0 0 0 1-.8L21 7H6"/>',
   bag: '<path d="M5 8h14l-1 13H6L5 8z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/>',
   heart: '<path d="M12 20s-7-4.5-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.5-7 10-7 10z"/>',
+  spark: '<path d="M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.5 2.5M15.5 15.5L18 18M6 18l2.5-2.5M15.5 8.5L18 6"/>',
 };
 const icon = (k: Flow['icon']) => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICON[k]}</svg>`;
 
@@ -24,34 +25,36 @@ const model = brands.map((b) => ({
   slug: b.slug, name: b.name, initials: b.initials, tint: b.tint, sender: b.sender,
   flows: b.flows.map((f) => {
     const at = timeline(f);
+    const campaign = f.kind === 'campaign';
     return {
-      slug: f.slug, name: f.name, trigger: f.trigger, goal: f.goal, startLabel: f.startLabel,
-      days: Math.round(at[at.length - 1] / 24),
+      slug: f.slug, name: f.name, trigger: f.trigger, goal: f.goal, startLabel: f.startLabel, campaign,
+      days: campaign ? 0 : Math.round(at[at.length - 1] / 24),
       emails: f.emails.map((e, i) => ({
         n: i + 1, subject: e.subject, preview: e.preview ?? '', offer: e.offer ?? 0, job: e.job ?? '',
         img: e.img ? `/images/email/${b.slug}/${e.img}` : '', d: e.d, m: e.m,
-        at: atLabel(at[i]), when: whenLine(i + 1, e.wait), h: at[i],
+        at: e.label ?? atLabel(at[i]), h: at[i],
+        when: campaign ? `Campaign email ${i + 1}` : whenLine(i + 1, e.wait),
       })),
     };
   }),
 }));
 
-const flowCount = model.reduce((n, b) => n + b.flows.length, 0);
-const emailCount = model.reduce((n, b) => n + b.flows.reduce((m, f) => m + f.emails.length, 0), 0);
+const flowCount = model.reduce((n, b) => n + b.flows.filter((f) => !f.campaign).length, 0);
+const emailCount = model.reduce((n, b) => n + b.flows.reduce((m, f) => m + (f.campaign ? 0 : f.emails.length), 0), 0);
 const first = model[0], firstFlow = first.flows[0], firstMail = firstFlow.emails[0];
 const shown = (f: (typeof model)[number]['flows'][number]) => f.emails.filter((e) => e.img);
 
 // the hero fan: one email from the start, middle and end of the customer journey
-const fanPick = [['hh', 'welcome', 1], ['hh', 'checkout', 1], ['hh', 'winback', 9]] as const;
+const fanPick = [['kemp', 'welcome', 1], ['kemp', 'cart', 4], ['hh', 'checkout', 1]] as const;
 const fan = fanPick.map(([b, f, n]) => {
   const brand = model.find((x) => x.slug === b)!, mail = brand.flows.find((x) => x.slug === f)!.emails[n - 1];
   return { brand, mail };
 });
 
 // offer ladders: flows where every step was rendered, so each offer level is read from the email itself
-const ladders = ['checkout', 'browse'].map((slug) => {
-  const f = first.flows.find((x) => x.slug === slug)!;
-  return { name: f.name, startLabel: f.startLabel, steps: f.emails.map((e) => ({ n: e.n, h: e.h, offer: e.offer, subject: e.subject, at: e.at })) };
+const ladders = ([['kemp', 'cart'], ['hh', 'checkout'], ['hh', 'browse']] as const).map(([b, slug]) => {
+  const brand = model.find((x) => x.slug === b)!, f = brand.flows.find((x) => x.slug === slug)!;
+  return { brand: brand.name, name: f.name, startLabel: f.startLabel, steps: f.emails.map((e) => ({ n: e.n, h: e.h, offer: e.offer, subject: e.subject, at: e.at })) };
 });
 const LW = 520, LH = 190, PAD = { l: 40, r: 12, t: 12, b: 4 };
 const xMax = 20 * 24;
@@ -59,7 +62,7 @@ const lx = (h: number) => PAD.l + (Math.sqrt(h) / Math.sqrt(xMax)) * (LW - PAD.l
 const ly = (o: number) => PAD.t + (1 - o / 22) * (LH - PAD.t - PAD.b);
 const xTicks: [number, string][] = [[1, '1 h'], [24, '1 d'], [72, '3 d'], [168, '7 d'], [336, '14 d'], [480, '20 d']];
 const stepPath = (steps: { h: number; offer: number }[]) => {
-  let d = `M${lx(0)} ${ly(0)} L${lx(steps[0].h)} ${ly(0)} L${lx(steps[0].h)} ${ly(steps[0].offer)}`;
+  let d = `M${lx(0)} ${ly(0)} L${lx(steps[0].h)} ${ly(0)} L${lx(steps[0].h)} ${ly(steps[0].offer)}`; // flat at 0 until the first offer
   for (let i = 1; i < steps.length; i++) d += ` L${lx(steps[i].h)} ${ly(steps[i - 1].offer)} L${lx(steps[i].h)} ${ly(steps[i].offer)}`;
   return d + ` L${lx(xMax)} ${ly(steps[steps.length - 1].offer)}`;
 };
@@ -82,7 +85,7 @@ const build = [
         <div class="breadcrumb-head mx-crumb"><a href="/work">← All work</a></div>
         <span class="sec-kicker reveal">Email marketing · Klaviyo</span>
         <h1 class="reveal">Emails that follow up for you, <span class="accent">and actually reach the inbox.</span></h1>
-        <p class="work-lede reveal">Welcome, browse, checkout, post-purchase and win-back flows I built in Klaviyo. Every email on this page is the real one, rendered from the live account.</p>
+        <p class="work-lede reveal">Welcome, browse, cart, post-purchase, replenishment and win-back flows I built in Klaviyo for Kemp Beauty and The Healthy Hand. Every email on this page is the real one, rendered from the live account.</p>
         <div class="mx-hero-ctas reveal">
           <a class="btn btn-primary" href="#inbox">Open the inbox ↓</a>
           <a class="btn btn-ghost" href="#deliver">Why they arrive</a>
@@ -97,7 +100,7 @@ const build = [
       <div class="mx-fan reveal" aria-hidden="true">
         {fan.map(({ brand, mail }, i) => (
           <figure class="mx-fan-phone" style={`--i:${i - 1}`}>
-            <div class="mx-fan-notif"><span class="mx-av" style={`--tint:${brand.tint}`}>{brand.initials}</span><span><b>{brand.sender}</b>{mail.subject}</span><time>{mail.at}</time></div>
+            <div class="mx-fan-notif"><span class="mx-av" style={`--tint:${brand.tint}`}>{brand.initials}</span><span><b>{brand.sender}</b>{mail.subject}</span><time>{mail.at === 'Instantly' ? 'now' : mail.at}</time></div>
             <img src={`${mail.img}-m.webp`} width={mail.m![0]} height={mail.m![1]} alt="" loading="eager" decoding="async" />
           </figure>
         ))}
@@ -135,8 +138,9 @@ const build = [
           <nav class="mx-folders" aria-label="Flows">
             {model.map((b, bi) => (
               <ul data-brand={b.slug} hidden={bi !== 0}>
+                <li class="mx-folder-sep">Flows</li>
                 {b.flows.map((f, fi) => (
-                  <li>
+                  <li class={f.campaign && !b.flows[fi - 1]?.campaign ? 'mx-folder-gap' : undefined}>
                     <button class="mx-folder" type="button" data-flow={f.slug} aria-current={bi === 0 && fi === 0 ? 'true' : 'false'}>
                       <span class="mx-folder-ico" set:html={icon(brands[bi].flows[fi].icon)} />
                       <span class="mx-folder-name">{f.name}</span>
@@ -155,7 +159,7 @@ const build = [
                   <h3>{f.name}</h3>
                   <p>{f.goal}</p>
                   <div class="mx-flow-meta">
-                    <span class="mx-trigger"><b>Trigger</b>{f.trigger}</span>
+                    <span class="mx-trigger"><b>{f.campaign ? 'Send' : 'Trigger'}</b>{f.trigger}</span>
                     <span>{f.emails.length} {f.emails.length === 1 ? 'email' : 'emails'}{f.days > 0 && ` · over ${f.days} days`}</span>
                     {shown(f).length < f.emails.length && <span>{shown(f).length} previewed</span>}
                   </div>
@@ -216,7 +220,7 @@ const build = [
           </article>
         </div>
       </div>
-      <p class="mx-note">Rendered from Klaviyo with a placeholder first name. Discount codes are masked.</p>
+      <p class="mx-note">Rendered from Klaviyo with a placeholder first name and one sample cart item. Discount codes are masked.</p>
     </div>
     <script type="application/json" id="mxData" set:html={JSON.stringify(model)} />
   </section>
@@ -228,13 +232,13 @@ const build = [
         <div>
           <span class="sec-kicker">The offer ladder</span>
           <h2>Discounts climb only for people who don’t buy</h2>
-          <p>Each dot is an email. Order at any step and Klaviyo takes them out of the flow, so a day-one buyer never sees the 20% code.</p>
+          <p>Each dot is an email. Kemp Beauty holds its 10% back until day two; The Healthy Hand steps from 10% to 20%. Either way, ordering at any step takes them out of the flow, so early buyers never see the bigger code.</p>
         </div>
       </div>
       <div class="mx-ladders">
         {ladders.map((l) => (
           <figure class="mx-ladder reveal">
-            <figcaption><b>{l.name}</b><span>Discount by time since “{l.startLabel.toLowerCase()}”</span></figcaption>
+            <figcaption><span class="mx-ladder-brand">{l.brand}</span><b>{l.name}</b><span>Discount by time since “{l.startLabel.toLowerCase()}”</span></figcaption>
             <div class="mx-plot">
               <svg viewBox={`0 0 ${LW} ${LH}`} role="img" aria-label={`${l.name}: ${l.steps.map((s) => `${s.at} ${s.offer}%`).join(', ')}`}>
                 {[10, 15, 20].map((o) => <line class="mx-grid" x1={PAD.l} x2={LW - PAD.r} y1={ly(o)} y2={ly(o)} />)}
@@ -242,13 +246,13 @@ const build = [
                 <path class="mx-area" d={`${stepPath(l.steps)} L${lx(xMax)} ${ly(0)} Z`} />
                 <path class="mx-line" d={stepPath(l.steps)} />
                 {l.steps.map((s) => (
-                  <g class="mx-pt" tabindex="0" aria-label={`Email ${s.n}, ${s.at}, ${s.offer}% off: ${s.subject}`} data-tip={`#${s.n} · ${s.at} · ${s.offer}% off|${s.subject}`}>
+                  <g class="mx-pt" tabindex="0" aria-label={`Email ${s.n}, ${s.at}, ${s.offer ? `${s.offer}% off` : 'no offer'}: ${s.subject}`} data-tip={`#${s.n} · ${s.at} · ${s.offer ? `${s.offer}% off` : 'no offer'}|${s.subject}`}>
                     <circle class="mx-hit" cx={lx(s.h)} cy={ly(s.offer)} r="13" />
                     <circle class="mx-mark" cx={lx(s.h)} cy={ly(s.offer)} r="4.5" />
                   </g>
                 ))}
               </svg>
-              {[10, 15, 20].map((o) => <span class="mx-yt" style={`top:${(ly(o) / LH) * 100}%;right:${100 - ((PAD.l - 8) / LW) * 100}%`}>{o}%</span>)}
+              {[0, 10, 15, 20].map((o) => <span class="mx-yt" style={`top:${(ly(o) / LH) * 100}%;right:${100 - ((PAD.l - 8) / LW) * 100}%`}>{o}%</span>)}
               {xTicks.map(([h, t]) => <span class="mx-xt" style={`left:${(lx(h) / LW) * 100}%`}>{t}</span>)}
               <div class="mx-tip" aria-hidden="true"></div>
             </div>
@@ -256,7 +260,7 @@ const build = [
               <summary>View as table</summary>
               <table>
                 <thead><tr><th>Email</th><th>Sends</th><th>Offer</th><th>Subject</th></tr></thead>
-                <tbody>{l.steps.map((s) => <tr><td>#{s.n}</td><td>{s.at}</td><td>{s.offer}%</td><td>{s.subject}</td></tr>)}</tbody>
+                <tbody>{l.steps.map((s) => <tr><td>#{s.n}</td><td>{s.at}</td><td>{s.offer ? `${s.offer}%` : '–'}</td><td>{s.subject}</td></tr>)}</tbody>
               </table>
             </details>
           </figure>

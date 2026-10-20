@@ -1511,6 +1511,10 @@
   .mx-body{ display:grid; grid-template-columns:224px minmax(300px, 370px) minmax(0,1fr); height:min(80vh, 780px); min-height:580px; }
   .mx-folders{ padding:12px 8px; border-right:1px solid var(--line); background:#182031; overflow:auto; }
   .mx-folders ul{ display:flex; flex-direction:column; gap:2px; }
+  .mx-folders ul[hidden], .mx-flow[hidden]{ display:none; }
+  .mx-folder-sep, .mx-folder-gap::before{ display:block; padding:4px 10px 6px; font:600 .62rem var(--font-mono); text-transform:uppercase; letter-spacing:.12em; color:var(--muted); opacity:.8; }
+  .mx-folder-gap{ margin-top:12px; }
+  .mx-folder-gap::before{ content:'Campaigns'; }
   .mx-folder{ display:flex; align-items:center; gap:10px; width:100%; padding:9px 10px; border-radius:10px; font:600 .85rem var(--font-display); color:var(--muted); text-align:left; transition:background .15s, color .15s; }
   .mx-folder:hover{ background:rgba(255,255,255,.04); color:var(--text); }
   .mx-folder[aria-current="true"]{ background:var(--accent-soft); color:var(--text); }
@@ -1595,6 +1599,8 @@
     .mx-folders{ padding:10px; border-right:none; border-bottom:1px solid var(--line); overflow-x:auto; scrollbar-width:none; }
     .mx-folders ul{ flex-direction:row; gap:6px; width:max-content; }
     .mx-folder{ padding:7px 12px; border:1px solid var(--line); border-radius:999px; white-space:nowrap; }
+    .mx-folder-sep, .mx-folder-gap::before{ display:none; }
+    .mx-folder-gap{ margin-top:0; }
     .mx-list{ border-right:none; overflow:visible; }
     .mx-flow-head{ position:static; }
     .mx-read{
@@ -1623,10 +1629,12 @@
     .mx-fan-notif .mx-av{ display:none; }
     .mx-fan-notif{ grid-template-columns:minmax(0,1fr) auto; }
     .mx-acct{ font-size:.78rem; }
+    .mx-acct small{ display:none; }
   }
 
   /* ---- offer ladder ---- */
-  .mx-ladders{ display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:20px; }
+  .mx-ladders{ display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:18px; }
+  .mx-ladder-brand{ display:block; margin-bottom:4px; font:600 .66rem var(--font-mono); text-transform:uppercase; letter-spacing:.1em; color:var(--accent-ink); }
   .mx-ladder{ padding:20px 22px 16px; border-radius:var(--radius); border:1px solid transparent; background:linear-gradient(var(--panel), var(--panel)) padding-box, var(--edge) border-box; }
   .mx-ladder figcaption b{ display:block; font:700 1.02rem var(--font-display); }
   .mx-ladder figcaption span{ font-size:.8rem; color:var(--muted); }

@@ -1,6 +1,7 @@
 // Klaviyo flows behind /work/email-marketing. Everything here is read from the live
 // accounts: subjects, preview text, waits and offers are as set in Klaviyo. Previews were
-// rendered with a placeholder first name ("Alex") and every discount code masked.
+// rendered with a placeholder first name ("Alex") and every discount code masked; Kemp's
+// cart emails show one real product as the sample cart.
 // Steps with an `img` have a preview; the rest only appear on the flow timeline.
 
 export interface FlowEmail {
@@ -9,13 +10,15 @@ export interface FlowEmail {
   wait: string;             // delay before this step: '5m' | '3h' | '1d' …, '0' = instantly
   offer?: number;           // discount %, when the email carries one
   job?: string;             // what this email is there to do
+  label?: string;           // campaigns: replaces the send-time chip ("Launch", "Last day")
   img?: string;             // /images/email/<brand>/<img>-{d,m}.webp
   d?: [number, number];     // desktop render (600px @1.5x)
   m?: [number, number];     // phone render (390px @2x)
 }
 
 export interface Flow {
-  slug: string; name: string; icon: 'welcome' | 'browse' | 'site' | 'cart' | 'bag' | 'heart';
+  slug: string; name: string; icon: 'welcome' | 'browse' | 'site' | 'cart' | 'bag' | 'heart' | 'spark';
+  kind?: 'campaign';        // a one-off campaign rather than an automated flow
   trigger: string; goal: string; startLabel: string;
   emails: FlowEmail[];
 }
@@ -126,7 +129,123 @@ const hh: Brand = {
   ],
 };
 
-export const brands: Brand[] = [hh];
+const kemp: Brand = {
+  slug: 'kemp', name: 'Kemp Beauty', initials: 'KB', tint: '#C696BA',
+  sender: 'Kemp Beauty', sectorLine: 'Lashes & beauty · Shopify',
+  scope: 'Every live flow',
+  flows: [
+    {
+      slug: 'welcome', name: 'Welcome series', icon: 'welcome', startLabel: 'Signs up',
+      trigger: 'Joins the email list', goal: 'Introduce the brand, teach the product and convert with a unique 10% code.',
+      emails: [
+        { subject: 'Welcome to Kemp Beauty - here\'s 10% off', preview: 'Performance lashes that stay on and 10% off is waiting', wait: '0', offer: 10, job: 'Welcome, with a unique 10% code', img: 'welcome-1', d: [900, 3416], m: [780, 3914] },
+        { subject: 'Made for women in motion', preview: 'The story behind Kemp Beauty and founder Dana Kemp', wait: '1d', offer: 10, job: 'Brand story: who the lashes are for', img: 'welcome-2', d: [900, 2853], m: [780, 3610] },
+        { subject: 'Perfect lashes in under 5 minutes', preview: 'No glue, no mess - see how easy Caris Clusters are', wait: '1d', offer: 10, job: 'How it works, in four photo steps', img: 'welcome-3', d: [900, 3494], m: [780, 5626] },
+        { subject: 'Tried, tested, and trusted by our community', preview: 'Real reviews from the Kemp Beauty community', wait: '2d', offer: 10, job: 'Social proof: verified reviews', img: 'welcome-4', d: [900, 5096], m: [780, 6098] },
+        { subject: 'Why you\'ll love your new lashes', preview: 'Lightweight, reusable, up to 24-hour hold', wait: '2d', job: 'Benefits, plus Dana’s favorites', img: 'welcome-5', d: [900, 3207], m: [780, 3830] },
+        { subject: 'Last chance - your 10% off expires soon', preview: 'Your 10% off expires soon - don\'t miss it', wait: '2d', offer: 10, job: 'Last call on the welcome code', img: 'welcome-6', d: [900, 2937], m: [780, 3618] },
+        { subject: 'A note from our founder, Dana', preview: 'Why Kemp Beauty exists - and a thank you', wait: '1d', job: 'A personal note from the founder', img: 'welcome-7', d: [900, 2286], m: [780, 4018] },
+      ],
+    },
+    {
+      slug: 'browse', name: 'Browse abandonment', icon: 'browse', startLabel: 'Views a product',
+      trigger: 'Viewed a product, no checkout', goal: 'Bring browsers back with favorites and reviews before any discount.',
+      emails: [
+        { subject: 'Caught your eye?', preview: 'Community favorites worth a second look', wait: '4h', job: 'Community favorites worth a second look', img: 'browse-1', d: [900, 1818], m: [780, 2424] },
+        { subject: 'Trusted by women in motion', preview: 'Real reviews and bestsellers inside', wait: '20h', job: 'Reviews and bestsellers', img: 'browse-2', d: [900, 2121], m: [780, 3048] },
+        { subject: 'A little something for you: 10% off', preview: 'Take another look - 10% off inside', wait: '2d', offer: 10, job: 'The first offer, two days in', img: 'browse-3', d: [900, 1350], m: [780, 1800] },
+      ],
+    },
+    {
+      slug: 'cart', name: 'Abandoned cart', icon: 'cart', startLabel: 'Adds to cart',
+      trigger: 'Added to cart, didn’t order', goal: 'Show the exact item left behind, and hold the discount until day two.',
+      emails: [
+        { subject: 'You left something beautiful behind', preview: 'Good news — your cart is saved. Your Kemp Beauty picks are lightweight, reusable, and ready when you are.', wait: '1h', job: 'Cart reminder an hour later, item shown', img: 'cart-1', d: [900, 2000], m: [780, 3912] },
+        { subject: 'Your picks are waiting', preview: 'Beautiful choices! Here’s what our community says about their Kemp Beauty favorites:', wait: '11h', job: 'Reviews next to the cart item', img: 'cart-2', d: [900, 2027], m: [780, 2560] },
+        { subject: 'Don\'t forget your cart', preview: 'A quick reminder of why you picked us: lightweight, reusable lashes with up to 24-hour hold — no glue, no mess, applied in under 5 minutes.', wait: '12h', job: 'Reasons to buy, then the cart', img: 'cart-3', d: [900, 2231], m: [780, 2666] },
+        { subject: 'Here\'s 10% off to help you decide', preview: 'We saved your cart — and to make it easier, here’s 10% off your order.', wait: '1d', offer: 10, job: '10% off, only on day two', img: 'cart-4', d: [900, 2444], m: [780, 3320] },
+        { subject: 'Last call for your cart', preview: 'Your cart — and your 10% off code — expire soon. This is our final reminder before we let your picks go.', wait: '1d', offer: 10, job: 'Final reminder before the cart expires', img: 'cart-5', d: [900, 2465], m: [780, 2820] },
+      ],
+    },
+    {
+      slug: 'checkout', name: 'Abandoned checkout', icon: 'cart', startLabel: 'Starts checkout',
+      trigger: 'Started checkout, didn’t order', goal: 'Recover the order that was one step from done.',
+      emails: [
+        { subject: 'You\'re almost there', preview: 'Your order is saved - finish in seconds', wait: '1h', job: 'Checkout saved, finish in seconds', img: 'checkout-1', d: [900, 1847], m: [780, 2116] },
+        { subject: 'Can we help with anything?', preview: 'Quick answers before you check out', wait: '23h', job: 'Answers the questions that stall a checkout', img: 'checkout-2', d: [900, 2099], m: [780, 2308] },
+        { subject: '10% off - on us', preview: 'Finish your order with 10% off', wait: '1d', offer: 10, job: '10% off to finish the order', img: 'checkout-3', d: [900, 1613], m: [780, 1800] },
+      ],
+    },
+    {
+      slug: 'post', name: 'Post-purchase', icon: 'bag', startLabel: 'First order',
+      trigger: 'Places a first order', goal: 'Set expectations and teach the product so the first wear goes well.',
+      emails: [
+        { subject: 'Thank You for Your Kemp Beauty Order', preview: 'Your shipping confirmation is next, then a few quick tips for your lashes.', wait: '0', job: 'Thank-you, and what happens next', img: 'post-1', d: [900, 5432], m: [780, 6116] },
+        { subject: 'How to Apply Your Kemp Beauty Lashes', preview: 'Three moves, no glue, and they stay on for days.', wait: '2d', job: 'How to apply: curl, place, press', img: 'post-2', d: [900, 3932], m: [780, 4904] },
+        { subject: 'Caring for Your Lashes + What to Expect', preview: 'Keep them dry, remove them gently, and know when to start fresh.', wait: '5d', job: 'Care guide: wear, remove, repeat', img: 'post-3', d: [900, 4889], m: [780, 6170] },
+      ],
+    },
+    {
+      slug: 'shipped', name: 'Order shipped', icon: 'bag', startLabel: 'Order ships',
+      trigger: 'Order fulfilled', goal: 'Confirm the order is moving, with tracking.',
+      emails: [
+        { subject: 'On The Way', preview: 'Your order is on the way', wait: '0', job: 'Shipping confirmation with tracking', img: 'shipped-1', d: [900, 2303], m: [780, 3420] },
+      ],
+    },
+    {
+      slug: 'delivery', name: 'Out for delivery', icon: 'bag', startLabel: 'Out for delivery',
+      trigger: 'Out for delivery', goal: 'Build excitement the day the order lands.',
+      emails: [
+        { subject: 'Clear a spot on the vanity', preview: 'Your Kemp Beauty order is out for delivery and should land today.', wait: '0', job: 'Arriving today, with what’s inside', img: 'delivery-1', d: [900, 1812], m: [780, 2152] },
+      ],
+    },
+    {
+      slug: 'review', name: 'Review request', icon: 'heart', startLabel: 'Delivered',
+      trigger: 'Order delivered', goal: 'Ask for a review once they’ve had time to wear them.',
+      emails: [
+        { subject: 'How Are You Loving Your Lashes?', preview: 'It\'s been about two weeks since your Kemp Beauty order arrived, so you\'ve had time to really put your Kemp Beauty picks to the test.', wait: '14d', job: 'Review ask, two weeks after delivery', img: 'review-1', d: [900, 2267], m: [780, 2446] },
+      ],
+    },
+    {
+      slug: 'repeat', name: 'Repeat buyer', icon: 'heart', startLabel: 'Second order',
+      trigger: 'Places a second order', goal: 'Thank returning customers and grow the basket.',
+      emails: [
+        { subject: 'Welcome back', preview: 'Thank you for the second order', wait: '2d', job: 'Thank-you for coming back', img: 'repeat-1', d: [900, 1350], m: [780, 1800] },
+        { subject: 'Build your routine', preview: 'The tools that make it easier', wait: '7d', job: 'Cross-sell the tools that pair with lashes', img: 'repeat-2', d: [900, 1350], m: [780, 1800] },
+      ],
+    },
+    {
+      slug: 'reorder', name: 'Replenishment', icon: 'bag', startLabel: 'Last order',
+      trigger: 'Order placed, no reorder yet', goal: 'Time the restock reminder to when a box runs out.',
+      emails: [
+        { subject: 'Running Low? Time to Restock', preview: 'It\'s been about a month since your last Kemp Beauty order - most of our customers are ready to restock right around now.', wait: '20d', job: 'Restock reminder with their last picks', img: 'reorder-1', d: [900, 2609], m: [780, 2846] },
+        { subject: 'Don\'t Forget Your Kemp Beauty Refill', preview: 'Your go-to Caris Clusters are just a click away. Don\'t let a busy week turn into an empty lash case.', wait: '15d', job: 'Second restock nudge', img: 'reorder-2', d: [900, 1976], m: [780, 2834] },
+        { subject: '10% Off Your Next Order', preview: 'Because you\'re part of the Kemp Beauty community, here\'s 10% off to make restocking even easier.', wait: '15d', offer: 10, job: '10% off the reorder', img: 'reorder-3', d: [900, 1814], m: [780, 2260] },
+      ],
+    },
+    {
+      slug: 'winback', name: 'Win-back', icon: 'heart', startLabel: 'Goes quiet',
+      trigger: 'Enters the lapsed-customer segment', goal: 'Bring lapsed customers back, and ask why if they don’t.',
+      emails: [
+        { subject: 'We Miss You at Kemp Beauty', preview: 'It\'s been a while. Come see what\'s new at Kemp Beauty.', wait: '0', job: '“We miss you”, and what’s new', img: 'winback-1', d: [900, 3944], m: [780, 4424] },
+        { subject: 'Here\'s 10% Off to Welcome You Back', preview: 'Here\'s 10% off your next order, on us.', wait: '2d', offer: 10, job: '10% off to come back', img: 'winback-2', d: [900, 2963], m: [780, 3330] },
+        { subject: 'Last Chance: Your 10% Off Expires Soon', preview: 'Your 10% off is still waiting.', wait: '3d', offer: 10, job: 'Last chance, plus a request for feedback', img: 'winback-3', d: [900, 1938], m: [780, 2472] },
+      ],
+    },
+    {
+      slug: 'halloween', name: 'Halloween sale', icon: 'spark', kind: 'campaign', startLabel: 'Campaign',
+      trigger: 'Campaign to the list', goal: 'A three-email Halloween sale: 20% off sitewide, closing at midnight.',
+      emails: [
+        { subject: 'All treats. 20% off.', preview: 'Your Halloween look deserves a little extra glam. Get 20% off everything you need to make it happen.', wait: '0', offer: 20, job: 'Launch: 20% off sitewide', label: 'Launch', img: 'halloween-1', d: [900, 2921], m: [780, 4616] },
+        { subject: 'Scary good glam. 20% less.', preview: 'Go sweet, spooky or full drama. Pick your lashes, add your color and save 20% on every finishing touch.', wait: '0', offer: 20, job: 'Product picks, each marked 20% off', label: 'Mid-sale', img: 'halloween-2', d: [900, 3446], m: [780, 3852] },
+        { subject: '20% off disappears at midnight', preview: 'One last treat before the sale vanishes. Get 20% off sitewide before midnight.', wait: '0', offer: 20, job: 'Final hours, before midnight', label: 'Last day', img: 'halloween-3', d: [900, 3398], m: [780, 3514] },
+      ],
+    },
+  ],
+};
+
+
+export const brands: Brand[] = [kemp, hh];
 
 /** Hours a wait string adds: '30m' → 0.5, '3h' → 3, '2d' → 48, '0' → 0. */
 export const waitHours = (w: string) => {
