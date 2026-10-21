@@ -38,6 +38,8 @@ export function init(opt) {
   var muted = load('mg-muted') === '1', sentHome = load('mg-home') === '1';
   var returning = !!load('mg-seen') && !load('mg-visit', true);
   save('mg-seen', String(now())); save('mg-visit', '1', true);
+  var pagesSeen = +(load('mg-pages', true) || 0); // later pages in a visit get a quicker entrance
+  save('mg-pages', String(pagesSeen + 1), true);
 
   /* ---------- spots ---------- */
   var spots = [];
@@ -47,8 +49,10 @@ export function init(opt) {
     page.spots.forEach(function (base) {
       var s = Object.assign({}, base, ph && base.phone ? base.phone : {});
       if (s.mode === 'hero' && !hero) return;
+      if (s.min && innerWidth < s.min) return;
       s.el = $(s.sel);
       if (!s.el) return;
+      s.shared = !!base.key || s.id === 'contact'; // the same on every page, so no per-page lines
       s.key = s.key || (s.id === 'contact' ? 'contact' : page.key + '.' + s.id);
       spots.push(s);
     });
@@ -121,10 +125,21 @@ export function init(opt) {
     if (sp.mode === 'peek-top') return bustAt(r.left + r.width * fx + scrollX, r.top + scrollY, bustSize());
     if (sp.mode === 'sit') return inView(bodyAt('sit', P.sit.seat, r.left + r.width * fx + scrollX, r.top + scrollY, 1));
     if (sp.mode === 'hang') return inView(bodyAt('hang', P.hang.grip, r.left + r.width * fx + scrollX, r.bottom + scrollY, 1), 22); // room for the swing
+    if (sp.mode === 'stand') return inView(bodyAt('stand', P.stand.feet, r.left + r.width * fx + scrollX, r.top + scrollY, 1));
+    if (sp.mode === 'point') return pointLayout(sp, r);
     var L = peekSide(r, sp.side, sp.fy);
     // no room in the gutter (narrow screens): peek over the top edge instead
     var room = sp.side === 'r' ? innerWidth - r.right : r.left;
     return room >= P.peek.cut * L.s + 4 ? L : bustAt(r.left + r.width * 0.86 + scrollX, r.top + scrollY, bustSize());
+  }
+  // standing in the empty space beside an element, pointing at it with his fingertip just past its edge;
+  // no layout (so the spot is skipped) when the screen is too narrow for him to stand there
+  function pointLayout(sp, r) {
+    if (sp.min && innerWidth < sp.min) return null;
+    var right = sp.side === 'r', s = bodyScale(), outer = sp.edge && $(sp.edge), e = outer ? outer.getBoundingClientRect() : r;
+    var L = bodyAt('point', P.point.tip, (right ? e.right + 8 : e.left - 8) + scrollX, r.top + r.height * (sp.fy == null ? 0.5 : sp.fy) + scrollY, right ? -1 : 1);
+    var v = L.x - scrollX, left = v + (right ? CW - 273 : 55) * s, end = v + (right ? CW - 55 : 273) * s;
+    return left >= 4 && end <= innerWidth - 4 ? L : null;
   }
   // nudge a page-positioned box so none of it hangs past the sides of the screen
   function inView(L, m) { m = m || 4; L.x = clamp(L.x, scrollX + m, scrollX + innerWidth - L.w - m); return L; }
@@ -149,6 +164,7 @@ export function init(opt) {
   function pointOf(loc) {
     if (loc.kind === 'hero') { var hr = hero.rect(); return { x: hr.left + hr.width / 2, y: hr.top + hr.height * 0.55 }; }
     var L = layout(loc);
+    if (!L) return { x: innerWidth - 6, y: innerHeight * 0.5 };
     if (loc.kind === 'dock') return { x: innerWidth - 6, y: L.y + L.h * 0.3 };
     var g = groundOf(L);
     return toView(g.x, g.y, L.fixed);
@@ -202,7 +218,7 @@ export function init(opt) {
     ctx.globalCompositeOperation = 'lighter';
     var list = items; items = [];
     list.forEach(function (it) {
-      var p = Math.min(1, (t - it.t0) / it.dur);
+      var p = clamp((t - it.t0) / it.dur, 0, 1); // a frame can be stamped just before an effect was added
       it.draw(p, t);
       if (p < 1) items.push(it); else if (it.done) it.done();
     });
@@ -384,7 +400,7 @@ export function init(opt) {
     say(line, key);
     return true;
   }
-  function spotKeys(sp) { return slug && sp.key !== 'contact' ? [slug + '.' + sp.id, 'case.' + sp.id] : [sp.key]; }
+  function spotKeys(sp) { return slug && !sp.shared ? [slug + '.' + sp.id, 'case.' + sp.id] : [sp.key]; }
   function speakSpot(sp, force) {
     var keys = spotKeys(sp);
     if ((spotSaid[sp.key] || 0) >= 2 && !force) return false;
@@ -401,7 +417,9 @@ export function init(opt) {
     if (s.mode === 'hero') { var hr = hero.rect(); return hr.height ? { head: hr.top + hr.height * 0.1, foot: hr.top + hr.height * 0.875 } : null; }
     var r = s.el.getBoundingClientRect();
     if (!r.width && !r.height) return null; // filtered away or hidden
-    var L = spotLayout(s), v = toView(L.x, L.y, L.fixed);
+    var L = spotLayout(s);
+    if (!L) return null; // doesn't fit at this width
+    var v = toView(L.x, L.y, L.fixed);
     return { head: v.y + L.hy, foot: v.y + (L.form === 'bust' ? L.edge : L.h * 0.97) };
   }
   // the visible spot closest to where you're reading wins; he stays put unless another is clearly closer
@@ -440,6 +458,7 @@ export function init(opt) {
   function reflow() {
     if (state !== 'idle' || !cur || cur.kind === 'hero' || cur.kind === 'gone') return;
     var L = layout(cur);
+    if (!L) { go({ kind: 'dock' }); return; } // his spot no longer fits (the window got narrower)
     if (!curL || Math.abs(L.x - curL.x) > 0.5 || Math.abs(L.y - curL.y) > 0.5 || L.w !== curL.w || L.form !== curL.form) apply(L);
   }
 
@@ -460,7 +479,7 @@ export function init(opt) {
       fxBolt(start, function () { return pointOf(cur); }, function () {
         state = 'arriving';
         arrive(cur, function () { finish(from, info); });
-      }, to.kind === 'dock' || (!!from && from.kind === 'dock'));
+      }, to.kind === 'dock' || (!!from && from.kind === 'dock') || (!from && pagesSeen > 0));
     });
   }
   function finish(from, info) {
@@ -472,7 +491,7 @@ export function init(opt) {
     if (pending) { pending = false; setTimeout(evaluate, 80); }
   }
   function depart(from, done) {
-    if (!from) { done({ x: innerWidth + 30, y: headerBottom() + 40 }); return; }
+    if (!from) { done(pagesSeen ? { x: innerWidth - 4, y: clamp(pointOf(cur).y, headerBottom() + 20, innerHeight - 20) } : { x: innerWidth + 30, y: headerBottom() + 40 }); return; }
     if (from.kind === 'hero') { hero.away(true); setTimeout(function () { done(pointOf(from)); }, reduce ? 0 : 170); return; }
     var L = curL || layout(from), r = figRect();
     var visible = r.bottom > 0 && r.top < innerHeight;
@@ -515,6 +534,7 @@ export function init(opt) {
       return;
     }
     var L = layout(loc);
+    if (!L) { loc = cur = { kind: 'dock' }; L = layout(loc); }
     root.classList.toggle('is-help', loc.kind === 'help');
     if (reduce) { apply(L); showFig(); done(); return; }
     var e;
@@ -550,8 +570,8 @@ export function init(opt) {
       if (!greeted) {
         greeted = true;
         var gk = 'mg-greet-' + page.key;
-        if (returning && speak('welcomeBack', true)) return;
-        if (!load(gk, true)) { save(gk, '1', true); if (speak('greet.' + page.key, true)) return; }
+        if (returning && speak('welcomeBack', true)) { wave(2200); return; }
+        if (!load(gk, true)) { save(gk, '1', true); if (speak('greet.' + page.key, true)) { wave(2200); return; } }
       }
       if (cur.kind === 'dock') { if (Math.random() < 0.5) speak('dock'); return; }
       if (cur.kind === 'hero') return; // the hero bust has its own tips
@@ -559,6 +579,22 @@ export function init(opt) {
       if (info.back && Math.random() < 0.35 && speak('back')) return;
       speakSpot(cur.spot, info.first);
     }, 320);
+  }
+
+  /* ---------- waving: he stands up on his edge (or where he stands) and waves for a moment ---------- */
+  var waving = 0;
+  function wave(ms) {
+    if (reduce || state !== 'idle' || !cur || cur.kind !== 'spot' || !curL || curL.form !== 'body' || waving) return false;
+    if (curL.pose !== 'sit' && curL.pose !== 'stand' && curL.pose !== 'point') return false;
+    var g = groundOf(curL);
+    apply(bodyAt('wave', P.wave.feet, g.x, g.y, curL.flip, curL.fixed));
+    waving = setTimeout(function () {
+      waving = 0;
+      if (state !== 'idle' || !cur || cur.kind !== 'spot') return;
+      var L = layout(cur);
+      if (L) { apply(L); replay('is-hop', 500); }
+    }, ms || 1300);
+    return true;
   }
 
   /* ---------- hiding: duck behind the edge when the cursor comes close ---------- */
@@ -569,7 +605,7 @@ export function init(opt) {
     var r = figRect(), d = Math.hypot(px - (r.left + r.width / 2), py - (r.top + r.height * 0.4));
     if (d > Math.max(110, r.width * 0.9)) return;
     duckNext = now() + 5200;
-    if (curL.form === 'body' && curL.pose !== 'peek') { replay(curL.pose === 'hang' ? 'is-grab' : 'is-hop', 900); return; }
+    if (curL.form === 'body' && curL.pose !== 'peek') { if (!wave(1300)) replay(curL.pose === 'hang' ? 'is-grab' : 'is-hop', 900); return; }
     ducked = true;
     root.classList.add('is-duck');
     if (curL.form === 'bust') setFace('surprised');
@@ -581,16 +617,26 @@ export function init(opt) {
   }
   if (fine) {
     window.addEventListener('pointermove', function (e) {
-      px = e.clientX; py = e.clientY; lastInput = now();
+      px = e.clientX; py = e.clientY; wake();
       if (!proxRaf) proxRaf = requestAnimationFrame(proximity);
     }, { passive: true });
   }
 
-  /* ---------- idle life: blinks, hops, the odd line ---------- */
-  var idleLines = 0;
+  /* ---------- idle life: blinks, hops, the odd line, a doze ---------- */
+  var idleLines = 0, sleeping = false;
+  function wake() {
+    lastInput = now();
+    if (!sleeping) return;
+    sleeping = false;
+    if (curL && curL.form === 'bust') { setFace('blink'); setTimeout(function () { if (!sleeping) setFace('idle'); }, 160); }
+  }
   function idle() {
     setTimeout(idle, 2600 + Math.random() * 2200);
     if (state !== 'idle' || !cur || document.hidden || hushed || ducked || cur.kind === 'hero' || cur.kind === 'gone' || cur.kind === 'help') return;
+    if (now() - lastInput > 40000) {
+      if (!sleeping && curL && curL.form === 'bust') { sleeping = true; setFace('sleepy'); }
+      return; // dozing: no blinks, hops or chatter until something happens
+    }
     if (curL && curL.form === 'bust' && Math.random() < 0.6) { setFace('blink'); setTimeout(function () { setFace('idle'); }, 130); }
     else if (!reduce && curL && curL.form === 'body' && curL.pose !== 'peek' && Math.random() < 0.18) replay(curL.pose === 'hang' ? 'is-grab' : 'is-hop', 900);
     var quiet = now() - lastSay, active = now() - lastInput < 60000;
@@ -622,13 +668,13 @@ export function init(opt) {
     helpT = setTimeout(function () { pokes = 0; openHelp(); }, 520);
   }
   root.addEventListener('click', function () {
-    lastInput = now();
+    wake();
     if (state !== 'idle' || !cur) return;
     if (cur.kind === 'help') { replay('is-squash', 420); setFace('wink'); setTimeout(function () { setFace('idle'); }, 700); return; }
     poke();
   });
   if (hero) {
-    hero.onPoke = function () { lastInput = now(); if (state === 'idle') poke(); };
+    hero.onPoke = function () { wake(); if (state === 'idle') poke(); };
     hero.onDizzy = function () { clearTimeout(helpT); pokes = 0; };
     hero.nextTip = function () {
       if (muted || helpOpen || now() - lastSay < 6000) return null;
@@ -641,7 +687,7 @@ export function init(opt) {
   /* ---------- the help card ---------- */
   var asked = [], helpBack = null, showAll = false;
   function chipKey() {
-    if (cur && cur.spot && cur.spot.key === 'contact') return 'contact';
+    if (cur && cur.spot && (cur.spot.key === 'contact' || cur.spot.key === 'send')) return 'contact';
     return slug && CHIPS[slug] ? slug : page.key;
   }
   function msgEl(text, me) {
@@ -770,7 +816,7 @@ export function init(opt) {
     returnBtn.hidden = true;
     greeted = true;
     evaluate(true);
-    setTimeout(function () { speak('hello', true); }, 1500);
+    setTimeout(function () { if (speak('hello', true)) wave(2000); }, 1500);
   });
   document.addEventListener('keydown', function (e) {
     if (e.key === 'Escape' && helpOpen) { closeHelp(); return; }
@@ -819,7 +865,7 @@ export function init(opt) {
 
   window.addEventListener('scroll', function () {
     var t = performance.now(), dy = Math.abs(scrollY - lastY), dt = Math.max(1, t - lastT);
-    vel = vel * 0.6 + (dy / dt) * 0.4; lastY = scrollY; lastT = t; lastInput = now();
+    vel = vel * 0.6 + (dy / dt) * 0.4; lastY = scrollY; lastT = t; wake();
     clearTimeout(settleT);
     settleT = setTimeout(function () { vel = 0; evaluate(); }, 170);
     if (!scrollRaf) scrollRaf = requestAnimationFrame(function () { scrollRaf = 0; evaluate(); });
@@ -837,6 +883,8 @@ export function init(opt) {
   }
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { spots.forEach(function (s) { s._range = undefined; }); reflow(); });
   document.addEventListener('visibilitychange', function () { if (!document.hidden) evaluate(); });
+  window.addEventListener('keydown', wake);
+  window.addEventListener('pointerdown', wake, { passive: true });
 
   /* ---------- go ---------- */
   var ready = false;

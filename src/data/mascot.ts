@@ -10,13 +10,13 @@ export const HAND_SVG = `
 
 // public/images/mascot/gab-body.webp: a 3×3 atlas of full-body poses in 316×344 cells.
 // Anchors are cell pixels: feet = bottom centre, seat = where he sits on an edge,
-// cut = the straight edge he peeks out from behind, grip = where his fists hold a ledge.
+// cut = the straight edge he peeks out from behind, grip = where his fists hold a ledge, tip = fingertip.
 export const BODY = {
   cell: [316, 344],
   poses: {
     stand: { i: 0, feet: [158, 338], head: [158, 9] },
     wave: { i: 1, feet: [158, 338], head: [160, 10] },
-    point: { i: 2, feet: [158, 338], head: [150, 6] },
+    point: { i: 2, feet: [158, 338], head: [150, 6], tip: [272, 156] },
     charge: { i: 3, feet: [164, 338], head: [112, 37] },
     launch: { i: 4, feet: [158, 338], head: [170, 24] },
     land: { i: 5, feet: [145, 338], head: [170, 18] },
@@ -29,22 +29,26 @@ export const BODY = {
 // the face atlas (gab-faces.webp, 3×3 of 360px): idle, blink, wink / laugh, surprised, stars / bashful, sleepy, dizzy
 export const FACES = { idle: 0, blink: 1, wink: 2, laugh: 3, surprised: 4, stars: 5, bashful: 6, sleepy: 7, dizzy: 8 } as const;
 
-type Mode = 'hero' | 'word' | 'peek-top' | 'sit' | 'peek-side' | 'hang';
+type Mode = 'hero' | 'word' | 'peek-top' | 'sit' | 'stand' | 'peek-side' | 'hang' | 'point';
 export type Spot = {
   id: string;
   sel: string;
   mode: Mode;
   fx?: number; // where along the element's width (0–1)
   fy?: number; // peek-side: where along the height his head sits (0–1)
-  side?: 'l' | 'r'; // peek-side: which edge he hides behind
+  side?: 'l' | 'r'; // peek-side: which edge he hides behind; point: which side of the element he stands on
   word?: string; // word mode: a word on the heading's first line, which he hides behind
   phone?: Partial<Spot>; // overrides at ≤760px, where there are no side gutters
-  key?: string; // whose lines he says (defaults to page.id)
+  key?: string; // whose lines he says (defaults to page.id); set on spots shared by every page
+  min?: number; // only at viewport widths of at least this many pixels
+  edge?: string; // point: stand outside this element (e.g. the card around a button) rather than the target itself
 };
 
 // the contact form is tall: he sits on its top edge, then hangs from its bottom once you scroll on
 const contact: Spot = { id: 'contact', sel: '#contact .contact-form', mode: 'sit', fx: 0.86, phone: { fx: 0.8 } };
 const contactLow: Spot = { id: 'contact-low', key: 'contact', sel: '#contact .contact-form', mode: 'hang', fx: 0.9 };
+// on wide screens the column beside the Send button is empty, so he stands there and points at it
+const send: Spot = { id: 'send', key: 'send', sel: '#contact .contact-submit', edge: '#contact .contact-form', mode: 'point', side: 'l', fy: 0.5, min: 901 };
 
 // spots in page order; the first one is where he starts
 export const PAGES: { key: string; match: RegExp; spots: Spot[] }[] = [
@@ -54,7 +58,7 @@ export const PAGES: { key: string; match: RegExp; spots: Spot[] }[] = [
       { id: 'workflow', sel: '.hero .demo-window', mode: 'peek-side', side: 'l', fy: 0.34, phone: { mode: 'sit', fx: 0.62 } },
       { id: 'results', sel: '.proof .proof-stats', mode: 'peek-top', fx: 0.74 },
       { id: 'services', sel: '#dashboard .bento-card:nth-child(3)', mode: 'peek-side', side: 'r', fy: 0.12, phone: { mode: 'peek-top', fx: 0.84 } },
-      contact, contactLow,
+      contact, send, contactLow,
     ],
   },
   {
@@ -64,12 +68,12 @@ export const PAGES: { key: string; match: RegExp; spots: Spot[] }[] = [
       { id: 'kemp', sel: '#caseGrid .case-card:nth-child(2)', mode: 'peek-side', side: 'l', fy: 0.12, phone: { mode: 'peek-top', fx: 0.84 } },
       { id: 'orange', sel: '#caseGrid .case-card:nth-child(4)', mode: 'peek-side', side: 'r', fy: 0.1, phone: { mode: 'peek-top', fx: 0.84 } },
       { id: 'roles', sel: '#caseGrid .case-card:nth-child(6)', mode: 'sit', fx: 0.86 },
-      { id: 'emailband', sel: '.mx-band', mode: 'sit', fx: 0.8 },
+      { id: 'emailband', sel: '.mx-band', mode: 'stand', fx: 0.8 },
       { id: 'automations', sel: '#workflows .wf-grid', mode: 'peek-side', side: 'r', fy: 0.06, phone: { mode: 'peek-top', fx: 0.84 } },
       { id: 'flows2', sel: '#workflows .wf-tile:nth-child(3)', mode: 'peek-side', side: 'l', fy: 0.1, phone: { mode: 'peek-top', fx: 0.84 } },
       { id: 'built', sel: '#projects .sec-head h2', mode: 'word', word: 'built' },
       { id: 'projects', sel: '#projectsGrid', mode: 'hang', fx: 0.9 },
-      contact, contactLow,
+      contact, send, contactLow,
     ],
   },
   {
@@ -80,7 +84,7 @@ export const PAGES: { key: string; match: RegExp; spots: Spot[] }[] = [
       { id: 'ladder', sel: '.mx-ladders', mode: 'hang', fx: 0.94 },
       { id: 'deliver', sel: '.mx-lanes', mode: 'peek-side', side: 'l', fy: 0.08, phone: { mode: 'peek-top', fx: 0.84 } },
       { id: 'build', sel: '.mx-steps', mode: 'sit', fx: 0.93 },
-      contact, contactLow,
+      contact, send, contactLow,
     ],
   },
   {
@@ -91,9 +95,9 @@ export const PAGES: { key: string; match: RegExp; spots: Spot[] }[] = [
       { id: 'diagram', sel: '.diagram-wrap', mode: 'hang', fx: 0.9 },
       { id: 'stack', sel: '.stack-row', mode: 'peek-top', fx: 0.94 },
       { id: 'gallery', sel: '.case-gallery', mode: 'sit', fx: 0.9 },
-      { id: 'ongoing', sel: '.cs-ongoing', mode: 'sit', fx: 0.9 },
+      { id: 'ongoing', sel: '.cs-ongoing', mode: 'stand', fx: 0.9 },
       { id: 'next', sel: '.cs-next-card', mode: 'peek-side', side: 'r', fy: 0.1, phone: { mode: 'peek-top', fx: 0.86 } },
-      contact, contactLow,
+      contact, send, contactLow,
     ],
   },
   {
@@ -102,11 +106,11 @@ export const PAGES: { key: string; match: RegExp; spots: Spot[] }[] = [
       { id: 'facts', sel: '.about-facts', mode: 'peek-top', fx: 0.95 },
       { id: 'mess', sel: '.mess-cards', mode: 'sit', fx: 0.88 },
       { id: 'month', sel: '.month-steps', mode: 'peek-top', fx: 0.95 },
-      { id: 'rules', sel: '.rule-grid', mode: 'sit', fx: 0.96 },
+      { id: 'rules', sel: '.rule-grid', mode: 'stand', fx: 0.96 },
       { id: 'path', sel: '.path-list', mode: 'peek-side', side: 'r', fy: 0.05, phone: { mode: 'peek-top', fx: 0.9 } },
       { id: 'tools', sel: '.toolkit .tool-group:last-child', mode: 'hang', fx: 0.95 },
       { id: 'faq', sel: '.faq-list', mode: 'peek-side', side: 'l', fy: 0.08, phone: { mode: 'peek-top', fx: 0.88 } },
-      contact, contactLow,
+      contact, send, contactLow,
     ],
   },
 ];
@@ -163,6 +167,8 @@ export const LINES: Record<string, string[]> = {
     'No budget yet? Pick “Not sure yet”. Totally fine.',
     'This is my favourite part of the site.',
   ],
+
+  send: ['That button sends it straight to Gab’s inbox.', 'Go on, press it. I’ll wait right here.', 'One click and Gab gets your message.', 'Fill it in, hit the green button, done.'],
 
   // work
   'work.title': ['“Live” is the key word. Everything on this page runs.', 'Filter by GoHighLevel, Klaviyo, Shopify or custom apps.', 'Four case studies, then the automations. Scroll on.'],
