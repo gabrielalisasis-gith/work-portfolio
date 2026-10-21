@@ -4,20 +4,16 @@
 // The face is one cell of a 3×3 sprite atlas (public/images/mascot/gab-faces.webp):
 // idle, blink, wink / laugh, surprised, stars / bashful, sleepy, dizzy.
 // Overlay extras carry data-show="<faces>" and only appear for those faces.
+import { HAND_SVG as hand } from '../data/mascot';
 const OL = '#2A1710';
-const SKIN = '#F2C097', SKIN_SH = '#DE9F78';
 const star = (cx: number, cy: number, s: number) =>
   `<path transform="translate(${cx} ${cy}) scale(${s})" d="M0 -12 L3.5 -4 L12 -3.5 L5.5 2.5 L7.5 11 L0 6.5 L-7.5 11 L-5.5 2.5 L-12 -3.5 L-3.5 -4 Z" fill="#FFC83D" stroke="${OL}" stroke-width="${(2.2 / s).toFixed(2)}" stroke-linejoin="round"/>`;
 const sparkle = (x: number, y: number, s: number, c: string) =>
   `<path transform="translate(${x} ${y}) scale(${s})" d="M0 -10 Q1.2 -1.2 10 0 Q1.2 1.2 0 10 Q-1.2 1.2 -10 0 Q-1.2 -1.2 0 -10 Z" fill="${c}" stroke="${OL}" stroke-width="${(1.6 / s).toFixed(2)}" stroke-linejoin="round"/>`;
-const hand = `
-    <path d="M6 14 C6 6 12 2 20 2 C28 2 34 6 34 14 C34 21 28 25 20 25 C12 25 6 21 6 14 Z" fill="${SKIN}" stroke="${OL}" stroke-width="3" stroke-linejoin="round" />
-    <path d="M13 16 v6 M20 16.5 v7 M27 16 v6" stroke="${SKIN_SH}" stroke-width="2.2" stroke-linecap="round" />
-    <ellipse cx="15" cy="8" rx="4" ry="2.2" fill="#fff" opacity=".5" />`;
 ---
 <div class="mascot" id="mascot" data-face="idle">
-  <div class="mascot-bubble" id="mascotBubble" role="status" aria-live="polite"></div>
-  <button class="mascot-btn" type="button" aria-label="Poke mini Gab">
+  <div class="mascot-bubble" id="mascotBubble" aria-hidden="true"></div>
+  <button class="mascot-btn" type="button" aria-label="Ask mini Gab, Gab’s sidekick">
     <span class="mascot-fig" aria-hidden="true">
       <span class="m-bob"><span class="m-look"><span class="mascot-sprite"></span></span></span>
       <svg class="mascot-fx" viewBox="0 0 160 160">

@@ -313,14 +313,15 @@ gsap.registerPlugin(ScrollTrigger);
   })();
 
   /* ---------- hero: mini Gab mascot (follows the cursor, reacts to pokes and bookings) ---------- */
+  var heroApi = null; // handed to the roaming guide (src/scripts/mascot.js) so he can leave the hero and come back
   (function () {
     var m = $('#mascot'); if (!m) return;
     var btn = $('.mascot-btn', m), bubbleEl = $('#mascotBubble'), hero = $('.hero');
     var look = $('.m-look', m), sprite = $('.mascot-sprite', m);
     var parts = $$('[data-show]', m);
-    var face = 'idle', hold = 0, timers = [], visible = true;
+    var face = 'idle', hold = 0, timers = [], visible = true, away = false;
     var tx = 0, ty = 0, lx = 0, ly = 0, raf = 0, lastInput = Date.now(), lastBook = 0;
-    var tips = ['Hi! I’m mini Gab 👋', 'Psst… poke me', 'New leads get a reply in 38s ↓', 'Need a CRM untangled?', 'Your workflows, minus the babysitting', 'Say hi → Let’s talk'];
+    var tips = ['Hi! I’m mini Gab 👋', 'Scroll down, I’ll show you around.', 'Click me if you have a question.', 'Need a CRM untangled? That’s his thing.', 'Your workflows, minus the babysitting.'];
     var tipI = 0, bubbleT = 0;
 
     function later(fn, ms) { var t = setTimeout(fn, ms); timers.push(t); return t; }
@@ -422,15 +423,16 @@ gsap.registerPlugin(ScrollTrigger);
       var now = Date.now();
       pokes = now - pokeAt < 1600 ? pokes + 1 : 1; pokeAt = now;
       if (!reduce) replay('is-squash', 440);
-      if (pokes >= 4) { pokes = 0; react('dizzy', 1400); say('Whoa… okay, okay, I’m dizzy 😵‍💫', 2400); return; }
+      if (pokes >= 4) { pokes = 0; react('dizzy', 1400); say('Whoa… okay, okay, I’m dizzy 😵‍💫', 2400); if (heroApi.onDizzy) heroApi.onDizzy(); return; }
       setFace('surprised'); clearTimeout(hold);
       hold = setTimeout(function () { react(payoffs[Math.floor(Math.random() * payoffs.length)], 700); }, 140);
-      if (pokes === 1 && Math.random() < 0.5) say(['Hehe, that tickles', 'Hi there!', 'Boop!', 'I automate things. Ask me how →'][Math.floor(Math.random() * 4)], 2200);
+      if (heroApi.onPoke) heroApi.onPoke(); // the guide opens its help card
+      else if (pokes === 1 && Math.random() < 0.5) say(['Hehe, that tickles', 'Hi there!', 'Boop!', 'I automate things. Ask me how →'][Math.floor(Math.random() * 4)], 2200);
     });
 
     // cheer when the hero workflow books a lead
     document.addEventListener('wf:booked', function (e) {
-      var now = Date.now(); if (!visible || now - lastBook < 3000) return; lastBook = now;
+      var now = Date.now(); if (!visible || away || now - lastBook < 3000) return; lastBook = now;
       tx = 0.9; ty = 0.5; resume(); // glance toward the workflow
       react('stars', 1600);
       if (!reduce) replay('is-cheer', 720);
@@ -440,7 +442,7 @@ gsap.registerPlugin(ScrollTrigger);
 
     // idle life: blinking, glancing around, falling asleep, tips
     function blink() {
-      if (visible && face === 'idle') {
+      if (visible && !away && face === 'idle') {
         var blinkOnce = function (ms) { showCell('blink'); setTimeout(function () { if (face === 'idle') showCell('idle'); }, ms); };
         blinkOnce(130);
         if (Math.random() < 0.25) setTimeout(function () { if (face === 'idle') blinkOnce(110); }, 280);
@@ -448,7 +450,7 @@ gsap.registerPlugin(ScrollTrigger);
       later(blink, 2600 + Math.random() * 3200);
     }
     function idle() {
-      if (visible) {
+      if (visible && !away) {
         var quiet = Date.now() - lastInput;
         if (quiet > 30000 && face === 'idle') setFace('sleepy');
         else if (quiet > 4000 && face === 'idle') { // look around on his own
@@ -459,9 +461,25 @@ gsap.registerPlugin(ScrollTrigger);
       later(idle, 2200 + Math.random() * 1800);
     }
     function tip() {
-      if (visible && face !== 'sleepy' && !bubbleEl.classList.contains('is-on')) { say(tips[tipI], 3400); tipI = (tipI + 1) % tips.length; }
+      if (visible && !away && face !== 'sleepy' && !bubbleEl.classList.contains('is-on')) {
+        if (heroApi.nextTip) { var line = heroApi.nextTip(); if (line) say(line, 3400); } // shared lines and rate limit
+        else { say(tips[tipI], 3400); tipI = (tipI + 1) % tips.length; }
+      }
       later(tip, 13000 + Math.random() * 6000);
     }
+
+    heroApi = {
+      el: m,
+      rect: function () { return btn.getBoundingClientRect(); },
+      // duck behind "that" while the guide roams the page; un-ducking replays the peek
+      away: function (on) {
+        away = on; m.classList.toggle('is-away', on);
+        if (on) { bubbleEl.classList.remove('is-on'); clearTimeout(hold); setFace('idle'); }
+        else react('laugh', 900);
+      },
+      say: function (text, ms) { say(text, ms); },
+      onPoke: null, onDizzy: null, nextTip: null,
+    };
 
     setFace('idle');
     function resume() { if (visible && !raf && !reduce) raf = requestAnimationFrame(tick); }
@@ -480,6 +498,15 @@ gsap.registerPlugin(ScrollTrigger);
       later(blink, 2000); later(idle, 3000); later(tip, 12000);
     }, 900);
   })();
+
+  /* ---------- mini Gab, the roaming guide: loaded once the page has settled ---------- */
+  if ($('#mg')) {
+    var startGuide = function () {
+      import('./mascot.js').then(function (mod) { mod.init({ reduce: reduce, fine: fine, hero: heroApi, lenis: lenis || null }); });
+    };
+    var whenIdle = function () { if ('requestIdleCallback' in window) requestIdleCallback(startGuide, { timeout: 2500 }); else setTimeout(startGuide, 1200); };
+    if (document.readyState === 'complete') whenIdle(); else window.addEventListener('load', whenIdle);
+  }
 
   /* ---------- case study diagrams: animate when scrolled into view ---------- */
   var diagrams = $$('.diagram');

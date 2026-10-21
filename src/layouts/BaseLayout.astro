@@ -4,6 +4,7 @@ import '@fontsource-variable/inter';
 import '@fontsource-variable/jetbrains-mono';
 import '../styles/global.css';
 import Header from '../components/Header.astro';
+import MascotGuide from '../components/MascotGuide.astro';
 import { CONTACT_EMAIL } from '../config';
 
 interface Props {
@@ -127,6 +128,8 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
     <span class="fan-hint">Click a card to bring it forward</span>
   </div>
 </div>
+
+<MascotGuide />
 
 <script>
   import '../scripts/site.js';
